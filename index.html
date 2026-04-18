@@ -200,8 +200,9 @@ tr:last-child td { border-bottom: none; }
 
 <script>
 // ========================================================
-// KONFIGURASI FIREBASE CLOUD 
+// ⚠️ KONFIGURASI FIREBASE CLOUD (GANTI PAKE PUNYA LO) ⚠️
 // ========================================================
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyCfz1UlF0HD3eZSwridBibwGMqn3-Z8Mu8",
   authDomain: "pratama-finance.firebaseapp.com",
@@ -420,7 +421,7 @@ return `
   
   <div id="budgetStatusCard" class="card" style="background: #f0f9ff; border: 1px solid #bae6fd; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
     <div style="flex: 1; min-width: 250px;">
-      <h3 id="budgetCardTitle" style="color: var(--primary-dark); margin-bottom: 5px;">Total Anggaran vs Saldo Kas</h3>
+      <h3 id="budgetCardTitle" style="color: var(--primary-dark); margin-bottom: 5px;">Sisa Rencana Perlu Dana</h3>
       <p style="margin: 0; font-size: 0.9rem; color: #64748b;">Target yang belum dibayar vs Saldo Kas saat ini.</p>
     </div>
     <div style="text-align: right; background: white; padding: 10px 20px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
@@ -1137,82 +1138,8 @@ function update(){
     });
   }
 
-  // RENDER BUDGET (SUDAH DIPERBAIKI LOGIKANYA)
-  const budgetList = document.getElementById("budgetList");
-  if(budgetList) {
-    budgetList.innerHTML = "";
-    
-    if(currentBudgets.length === 0) {
-      budgetList.innerHTML = `
-        <div style="grid-column: span 2; text-align:center; padding: 50px 20px; background: white; border-radius: 16px; border: 1px dashed #cbd5e1;">
-          <div style="width: 60px; height: 60px; background: #f1f5f9; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;">
-             <i class="fas fa-clipboard-list" style="font-size: 1.5rem; color: #94a3b8;"></i>
-          </div>
-          <h3 style="margin: 0 0 5px; color:#334155;">Anggaran Kosong</h3>
-          <p style="color:#64748b; font-size: 0.95rem; margin-bottom:20px;">Belum ada rencana pengeluaran untuk bulan <b>${monthNames[targetMonth]} ${targetYear}</b>.</p>
-          <button class="action" style="margin: 0 auto; background: var(--success); box-shadow: 0 4px 6px rgba(34, 197, 94, 0.2);" onclick="copyPreviousMonthBudgets()">
-            <i class="fas fa-copy"></i> Salin Data Bulan Sebelumnya
-          </button>
-        </div>
-      `;
-      // Reset status box atas kalau kosong
-      document.getElementById("budgetVsLiquid").innerHTML = `<span style="color: var(--success)">Rp 0</span> <small style="color:#94a3b8">/ ${formatRp(balance)}</small>`;
-    } else {
-      let spentThisMonth = {};
-      transactions.forEach(t => {
-        let d = new Date(t.date);
-        if(t.type === 'expense' && d.getMonth() === targetMonth && d.getFullYear() === targetYear) {
-          let cat = t.category || "Lainnya";
-          spentThisMonth[cat] = (spentThisMonth[cat] || 0) + t.amount;
-        }
-      });
-
-      let totalRemainingPlanning = 0;
-
-      currentBudgets.forEach((b, i) => {
-        let spent = spentThisMonth[b.category] || 0;
-        let remainingCategory = Math.max(0, b.amount - spent);
-        totalRemainingPlanning += remainingCategory;
-        
-        let percent = Math.min((spent / b.amount) * 100, 100).toFixed(1);
-        let isWarning = percent > 80;
-        let isDanger = percent >= 100;
-        let isDone = spent >= b.amount;
-        
-        let barColor = isDanger ? 'var(--danger)' : (isWarning ? 'var(--warning)' : 'var(--primary)');
-        if(isDone) barColor = 'var(--success)';
-        let bgLightColor = isDanger ? '#fee2e2' : (isWarning ? '#fef08a' : '#f1f5f9');
-        let borderCardColor = isDanger ? '#fca5a5' : 'var(--border)';
-        
-        budgetList.innerHTML += `
-          <div class="card" style="margin-bottom: 0; border: 1px solid ${borderCardColor}; border-left: 5px solid ${isDone ? 'var(--success)' : 'var(--primary)'}">
-            <div class="progress-header" style="align-items: center; margin-bottom: 12px;">
-              <strong style="font-size: 1.05rem; color: #1e293b;">${b.category} ${isDone ? '<span class="budget-badge badge-paid">✓ Terpenuhi</span>' : ''}</strong>
-              <button class="btn-danger" style="padding: 4px 8px; background: transparent; color: #cbd5e1; transition: color 0.2s;" onmouseover="this.style.color='var(--danger)'" onmouseout="this.style.color='#cbd5e1'" onclick="deleteBudget('${budgetYM}', ${i})"><i class="fas fa-trash"></i></button>
-            </div>
-            <div style="font-size: 0.95rem; color: #475569; margin-bottom: 12px;">
-              Terpakai: <strong style="color:#1e293b;">${formatRp(spent)}</strong> <span style="color:#94a3b8; font-size:0.85rem;">/ ${formatRp(b.amount)}</span>
-            </div>
-            <div class="progress" style="margin-bottom: 8px; background: ${bgLightColor};">
-              <div class="progress-bar" style="width:${percent}%; background: ${barColor}"></div>
-            </div>
-            <div style="text-align: right; font-weight: 700; font-size: 0.85rem; color: ${barColor}">
-              ${percent}% ${isDanger ? ' (Over Budget!)' : ''}
-            </div>
-          </div>
-        `;
-      });
-      
-      const statusCard = document.getElementById("budgetStatusCard");
-      const budgetVsLiquid = document.getElementById("budgetVsLiquid");
-      if(statusCard && budgetVsLiquid){
-        budgetVsLiquid.innerHTML = `<span style="color:${totalRemainingPlanning > balance ? 'var(--danger)' : 'var(--success)'}">${formatRp(totalRemainingPlanning)}</span> <small style="color:#94a3b8">/ ${formatRp(balance)}</small>`;
-        statusCard.style.backgroundColor = totalRemainingPlanning > balance ? '#fff1f2' : '#f0fdf4';
-        statusCard.style.borderColor = totalRemainingPlanning > balance ? '#fecaca' : '#bbf7d0';
-        document.getElementById("budgetCardTitle").innerText = totalRemainingPlanning > 0 ? "Sisa Rencana Perlu Dana" : "Rencana Bulan Ini Beres!";
-      }
-    }
-  }
+  // RENDER BUDGET (LOGIKA CERDAS)
+  renderBudgetList(currentBudgets, budgetYM);
 
   const assetListContainer = document.getElementById("assetListContainer");
   if(assetListContainer) {
@@ -1365,6 +1292,95 @@ function update(){
     });
     
     renderMonthlyChart(12);
+  }
+}
+
+// LOGIKA ANGGARAN CERDAS
+function renderBudgetList(list, ym) {
+  const container = document.getElementById("budgetList"); 
+  if(!container) return;
+  container.innerHTML = "";
+  
+  let bMonthAssets = getAssetsFor(ym);
+  let cash = 0;
+  bMonthAssets.forEach(a => { if(a.type === 'rekening') cash += a.value; });
+
+  if (list.length === 0) {
+    const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+    let [year, month] = ym.split('-');
+    let mName = monthNames[parseInt(month) - 1];
+
+    container.innerHTML = `
+      <div style="grid-column: span 2; text-align:center; padding: 50px 20px; background: white; border-radius: 16px; border: 1px dashed #cbd5e1;">
+        <div style="width: 60px; height: 60px; background: #f1f5f9; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;">
+           <i class="fas fa-clipboard-list" style="font-size: 1.5rem; color: #94a3b8;"></i>
+        </div>
+        <h3 style="margin: 0 0 5px; color:#334155;">Anggaran Kosong</h3>
+        <p style="color:#64748b; font-size: 0.95rem; margin-bottom:20px;">Belum ada rencana pengeluaran untuk bulan <b>${mName} ${year}</b>.</p>
+        <button class="action" style="margin: 0 auto; background: var(--success); box-shadow: 0 4px 6px rgba(34, 197, 94, 0.2);" onclick="copyPreviousMonthBudgets()">
+          <i class="fas fa-copy"></i> Salin Data Bulan Sebelumnya
+        </button>
+      </div>
+    `;
+    const statusCard = document.getElementById("budgetStatusCard");
+    const budgetVsLiquid = document.getElementById("budgetVsLiquid");
+    if(statusCard && budgetVsLiquid){
+      budgetVsLiquid.innerHTML = `<span style="color:var(--success)">Rp 0</span> <small style="color:#94a3b8">/ ${formatRp(cash)}</small>`;
+      statusCard.style.backgroundColor = '#f0fdf4';
+      statusCard.style.borderColor = '#bbf7d0';
+      document.getElementById("budgetCardTitle").innerText = "Sisa Rencana Perlu Dana";
+    }
+    return;
+  }
+  
+  let spentThisMonth = {};
+  transactions.filter(t => t.date.startsWith(ym) && t.type === 'expense').forEach(t => {
+    spentThisMonth[t.category] = (spentThisMonth[t.category] || 0) + t.amount;
+  });
+
+  let totalRemainingPlanning = 0;
+  
+  list.forEach((b, i) => {
+    let spent = spentThisMonth[b.category] || 0;
+    let remainingCategory = Math.max(0, b.amount - spent);
+    totalRemainingPlanning += remainingCategory;
+    
+    let percent = Math.min((spent / b.amount) * 100, 100).toFixed(1);
+    let isWarning = percent > 80;
+    let isDanger = percent >= 100;
+    let isDone = spent >= b.amount;
+    
+    let barColor = isDanger ? 'var(--danger)' : (isWarning ? 'var(--warning)' : 'var(--primary)');
+    if(isDone) barColor = 'var(--success)';
+    let bgLightColor = isDanger ? '#fee2e2' : (isWarning ? '#fef08a' : '#f1f5f9');
+    let borderCardColor = isDanger ? '#fca5a5' : 'var(--border)';
+    
+    container.innerHTML += `
+      <div class="card" style="margin-bottom: 0; border: 1px solid ${borderCardColor}; border-left: 5px solid ${isDone ? 'var(--success)' : 'var(--primary)'}">
+        <div class="progress-header" style="align-items: center; margin-bottom: 12px;">
+          <strong style="font-size: 1.05rem; color: #1e293b;">${b.category} ${isDone ? '<span class="budget-badge badge-paid">✓ Terpenuhi</span>' : ''}</strong>
+          <button class="btn-danger" style="padding: 4px 8px; background: transparent; color: #cbd5e1; transition: color 0.2s;" onmouseover="this.style.color='var(--danger)'" onmouseout="this.style.color='#cbd5e1'" onclick="deleteBudget('${ym}', ${i})"><i class="fas fa-trash"></i></button>
+        </div>
+        <div style="font-size: 0.95rem; color: #475569; margin-bottom: 12px;">
+          Terpakai: <strong style="color:#1e293b;">${formatRp(spent)}</strong> <span style="color:#94a3b8; font-size:0.85rem;">/ ${formatRp(b.amount)}</span>
+        </div>
+        <div class="progress" style="margin-bottom: 8px; background: ${bgLightColor};">
+          <div class="progress-bar" style="width:${percent}%; background: ${barColor}"></div>
+        </div>
+        <div style="text-align: right; font-weight: 700; font-size: 0.85rem; color: ${barColor}">
+          ${percent}% ${isDanger ? ' (Over Budget!)' : ''}
+        </div>
+      </div>
+    `;
+  });
+  
+  const statusCard = document.getElementById("budgetStatusCard");
+  const budgetVsLiquid = document.getElementById("budgetVsLiquid");
+  if(statusCard && budgetVsLiquid){
+    budgetVsLiquid.innerHTML = `<span style="color:${totalRemainingPlanning > cash ? 'var(--danger)' : 'var(--success)'}">${formatRp(totalRemainingPlanning)}</span> <small style="color:#94a3b8">/ ${formatRp(cash)}</small>`;
+    statusCard.style.backgroundColor = totalRemainingPlanning > cash ? '#fff1f2' : '#f0fdf4';
+    statusCard.style.borderColor = totalRemainingPlanning > cash ? '#fecaca' : '#bbf7d0';
+    document.getElementById("budgetCardTitle").innerText = totalRemainingPlanning > 0 ? "Sisa Rencana Perlu Dana" : "Rencana Bulan Ini Beres!";
   }
 }
 
