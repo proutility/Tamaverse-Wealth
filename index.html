@@ -33,7 +33,7 @@ body { font-family: 'Inter', sans-serif; margin: 0; background: var(--bg); color
 .main-content { flex: 1; overflow-y: auto; padding: 30px; position: relative; z-index: 1; background-color: var(--bg); }
 .page { animation: fadeIn 0.3s ease-in-out; max-width: 1200px; margin: 0 auto; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-.header-title { margin-top: 0; margin-bottom: 0; font-size: 1.8rem; font-weight: 700; color: var(--text); }
+.header-title { margin: 0; margin-bottom: 0; font-size: 1.8rem; font-weight: 700; color: var(--text); }
 
 /* --- CARDS & GRIDS --- */
 .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; margin-bottom: 20px; }
@@ -421,8 +421,8 @@ return `
   
   <div id="budgetStatusCard" class="card" style="background: #f0f9ff; border: 1px solid #bae6fd; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
     <div style="flex: 1; min-width: 250px;">
-      <h3 id="budgetCardTitle" style="color: var(--primary-dark); margin-bottom: 5px;">Sisa Rencana Perlu Dana</h3>
-      <p style="margin: 0; font-size: 0.9rem; color: #64748b;">Target yang belum dibayar vs Saldo Kas saat ini.</p>
+      <h3 id="budgetCardTitle" style="color: var(--primary-dark); margin-bottom: 5px;">Total Anggaran vs Saldo Kas</h3>
+      <p style="margin: 0; font-size: 0.9rem; color: #64748b;">TARGET vs SALDO KAS.</p>
     </div>
     <div style="text-align: right; background: white; padding: 10px 20px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
       <h2 id="budgetVsLiquid" style="margin: 0; color: var(--text); font-size: 1.8rem;">Rp 0 / Rp 0</h2>
@@ -1076,6 +1076,10 @@ function update(){
   let targetMonth = targetDate.getMonth();
   let targetYear = targetDate.getFullYear();
 
+  let assetTargetDate = new Date(assetYM + "-01");
+  let assetTargetMonth = assetTargetDate.getMonth();
+  let assetTargetYear = assetTargetDate.getFullYear();
+
   let curAssets = getAssetsFor(defaultYM); 
   let dispAssets = getAssetsFor(assetYM); 
   let currentBudgets = getBudgetsFor(budgetYM); 
@@ -1152,7 +1156,7 @@ function update(){
              <i class="fas fa-box-open" style="font-size: 1.5rem; color: #94a3b8;"></i>
           </div>
           <h3 style="margin: 0 0 5px; color:#334155;">Aset Kosong</h3>
-          <p style="color:#64748b; font-size: 0.95rem; margin-bottom:20px;">Belum ada pencatatan aset untuk bulan <b>${monthNames[targetMonth]} ${targetYear}</b>.</p>
+          <p style="color:#64748b; font-size: 0.95rem; margin-bottom:20px;">Belum ada pencatatan aset untuk bulan <b>${monthNames[assetTargetMonth]} ${assetTargetYear}</b>.</p>
           <button class="action" style="margin: 0 auto; background: var(--success); box-shadow: 0 4px 6px rgba(34, 197, 94, 0.2);" onclick="copyPreviousMonthAssets()">
             <i class="fas fa-copy"></i> Salin Aset Bulan Sebelumnya
           </button>
@@ -1380,7 +1384,7 @@ function renderBudgetList(list, ym) {
     budgetVsLiquid.innerHTML = `<span style="color:${totalRemainingPlanning > cash ? 'var(--danger)' : 'var(--success)'}">${formatRp(totalRemainingPlanning)}</span> <small style="color:#94a3b8">/ ${formatRp(cash)}</small>`;
     statusCard.style.backgroundColor = totalRemainingPlanning > cash ? '#fff1f2' : '#f0fdf4';
     statusCard.style.borderColor = totalRemainingPlanning > cash ? '#fecaca' : '#bbf7d0';
-    document.getElementById("budgetCardTitle").innerText = totalRemainingPlanning > 0 ? "Sisa Rencana Perlu Dana" : "Rencana Bulan Ini Beres!";
+    document.getElementById("budgetCardTitle").innerText = totalRemainingPlanning > 0 ? "Budgeting" : "Rencana Bulan Ini Beres!";
   }
 }
 
