@@ -97,7 +97,7 @@ tr:last-child td { border-bottom: none; }
 .progress-header { display: flex; justify-content: space-between; font-size: 0.95rem; margin-bottom: 8px; font-weight: 600; color: var(--text); }
 .progress { background: #e2e8f0; border-radius: 999px; height: 10px; overflow: hidden; margin-bottom: 8px; }
 .progress-bar { height: 100%; transition: width 0.5s ease; border-radius: 999px; }
-.login-wrap { display: flex; align-items: center; justify-content: center; height: 100vh; width: 100vw; background: #0f172a; }
+.login-wrap { display: flex; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; z-index: 9999; }
 .login-card { background: white; padding: 40px; border-radius: 16px; text-align: center; width: 100%; max-width: 380px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); }
 .chart-container { position: relative; height: 300px; width: 100%; margin-top: 15px;}
 .chart-controls { margin-bottom: 20px; display: flex; gap: 10px; }
@@ -514,7 +514,7 @@ return `
   
   <div id="budgetStatusCard" class="card" style="background: #f0f9ff; border: 1px solid #bae6fd; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
     <div style="flex: 1; min-width: 250px;">
-      <h3 id="budgetCardTitle" style="color: var(--primary-dark); margin-bottom: 5px;">Budgeting</h3>
+      <h3 id="budgetCardTitle" style="color: var(--primary-dark); margin-bottom: 5px;">Sisa Rencana Perlu Dana</h3>
       <p style="margin: 0; font-size: 0.9rem; color: #64748b;">Target yang belum dibayar vs Saldo Kas saat ini.</p>
     </div>
     <div style="text-align: right; background: white; padding: 10px 20px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
@@ -546,15 +546,19 @@ return `
 
   <div class="card">
     <div class="form-group">
-      <select id="assetType" style="flex: 0.5; min-width: 200px;">
+      <select id="assetType" style="flex: 0.5; min-width: 200px;" onchange="handleAssetTypeChange()">
         <option value="rekening">Rekening Bank / RDN 💳</option>
         <option value="saham">Saham (Ticker) 📈</option>
         <option value="emas">Emas 🏅</option>
         <option value="bergerak">Aset Bergerak 🚗</option>
         <option value="nonbergerak">Aset Tetap 🏠</option>
       </select>
-      <input id="assetName" placeholder="Nama (Misal: Saham INET, Seabank)">
-      <input type="number" id="assetValue" placeholder="Nilai Awal (Rp)">
+      <input id="assetName" placeholder="Nama (Misal: BCA, INET)">
+      
+      <input type="number" id="assetLot" placeholder="Jml Lot" style="display:none; flex: 0.5;">
+      <input type="number" id="assetAvg" placeholder="Avg Beli (Rp)" style="display:none; flex: 0.5;">
+      
+      <input type="number" id="assetValue" placeholder="Nilai Saat Ini / Saldo (Rp)">
       <button class="action" onclick="addAsset()"><i class="fas fa-plus"></i> Tambah Aset</button>
     </div>
   </div>
@@ -657,7 +661,7 @@ function handleTypeChange() {
   
   assetTarget.style.display = (type === 'beli_aset' || type === 'jual_aset' || type === 'transfer') ? "block" : "none";
   
-  // FIX: Kategori selalu tampil buat Pemasukan & Pengeluaran
+  // Kategori selalu tampil buat Pemasukan & Pengeluaran
   trxCat.style.display = (type === 'income' || type === 'expense') ? "block" : "none";
   
   if (type !== 'income' && type !== 'expense') customTrxCat.style.display = "none";
@@ -674,6 +678,21 @@ function handleTrxCategoryChange() {
 function handleBudgetCategoryChange() {
   let val = document.getElementById("budgetCategory").value;
   document.getElementById("customBudgetCategory").style.display = (val === 'Lainnya') ? 'block' : 'none';
+}
+
+// FIX: Menampilkan form khusus kalau pilih Saham
+function handleAssetTypeChange() {
+  let type = document.getElementById("assetType").value;
+  let lotInput = document.getElementById("assetLot");
+  let avgInput = document.getElementById("assetAvg");
+  
+  if (type === 'saham') {
+    lotInput.style.display = "block";
+    avgInput.style.display = "block";
+  } else {
+    lotInput.style.display = "none";
+    avgInput.style.display = "none";
+  }
 }
 
 function updateDropdowns() {
@@ -699,7 +718,6 @@ function updateDropdowns() {
     });
   }
 
-  // FIX: Kategori Dinamis buat Pemasukan vs Pengeluaran
   let defaultExpenseCats = ["Kebutuhan Pokok", "Transportasi", "Cicilan / Tagihan", "Hiburan / Ngedate"];
   let defaultIncomeCats = ["Gaji Pokok", "Tunjangan / Bonus", "Dividen Saham", "Hasil Jual Aset", "Pendapatan Lain"];
   
@@ -739,7 +757,6 @@ function updateDropdowns() {
     
     trxCatSel.innerHTML += '<option value="Lainnya">Lainnya (Ketik Sendiri)</option>';
     
-    // Set ulang kalau masih valid
     let opts = Array.from(trxCatSel.options).map(o => o.value);
     if(opts.includes(currentTrxCat)) trxCatSel.value = currentTrxCat;
   }
@@ -870,7 +887,6 @@ function addTransaction(){
     trxAssets[assetIdx].value += amountVal;
   }
 
-  // FIX: Simpan kategori untuk type pemasukan atau pengeluaran
   let finalCategory = (type === 'expense' || type === 'income') ? category : null;
   
   transactions.push({id: Date.now(), amount:amountVal, desc, date, type, walletName: trxAssets[walletIdx].name, category: finalCategory});
@@ -937,34 +953,64 @@ function copyPreviousMonthBudgets() {
   save(); update();
 }
 
+// FIX: Update Fungsi Add Asset untuk nyimpen data saham
 function addAsset(){
   let name = document.getElementById("assetName").value;
   let value = parseInt(document.getElementById("assetValue").value);
   let type = document.getElementById("assetType").value;
+  
   if(!name || isNaN(value)) return alert("Isi nama dan nominal!");
+  
+  let newData = {name, value, type};
+  
+  // Simpan info lot dan avg kalau tipenya saham
+  if (type === 'saham') {
+    let lot = parseInt(document.getElementById("assetLot").value);
+    let avg = parseInt(document.getElementById("assetAvg").value);
+    if(isNaN(lot) || isNaN(avg)) return alert("Isi Jumlah Lot dan Average Harga Beli untuk saham bro!");
+    newData.lot = lot;
+    newData.avg = avg;
+  }
   
   let assetYM = document.getElementById("assetMonthFilter") ? document.getElementById("assetMonthFilter").value : defaultYM;
   if(!assetYM) assetYM = defaultYM;
   if(!assetsData[assetYM]) assetsData[assetYM] = [];
   
-  assetsData[assetYM].push({name, value, type});
+  assetsData[assetYM].push(newData);
   
   document.getElementById("assetName").value = "";
   document.getElementById("assetValue").value = "";
+  if(document.getElementById("assetLot")) document.getElementById("assetLot").value = "";
+  if(document.getElementById("assetAvg")) document.getElementById("assetAvg").value = "";
   
   save(); update();
 }
 
+// FIX: Update Fungsi Edit Saham jadi dinamis hitung pakai Lot
 function updateStockValue(i) {
   let assetYM = document.getElementById("assetMonthFilter") ? document.getElementById("assetMonthFilter").value : defaultYM;
   if(!assetYM) assetYM = defaultYM;
   let curAssets = assetsData[assetYM];
+  let asset = curAssets[i];
   
-  let newVal = prompt(`Update harga pasar terbaru untuk ${curAssets[i].name} (Rp):`, curAssets[i].value);
-  if (newVal === null || newVal.trim() === "") return;
-  newVal = parseInt(newVal);
-  if (isNaN(newVal) || newVal < 0) return alert("Nominal gak valid bro!");
-  curAssets[i].value = newVal;
+  if (asset.type === 'saham' && asset.lot) {
+      let currentPrice = asset.value / (asset.lot * 100);
+      let newPrice = prompt(`Update harga saham ${asset.name} (per lembar).\n\nHarga saat ini: Rp ${currentPrice}\nLot dimiliki: ${asset.lot} lot\nAvg beli: Rp ${asset.avg || 0}`, currentPrice);
+      
+      if (newPrice === null || newPrice.trim() === "") return;
+      newPrice = parseInt(newPrice);
+      if (isNaN(newPrice) || newPrice < 0) return alert("Harga gak valid bro!");
+      
+      // Auto hitung total value baru
+      asset.value = newPrice * asset.lot * 100;
+  } else {
+      let newVal = prompt(`Update nominal terbaru untuk ${asset.name} (Rp):`, asset.value);
+      if (newVal === null || newVal.trim() === "") return;
+      newVal = parseInt(newVal);
+      if (isNaN(newVal) || newVal < 0) return alert("Nominal gak valid bro!");
+      asset.value = newVal;
+  }
+  
   save(); update();
 }
 
@@ -1274,6 +1320,7 @@ function update(){
   // RENDER BUDGET (LOGIKA CERDAS)
   renderBudgetList(currentBudgets, budgetYM);
 
+  // FIX: RENDER ASET DENGAN PROFIT/LOSS SAHAM
   const assetListContainer = document.getElementById("assetListContainer");
   if(assetListContainer) {
     assetListContainer.innerHTML = "";
@@ -1314,8 +1361,22 @@ function update(){
         `;
 
         groupedAssets[cat].forEach(a => {
+          let stockInfo = "";
+          
+          // Logika khusus nampilin detail saham dan Profit/Loss
+          if (a.type === 'saham' && a.lot && a.avg) {
+             let modal = a.lot * 100 * a.avg;
+             let profitLoss = a.value - modal;
+             let pct = ((profitLoss / modal) * 100).toFixed(2);
+             let colorClass = profitLoss >= 0 ? 'text-success' : 'text-danger';
+             let sign = profitLoss >= 0 ? '+' : '';
+             
+             stockInfo = `<br><small style="color:#64748b; font-size:0.8rem;">${a.lot} Lot | Avg: ${formatRp(a.avg)}</small>
+                          <div class="${colorClass}" style="font-size: 0.8rem; font-weight:700;">${sign}${formatRp(profitLoss)} (${sign}${pct}%)</div>`;
+          }
+          
           groupHTML += `<tr style="border-bottom: 1px solid #f1f5f9;">
-            <td style="padding: 12px 15px;"><strong style="color: #1e293b; font-size:0.95rem;">${a.name}</strong></td>
+            <td style="padding: 12px 15px;"><strong style="color: #1e293b; font-size:0.95rem;">${a.name}</strong>${stockInfo}</td>
             <td style="padding: 12px 15px; font-weight: 500; color: #475569;">${formatRp(a.value)}</td>
             <td style="padding: 12px 15px; text-align: right;">
               <button class="btn-warning" style="padding: 6px 10px; margin-right: 5px;" onclick="updateStockValue(${a.originalIndex})" title="Edit Harga"><i class="fas fa-edit"></i></button>
@@ -1461,7 +1522,7 @@ function renderBudgetList(list, ym) {
       budgetVsLiquid.innerHTML = `<span style="color:var(--success)">Rp 0</span> <small style="color:#94a3b8">/ ${formatRp(cash)}</small>`;
       statusCard.style.backgroundColor = '#f0fdf4';
       statusCard.style.borderColor = '#bbf7d0';
-      document.getElementById("budgetCardTitle").innerText = "Budgeting";
+      document.getElementById("budgetCardTitle").innerText = "Sisa Rencana Perlu Dana";
     }
     return;
   }
@@ -1513,7 +1574,7 @@ function renderBudgetList(list, ym) {
     budgetVsLiquid.innerHTML = `<span style="color:${totalRemainingPlanning > cash ? 'var(--danger)' : 'var(--success)'}">${formatRp(totalRemainingPlanning)}</span> <small style="color:#94a3b8">/ ${formatRp(cash)}</small>`;
     statusCard.style.backgroundColor = totalRemainingPlanning > cash ? '#fff1f2' : '#f0fdf4';
     statusCard.style.borderColor = totalRemainingPlanning > cash ? '#fecaca' : '#bbf7d0';
-    document.getElementById("budgetCardTitle").innerText = totalRemainingPlanning > 0 ? "Budgeting" : "Rencana Bulan Ini Beres!";
+    document.getElementById("budgetCardTitle").innerText = totalRemainingPlanning > 0 ? "Sisa Rencana Perlu Dana" : "Rencana Bulan Ini Beres!";
   }
 }
 
