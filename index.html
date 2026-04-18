@@ -33,7 +33,7 @@ body { font-family: 'Inter', sans-serif; margin: 0; background: var(--bg); color
 .main-content { flex: 1; overflow-y: auto; padding: 30px; position: relative; z-index: 1; background-color: var(--bg); }
 .page { animation: fadeIn 0.3s ease-in-out; max-width: 1200px; margin: 0 auto; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-.header-title { margin-top: 0; margin-bottom: 0; font-size: 1.8rem; font-weight: 700; color: var(--text); }
+.header-title { margin: 0; margin-bottom: 0; font-size: 1.8rem; font-weight: 700; color: var(--text); }
 
 /* --- CARDS & GRIDS --- */
 .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; margin-bottom: 20px; }
@@ -73,11 +73,8 @@ tr:last-child td { border-bottom: none; }
 .progress-header { display: flex; justify-content: space-between; font-size: 0.95rem; margin-bottom: 8px; font-weight: 600; color: var(--text); }
 .progress { background: #e2e8f0; border-radius: 999px; height: 10px; overflow: hidden; margin-bottom: 8px; }
 .progress-bar { height: 100%; transition: width 0.5s ease; border-radius: 999px; }
-
-/* TAMPILAN LOGIN - DIBIKIN FIXED BIAR AMAN DI HP/DESKTOP */
 .login-wrap { display: flex; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; z-index: 9999; }
 .login-card { background: white; padding: 40px; border-radius: 16px; text-align: center; width: 100%; max-width: 380px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); }
-
 .chart-container { position: relative; height: 300px; width: 100%; margin-top: 15px;}
 .chart-controls { margin-bottom: 20px; display: flex; gap: 10px; }
 .chart-controls button { padding: 8px 16px; border: 1px solid #cbd5e1; background: white; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 500; color: #475569; transition: all 0.2s ease;}
@@ -116,41 +113,53 @@ tr:last-child td { border-bottom: none; }
   .main-content { display: block; height: auto; overflow: visible; padding: 15px; padding-bottom: 100px; }
   
   /* Set ulang ukuran Sidebar dan kasih scroll */
-  .sidebar { position: fixed; left: -260px; top: 0; bottom: 0; transition: 0.3s; z-index: 1000; height: 100dvh; box-shadow: 4px 0 15px rgba(0,0,0,0.5); width: 240px; overflow-y: auto; padding-bottom: 40px; }
+  .sidebar { position: fixed; left: -260px; top: 0; bottom: 0; transition: 0.3s; z-index: 1000; height: 100dvh; box-shadow: 4px 0 15px rgba(0,0,0,0.5); width: 240px; overflow-y: auto; display: flex; flex-direction: column; padding-bottom: 20px;}
   .sidebar.open { left: 0; }
+  .logout-btn { margin-top: auto; margin-bottom: 30px; } /* Pastikan gak ketutup tombol bawah */
   
   /* Menampilkan overlay dan tombol menu hamburger */
   #mobileMenuBtn { display: flex !important; }
   #mobileOverlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 999; }
   #mobileOverlay.show { display: block; }
   
-  /* Form & Grid Layout Fixes biar gak jebol kesamping */
-  .grid-2, .grid-3 { grid-template-columns: 1fr; gap: 15px; }
+  /* Form & Grid Layout Fixes biar rapi dan mixed */
+  .grid-2, .grid-3 { grid-template-columns: 1fr; gap: 12px; }
   .form-group { flex-direction: column; align-items: stretch; gap: 10px; }
-  .form-group > input, .form-group > select, .form-group > button, .form-group > div { width: 100%; min-width: 100%; box-sizing: border-box; }
-  .header-with-picker { flex-direction: column; align-items: flex-start; gap: 15px; }
+  .form-group > input, .form-group > select, .form-group > button, .form-group > div { width: 100%; min-width: 100%; box-sizing: border-box; font-size: 0.9rem; }
+  .header-with-picker { flex-direction: column; align-items: flex-start; gap: 12px; margin-bottom: 20px;}
   .month-picker-capsule { width: 100%; justify-content: center; box-sizing: border-box;}
   
-  .card { padding: 15px; }
-  .header-title { font-size: 1.5rem; margin-bottom: 15px; }
+  .card { padding: 15px; margin-bottom: 12px;}
+  .card h2 { font-size: 1.5rem !important; }
+  .card h3 { font-size: 0.75rem !important; margin-bottom: 8px;}
+  .header-title { font-size: 1.4rem !important; margin-bottom: 15px; }
+  .anim-float { font-size: 0.9rem !important; }
+  
+  /* Anggaran Bulanan Status Card di HP */
+  #budgetStatusCard { flex-direction: column; align-items: flex-start; padding: 15px; gap: 5px !important;}
+  #budgetStatusCard > div:first-child p { font-size: 0.8rem; }
+  #budgetStatusCard > div:last-child { text-align: left !important; padding: 0 !important; box-shadow: none !important; background: transparent !important; }
+  #budgetVsLiquid { font-size: 1.4rem !important; }
   
   /* Mengubah Tabel Menjadi Card (List) biar responsif */
   table, thead, tbody, th, td, tr { display: block; width: 100%; box-sizing: border-box; }
   thead tr { position: absolute; top: -9999px; left: -9999px; }
-  tr { margin-bottom: 15px; border: 1px solid var(--border); border-radius: 8px; padding: 10px; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-  td { display: flex; justify-content: space-between; align-items: center; padding: 8px 5px; text-align: right; border-bottom: 1px solid #f1f5f9; }
-  td:last-child { border-bottom: none; justify-content: flex-end; }
+  tr { margin-bottom: 12px; border: 1px solid var(--border); border-radius: 8px; padding: 12px; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
   
-  #trxList td:nth-of-type(1)::before { content: "Tanggal"; font-weight: 600; color: #64748b; font-size: 0.8rem; text-transform: uppercase; }
-  #trxList td:nth-of-type(2)::before { content: "Jenis"; font-weight: 600; color: #64748b; font-size: 0.8rem; text-transform: uppercase; }
-  #trxList td:nth-of-type(3)::before { content: "Keterangan"; font-weight: 600; color: #64748b; font-size: 0.8rem; text-transform: uppercase; }
-  #trxList td:nth-of-type(4)::before { content: "Nominal"; font-weight: 600; color: #64748b; font-size: 0.8rem; text-transform: uppercase; }
+  /* Ubah TD jadi flex column ke bawah biar tulisan panjang rapi */
+  td { display: flex; flex-direction: column; align-items: flex-start; text-align: left; padding: 6px 0; border-bottom: 1px dashed #f1f5f9; font-size: 0.9rem;}
+  td:last-child { border-bottom: none; flex-direction: row; justify-content: flex-start; gap: 8px; padding-bottom: 0; margin-top: 8px; }
   
-  #debtList td:nth-of-type(1)::before { content: "Keterangan"; font-weight: 600; color: #64748b; font-size: 0.8rem; text-transform: uppercase; }
-  #debtList td:nth-of-type(2)::before { content: "Total"; font-weight: 600; color: #64748b; font-size: 0.8rem; text-transform: uppercase; }
-  #debtList td:nth-of-type(3)::before { content: "Sisa Tagihan"; font-weight: 600; color: #64748b; font-size: 0.8rem; text-transform: uppercase; }
+  #trxList td:nth-of-type(1)::before { content: "Tanggal"; font-size: 0.7rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;}
+  #trxList td:nth-of-type(2)::before { content: "Jenis"; font-size: 0.7rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;}
+  #trxList td:nth-of-type(3)::before { content: "Keterangan"; font-size: 0.7rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;}
+  #trxList td:nth-of-type(4)::before { content: "Nominal"; font-size: 0.7rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;}
   
-  td > div { text-align: right; }
+  #debtList td:nth-of-type(1)::before { content: "Keterangan"; font-size: 0.7rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;}
+  #debtList td:nth-of-type(2)::before { content: "Total"; font-size: 0.7rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;}
+  #debtList td:nth-of-type(3)::before { content: "Sisa Tagihan"; font-size: 0.7rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;}
+  
+  td * { text-align: left !important; word-wrap: break-word; white-space: normal; }
   
   .login-card { padding: 30px 20px; width: 90%; }
 }
@@ -168,7 +177,7 @@ tr:last-child td { border-bottom: none; }
 
 <script>
 // ========================================================
-// Fungsi Buka Tutup Sidebar HP
+// Fungsi Tombol Menu HP (Buka/Tutup Sidebar)
 // ========================================================
 function toggleSidebar() {
   const sidebar = document.querySelector('.sidebar');
@@ -400,7 +409,7 @@ return `
   
   <div id="budgetStatusCard" class="card" style="background: #f0f9ff; border: 1px solid #bae6fd; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
     <div style="flex: 1; min-width: 250px;">
-      <h3 id="budgetCardTitle" style="color: var(--primary-dark); margin-bottom: 5px;">Total Anggaran vs Saldo Kas</h3>
+      <h3 id="budgetCardTitle" style="color: var(--primary-dark); margin-bottom: 5px;">Budgeting</h3>
       <p style="margin: 0; font-size: 0.9rem; color: #64748b;">Target yang belum dibayar vs Saldo Kas saat ini.</p>
     </div>
     <div style="text-align: right; background: white; padding: 10px 20px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
@@ -526,8 +535,7 @@ function showPage(p){
     const overlay = document.getElementById('mobileOverlay');
     if(sidebar && overlay) {
       sidebar.classList.remove('open');
-      overlay.style.display = 'none';
-      document.body.style.overflow = 'auto'; // Pastikan scroll kebuka lagi
+      overlay.classList.remove('show');
     }
   }
   
@@ -544,10 +552,10 @@ function handleTypeChange() {
   
   assetTarget.style.display = (type === 'beli_aset' || type === 'jual_aset' || type === 'transfer') ? "block" : "none";
   
-  // FIX: Kategori tampil buat Pemasukan & Pengeluaran
+  // FIX: Kategori selalu tampil buat Pemasukan & Pengeluaran
   trxCat.style.display = (type === 'income' || type === 'expense') ? "block" : "none";
   
-  if (type !== 'expense' && type !== 'income') customTrxCat.style.display = "none";
+  if (type !== 'income' && type !== 'expense') customTrxCat.style.display = "none";
   else handleTrxCategoryChange(); 
   
   updateDropdowns();
@@ -586,7 +594,7 @@ function updateDropdowns() {
     });
   }
 
-  // FIX: Daftar Kategori Spesifik Pemasukan vs Pengeluaran
+  // FIX: Kategori Dinamis buat Pemasukan vs Pengeluaran
   let defaultExpenseCats = ["Kebutuhan Pokok", "Transportasi", "Cicilan / Tagihan", "Hiburan / Ngedate"];
   let defaultIncomeCats = ["Gaji Pokok", "Tunjangan / Bonus", "Dividen Saham", "Hasil Jual Aset", "Pendapatan Lain"];
   
@@ -626,6 +634,7 @@ function updateDropdowns() {
     
     trxCatSel.innerHTML += '<option value="Lainnya">Lainnya (Ketik Sendiri)</option>';
     
+    // Set ulang kalau masih valid
     let opts = Array.from(trxCatSel.options).map(o => o.value);
     if(opts.includes(currentTrxCat)) trxCatSel.value = currentTrxCat;
   }
@@ -756,9 +765,9 @@ function addTransaction(){
     trxAssets[assetIdx].value += amountVal;
   }
 
-  // FIX: Simpan Kategori untuk Transaksi Pemasukan juga
+  // FIX: Simpan kategori untuk type pemasukan atau pengeluaran
   let finalCategory = (type === 'expense' || type === 'income') ? category : null;
-
+  
   transactions.push({id: Date.now(), amount:amountVal, desc, date, type, walletName: trxAssets[walletIdx].name, category: finalCategory});
   
   document.getElementById("amount").value = "";
