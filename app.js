@@ -714,22 +714,34 @@ function editWedGuest(id) {
     let guest = weddingData.guests.find(g => g.id === id);
     if (!guest) return;
 
-    // Munculin pop-up buat edit nama (default isinya nama yang lama)
+    // 1. Edit Nama
     let newName = prompt("Edit Nama Tamu / Keluarga:", guest.name);
-    if (newName === null) return; // Kalau di-cancel
+    if (newName === null) return;
     if (newName.trim() === "") return alert("Nama tidak boleh kosong bro!");
 
-    // Munculin pop-up buat edit jumlah Pax
+    // 2. Edit Jenis Tamu (VIP, Keluarga Pria, Keluarga Wanita, Reguler)
+    let newType = prompt("Edit Jenis (Keluarga Pria / Keluarga Wanita / VIP / Reguler):", guest.type || 'Reguler');
+    if (newType === null) return;
+    
+    // Validasi agar input sesuai dengan kategori yang ada
+    const validTypes = ['VIP', 'Keluarga Pria', 'Keluarga Wanita', 'Reguler'];
+    if (!validTypes.includes(newType.trim())) {
+        return alert("Gagal! Jenis harus: VIP, Keluarga Pria, Keluarga Wanita, atau Reguler (sesuaikan huruf besar/kecilnya).");
+    }
+
+    // 3. Edit Jumlah Pax
     let newCountStr = prompt(`Edit Jumlah (Pax) untuk ${newName.trim()}:`, guest.count);
-    if (newCountStr === null) return; // Kalau di-cancel
+    if (newCountStr === null) return;
     let newCount = parseInt(newCountStr);
     if (isNaN(newCount) || newCount <= 0) return alert("Jumlah (Pax) nggak valid bro!");
 
-    // Save perubahan
+    // Simpan semua perubahan
     guest.name = newName.trim();
+    guest.type = newType.trim();
     guest.count = newCount;
 
-    save(); renderWedding();
+    save(); 
+    renderWedding(); // Refresh tabel agar tamu pindah ke tabel yang sesuai jika jenisnya berubah
 }
 
 function exportGuestsToCSV() {
