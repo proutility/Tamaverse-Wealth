@@ -863,6 +863,7 @@ function deleteWedBudget(id) {
         weddingData.budget = weddingData.budget.filter(b => b.id !== id);
         save(); renderWedding();
     }
+}
 function addWedSubItem(id) {
     let item = weddingData.budget.find(b => b.id === id);
     let name = prompt("Nama Sub Item (misal: Cincin Cowo):");
