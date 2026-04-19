@@ -904,6 +904,24 @@ function deleteWedSubItem(itemId, subId) {
         save(); renderWedding();
     }
 }
+  function editWedBudgetNotes(id) {
+    let item = weddingData.budget.find(b => b.id === id);
+    let newNotes = prompt(`Update Keterangan/Link Vendor untuk ${item.name}:`, item.notes || "");
+    if (newNotes !== null) {
+        item.notes = newNotes;
+        save(); renderWedding();
+    }
+}
+
+function editWedSubItemNotes(itemId, subId) {
+    let item = weddingData.budget.find(b => b.id === itemId);
+    let sub = item.subItems.find(s => s.id === subId);
+    let newNotes = prompt(`Update Keterangan/Link Vendor untuk ${sub.name}:`, sub.notes || "");
+    if (newNotes !== null) {
+        sub.notes = newNotes;
+        save(); renderWedding();
+    }
+}
 
 function addWedVendor() {
     let name = document.getElementById('wedVendorName').value;
@@ -997,7 +1015,7 @@ function renderWedding() {
                     let subIsWarning = sub.real > sub.target;
                     let subRealColor = subIsWarning ? 'color: var(--danger);' : 'color: var(--success);';
                     
-                    // Panggil fungsi buat sub-item juga
+                    // Format otomatis jadi link
                     let subNotes = sub.notes ? `<div style="color:#94a3b8; font-size:0.75rem; margin-top: 4px;">- ${formatCatatan(sub.notes)}</div>` : '';
                     
                     subHTML += `
@@ -1007,6 +1025,7 @@ function renderWedding() {
                             <td style="color:#64748b;">${formatRp(sub.target)}</td>
                             <td style="${subRealColor}">${formatRp(sub.real)}</td>
                             <td style="text-align:center; display:flex; justify-content:center; gap:5px;">
+                                <button style="padding: 4px 8px; font-size: 0.75rem; background: #e2e8f0; color: #475569; border: none; border-radius: 6px; cursor: pointer;" onclick="editWedSubItemNotes(${b.id}, ${sub.id})" title="Edit Keterangan / Link"><i class="fas fa-link"></i></button>
                                 <button class="btn-warning" style="padding: 4px 8px; font-size: 0.75rem;" onclick="updateWedSubItemReal(${b.id}, ${sub.id})" title="Update Realisasi Sub"><i class="fas fa-edit"></i></button>
                                 <button class="btn-danger" style="padding: 4px 8px; font-size: 0.75rem;" onclick="deleteWedSubItem(${b.id}, ${sub.id})"><i class="fas fa-trash"></i></button>
                             </td>
@@ -1023,13 +1042,13 @@ function renderWedding() {
                     <td style="${realColor}">${formatRp(b.real)} ${isWarning ? '<i class="fas fa-exclamation-triangle" title="Overbudget!"></i>' : ''}</td>
                     <td style="text-align:center; display:flex; justify-content:center; gap:5px;">
                         <button style="padding: 6px 10px; background: #e0f2fe; color: #0ea5e9; border: none; border-radius: 6px; cursor: pointer;" onclick="addWedSubItem(${b.id})" title="Tambah Sub Item"><i class="fas fa-plus"></i></button>
+                        <button style="padding: 6px 10px; background: #e2e8f0; color: #475569; border: none; border-radius: 6px; cursor: pointer;" onclick="editWedBudgetNotes(${b.id})" title="Edit Keterangan / Link"><i class="fas fa-link"></i></button>
                         <button class="btn-warning" style="padding: 6px 10px;" onclick="updateWedBudgetReal(${b.id})" title="Update Realisasi"><i class="fas fa-edit"></i></button>
                         <button class="btn-danger" style="padding: 6px 10px;" onclick="deleteWedBudget(${b.id})"><i class="fas fa-trash"></i></button>
                     </td>
                 </tr>
                 ${subHTML}
             `;
-        });
         
         budgetTbody.innerHTML += `
             <tr style="background: #f1f5f9; border-top: 2px solid #cbd5e1;">
