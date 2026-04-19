@@ -398,7 +398,7 @@ let assetsData = {};
 
 // TAMBAHAN UNTUK WEDDING PLANNER
 let weddingData = {
-    budget: [], // {id, name, target, real}
+    budget: [], // {id, name, target, real, notes, subItems: []}
     vendors: [], // {id, name, service, status} -> status: DP, Lunas, Tanya
     guests: [] // {id, name, count, isInvited}
 };
@@ -864,6 +864,7 @@ function deleteWedBudget(id) {
         save(); renderWedding();
     }
 }
+
 function addWedSubItem(id) {
     let item = weddingData.budget.find(b => b.id === id);
     let name = prompt("Nama Sub Item (misal: Cincin Cowo):");
@@ -904,7 +905,8 @@ function deleteWedSubItem(itemId, subId) {
         save(); renderWedding();
     }
 }
-  function editWedBudgetNotes(id) {
+
+function editWedBudgetNotes(id) {
     let item = weddingData.budget.find(b => b.id === id);
     let newNotes = prompt(`Update Keterangan/Link Vendor untuk ${item.name}:`, item.notes || "");
     if (newNotes !== null) {
@@ -1015,7 +1017,7 @@ function renderWedding() {
                     let subIsWarning = sub.real > sub.target;
                     let subRealColor = subIsWarning ? 'color: var(--danger);' : 'color: var(--success);';
                     
-                    // Format otomatis jadi link
+                    // Panggil fungsi buat sub-item juga
                     let subNotes = sub.notes ? `<div style="color:#94a3b8; font-size:0.75rem; margin-top: 4px;">- ${formatCatatan(sub.notes)}</div>` : '';
                     
                     subHTML += `
@@ -1049,6 +1051,7 @@ function renderWedding() {
                 </tr>
                 ${subHTML}
             `;
+        });
         
         budgetTbody.innerHTML += `
             <tr style="background: #f1f5f9; border-top: 2px solid #cbd5e1;">
@@ -1059,6 +1062,7 @@ function renderWedding() {
             </tr>
         `;
     }
+
     // 2. Render Vendors
     const vendorTbody = document.getElementById('wedVendorTbody');
     if(vendorTbody) {
