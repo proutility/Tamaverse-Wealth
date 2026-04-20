@@ -388,3 +388,21 @@ body.sidebar-collapsed .main-content {
     .desktop-menu-btn { display: none !important; }
     .desktop-global-header { display: none !important; }
 }
+/* ========================================================= */
+/* PERBAIKAN SPACING & LAYOUT DESKTOP (BIAR LEGA)            */
+/* ========================================================= */
+@media (min-width: 769px) {
+    .main-content {
+        padding: 30px 40px !important; /* Kasih jarak lega kiri-kanan-atas-bawah */
+        max-width: 1400px; /* Biar gak terlalu melar kalau layarnya ultra-wide */
+        margin: 0 auto;
+    }
+    
+    .desktop-global-header {
+        margin-bottom: 30px !important; /* Jarak dari header sapaan ke konten bawahnya */
+    }
+
+    input, select {
+        box-sizing: border-box; /* Biar input box gak keluar jalur */
+    }
+}
