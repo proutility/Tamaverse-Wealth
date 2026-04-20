@@ -186,8 +186,37 @@ return `
 <div class="main-content">
 
 <div id="dashboard" class="page">
-  <div class="header-with-picker" style="border-bottom: none; margin-bottom: 15px;">
+  <div class="mobile-only-header">
+     <div style="display:flex; align-items:center; gap:10px;">
+        <img src="logo.png" style="width:35px; height:35px; border-radius:8px; object-fit:cover;">
+        <strong style="font-size:1.2rem; color:#1e293b;">Pro-Tama Apps</strong>
+     </div>
+     <i class="far fa-bell" style="font-size:1.4rem; color:#64748b;"></i>
+  </div>
+
+  <div class="header-with-picker" style="border-bottom: none; margin-bottom: 5px;">
      <h2 class="header-title">Halo, ${currentUser}! 👋</h2>
+  </div>
+
+  <div class="mobile-banner">
+     <img src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Banner">
+     <div class="mobile-banner-text">Dashboard Keuangan Elite</div>
+  </div>
+
+  <div class="mobile-menu-grid">
+     <div class="menu-btn" onclick="showPage('aset')"><div class="icon-box" style="background:#e0f2fe; color:#0284c7;"><i class="fas fa-home"></i></div><span>Asetku</span></div>
+     <div class="menu-btn" onclick="showPage('anggaran')"><div class="icon-box" style="background:#dcfce7; color:#16a34a;"><i class="fas fa-file-invoice-dollar"></i></div><span>Anggaran</span></div>
+     <div class="menu-btn" onclick="showPage('transaksi')"><div class="icon-box" style="background:#fef9c3; color:#ca8a04;"><i class="fas fa-exchange-alt"></i></div><span>Mutasi</span></div>
+     <div class="menu-btn" onclick="showPage('target')"><div class="icon-box" style="background:#f3e8ff; color:#9333ea;"><i class="fas fa-bullseye"></i></div><span>Target</span></div>
+     <div class="menu-btn" onclick="showPage('wedding')"><div class="icon-box" style="background:#fce7f3; color:#db2777;"><i class="fas fa-ring"></i></div><span>Wedding</span></div>
+     <div class="menu-btn" onclick="showPage('hutang')"><div class="icon-box" style="background:#fee2e2; color:#dc2626;"><i class="fas fa-hand-holding-usd"></i></div><span>Hutang</span></div>
+     <div class="menu-btn" onclick="alert('Fitur Kartu Tamu Digital segera hadir bro!')"><div class="icon-box" style="background:#f1f5f9; color:#475569;"><i class="fas fa-id-card"></i></div><span>Tamu</span></div>
+     <div class="menu-btn" onclick="alert('Panic Button ditekan!')"><div class="icon-box" style="background:#ffedd5; color:#ef4444;"><i class="fas fa-exclamation-triangle"></i></div><span>SOS</span></div>
+  </div>
+  
+  <div style="margin-bottom: 15px; display:flex; justify-content:space-between; align-items:center;">
+      <h3 style="margin:0; font-size:1.1rem; color:#1e293b;">Ringkasan Keuangan</h3>
+      <span style="font-size:0.8rem; color:var(--primary); font-weight:700; cursor:pointer;" onclick="update()">Refresh</span>
   </div>
   
   <div id="debtReminderContainer"></div>
@@ -509,14 +538,26 @@ return `
 </div>
 
 </div>
+<div class="bottom-nav">
+  <div class="nav-item active" id="botnav-dashboard" onclick="showPage('dashboard')"><i class="fas fa-home"></i><span>Beranda</span></div>
+  <div class="nav-item" id="botnav-transaksi" onclick="showPage('transaksi')"><i class="fas fa-file-alt"></i><span>Transaksi</span></div>
+  <div class="nav-item" id="botnav-wedding" onclick="showPage('wedding')"><i class="fas fa-ring"></i><span>Wedding</span></div>
+  <div class="nav-item" onclick="logout()"><i class="fas fa-user-circle"></i><span>Profil</span></div>
+</div>
 `;
 }
 
 function showPage(p){
   document.querySelectorAll(".page").forEach(x => x.style.display="none");
   document.getElementById(p).style.display="block";
+  
+  // Ubah active state di Sidebar (Desktop)
   document.querySelectorAll(".sidebar button").forEach(btn => btn.classList.remove("active"));
   if(document.getElementById("nav-" + p)) document.getElementById("nav-" + p).classList.add("active");
+  
+  // Ubah active state di Bottom Nav (Mobile)
+  document.querySelectorAll(".bottom-nav .nav-item").forEach(btn => btn.classList.remove("active"));
+  if(document.getElementById("botnav-" + p)) document.getElementById("botnav-" + p).classList.add("active");
   
   if (window.innerWidth <= 768) {
     const sidebar = document.querySelector('.sidebar');
