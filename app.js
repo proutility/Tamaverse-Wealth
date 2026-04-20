@@ -90,13 +90,36 @@ auth.onAuthStateChanged((user) => {
   } else {
     document.getElementById("app").innerHTML = `
       <div class="login-wrap">
-        <div class="login-card">
-          <img src="logo.png" alt="Logo" style="width: 80px; height: 80px; object-fit: cover; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-          <h2 style="margin:0 0 8px 0; color: #1e293b;">Pro-Tama Finance</h2>
-          <p style="color:#64748b; margin-bottom:30px; font-size: 0.95rem;">Cloud Dashboard Elite++</p>
-          <button class="action" style="width:100%; justify-content:center; padding: 14px; font-size: 1.05rem; background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; cursor: pointer;" onclick="login()">
-            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width:20px; margin-right:10px;"> Masuk pakai Google
-          </button>
+        <div class="login-container">
+          
+          <div class="login-left">
+            <img src="logo.png" alt="Logo" style="width: 75px; height: 75px; object-fit: cover; border-radius: 18px; margin-bottom: 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.08);">
+            <h1 style="margin: 0 0 10px 0; color: #1e293b; font-size: 2.2rem; line-height: 1.2;">Pro-Tama Finance</h1>
+            <p style="color:#64748b; font-size: 1.05rem; margin-bottom: 20px; line-height: 1.5;">Platform manajemen keuangan & aset kelas elit untuk masa depan yang lebih tertata.</p>
+            
+            <div class="login-features">
+                <div class="feature-item"><i class="fas fa-chart-pie"></i> <span>Pantau Cashflow & Aset Real-time</span></div>
+                <div class="feature-item"><i class="fas fa-ring" style="color: #ec4899; background: #fdf2f8;"></i> <span>Wedding Planner Terintegrasi</span></div>
+                <div class="feature-item"><i class="fas fa-calculator" style="color: #8b5cf6; background: #f5f3ff;"></i> <span>Kalkulator Saham Pintar</span></div>
+            </div>
+          </div>
+          
+          <div class="login-right">
+            <div style="text-align:center; margin-bottom: 40px;">
+                <h2 style="margin:0 0 8px 0; color: #1e293b; font-size: 1.8rem;">Selamat Datang! 👋</h2>
+                <p style="color:#64748b; margin:0; font-size: 0.95rem;">Silakan masuk untuk mengakses dashboard.</p>
+            </div>
+            
+            <button class="login-btn-google" onclick="login()">
+              <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width:24px;"> 
+              Lanjutkan dengan Google
+            </button>
+            
+            <div style="margin-top: 40px; text-align: center; color: #94a3b8; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                <i class="fas fa-shield-alt"></i> Secured by Google Firebase
+            </div>
+          </div>
+
         </div>
       </div>
     `;
