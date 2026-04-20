@@ -797,7 +797,7 @@ function renderNotifs() {
             
             if(!isNaN(dueDay)) {
                 let diff = dueDay - currentDay;
-                // Cek apakah bulan ini udah dibayar (berdasarkan deskripsi)
+                // Cek apakah bulan ini udah dibayar
                 let isPaid = transactions.some(t => t.type === 'expense' && t.desc.toLowerCase().includes(d.name.toLowerCase()) && t.date && t.date.startsWith(ym));
                 
                 if(!isPaid) {
@@ -805,6 +805,23 @@ function renderNotifs() {
                         html += `<div class="notif-item danger"><i class="fas fa-clock"></i><div><strong>Tagihan!</strong><br><span style="color:#64748b; font-size:0.8rem;">${d.name} jatuh tempo ${diff === 0 ? 'HARI INI' : 'dlm ' + diff + ' hari'}.</span></div></div>`;
                     }
                 }
+            }
+        });
+
+        // 3. Cek Budget Over > 80% (Sekarang udah MASUK ke dalam fungsi)
+        let currentBudgets = getBudgetsFor(ym);
+        let spentThisMonth = {};
+        transactions.filter(t => t.date.startsWith(ym) && t.type === 'expense').forEach(t => {
+            spentThisMonth[t.category] = (spentThisMonth[t.category] || 0) + t.amount;
+        });
+
+        currentBudgets.forEach(b => {
+            let spent = spentThisMonth[b.category] || 0;
+            let pct = (spent / b.amount) * 100;
+            if(pct >= 100) {
+                html += `<div class="notif-item danger"><i class="fas fa-times-circle" style="color:#ef4444;"></i><div><strong>Overbudget: ${b.category}</strong><br><span style="color:#64748b;">Pengeluaran tembus 100% dari target!</span></div></div>`;
+            } else if(pct >= 80) {
+                html += `<div class="notif-item warning"><i class="fas fa-exclamation-triangle" style="color:#eab308;"></i><div><strong>Warning Budget: ${b.category}</strong><br><span style="color:#64748b;">Pengeluaran udah ${pct.toFixed(0)}%. Ngerem dikit!</span></div></div>`;
             }
         });
         
