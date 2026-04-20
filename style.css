@@ -361,3 +361,29 @@ tr:last-child td { border-bottom: none; }
   
   .notif-panel { top: 55px; right: 15px; width: calc(100% - 30px); }
 }
+/* ========================================================= */
+/* FITUR MODE FOKUS (COLLAPSE SIDEBAR DESKTOP)               */
+/* ========================================================= */
+.desktop-menu-btn { transition: color 0.2s; }
+.desktop-menu-btn:hover { color: var(--primary) !important; }
+
+/* Transisi halus biar ngilang/munculnya estetik */
+.sidebar { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s ease, opacity 0.2s ease; }
+.main-content { transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+
+/* Class saat Mode Fokus aktif */
+body.sidebar-collapsed .sidebar {
+    transform: translateX(-100%);
+    width: 0 !important;
+    opacity: 0;
+    pointer-events: none;
+}
+body.sidebar-collapsed .main-content {
+    margin-left: 0 !important;
+    width: 100% !important;
+}
+
+/* Sembunyikan ikon garis 3 ini di HP karena HP udah punya UI Bottom Nav */
+@media (max-width: 768px) {
+    .desktop-menu-btn { display: none !important; }
+}
