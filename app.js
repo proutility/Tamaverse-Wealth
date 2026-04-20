@@ -175,15 +175,17 @@ return `
      <i class="fas fa-bell" style="font-size:1.4rem; color:#64748b; cursor:pointer;" onclick="toggleNotif()"></i>
   </div>
 
-  <div class="header-with-picker" style="border-bottom: none; margin-bottom: 5px;">
-     <h2 class="header-title">Halo, ${userProfile.fullname || currentUser}! 👋</h2>
-     <div style="display:none;" id="desktopBellWrap">
-        <i class="fas fa-bell" style="font-size:1.5rem; color:#64748b; cursor:pointer; transition:0.2s;" onmouseover="this.style.color='#3b82f6'" onmouseout="this.style.color='#64748b'" onclick="toggleNotif()"></i>
+  <div class="header-with-picker" style="border-bottom: none; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
+     <h2 class="header-title" style="margin: 0;">Halo, ${userProfile.fullname || currentUser}! 👋</h2>
+     
+     <div class="desktop-bell" onclick="toggleNotif()">
+        <i class="fas fa-bell" style="font-size:1.2rem; color:var(--warning);"></i>
+        <span style="font-size: 0.85rem; font-weight: 700; color: #475569;">Notifikasi</span>
      </div>
   </div>
 
   <div class="mobile-banner">
-     <img src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Banner">
+     <img src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" alt="Banner">
      <div class="mobile-banner-text">Dashboard Keuangan Elite</div>
   </div>
 
