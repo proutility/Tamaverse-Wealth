@@ -389,21 +389,31 @@ body.sidebar-collapsed .main-content {
     .desktop-global-header { display: none !important; }
 }
 /* ========================================================= */
-/* PERBAIKAN SPACING & LAYOUT DESKTOP (BIAR LEGA)            */
+/* PERBAIKAN SPACING, LAYOUT DESKTOP & MODE FOKUS FULLSCREEN */
 /* ========================================================= */
+.desktop-global-header {
+    position: relative;
+    z-index: 999; /* Solusi biar Lonceng di laptop selalu di atas dan bisa diklik */
+}
+
 @media (min-width: 769px) {
     .main-content {
-        padding: 30px 40px !important; /* Kasih jarak lega kiri-kanan-atas-bawah */
-        max-width: 1400px; /* Biar gak terlalu melar kalau layarnya ultra-wide */
-        margin: 0 auto;
+        padding: 30px 40px !important;
+        margin-left: 260px !important; /* Jarak disamain sama lebar sidebar */
+        transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        max-width: 100% !important; /* Lepas batas biar bisa beneran mentok layar */
     }
     
+    body.sidebar-collapsed .main-content {
+        margin-left: 0 !important; /* Saat mode fokus, margin kiri jadi 0 (100% Fullscreen) */
+    }
+
     .desktop-global-header {
-        margin-bottom: 30px !important; /* Jarak dari header sapaan ke konten bawahnya */
+        margin-bottom: 30px !important;
     }
 
     input, select {
-        box-sizing: border-box; /* Biar input box gak keluar jalur */
+        box-sizing: border-box; 
     }
 }
 /* ========================================================= */
