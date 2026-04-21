@@ -611,3 +611,12 @@ body.sidebar-collapsed .main-content {
     .login-container { width: 400px; max-width: 90%; }
     .login-right { padding: 40px 30px; }
 }
+/* Senjata Pamungkas Hapus Logout di HP */
+@media screen and (max-width: 768px) {
+    button[onclick="logout()"].hide-on-mobile {
+        display: none !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+    }
+}
