@@ -74,12 +74,32 @@ let weddingData = {
 
 let currentGuestSort = 'newest';
 
+// FITUR BARU: Variabel untuk Sembunyikan Saldo
+let isBalanceHidden = false;
+
 let nowDt = new Date();
 let defaultYM = nowDt.getFullYear() + "-" + String(nowDt.getMonth() + 1).padStart(2, '0');
 
 function getAssetsFor(ym) { return assetsData[ym] || []; }
 function getBudgetsFor(ym) { return budgetsData[ym] || []; }
 let assets = [];
+
+// ================= FUNGSI BANTUAN =================
+// FITUR BARU: Fungsi mendapatkan ucapan berdasarkan jam
+function getGreeting() {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 11) return "Selamat Pagi";
+    if (hour >= 11 && hour < 15) return "Selamat Siang";
+    if (hour >= 15 && hour < 18) return "Selamat Sore";
+    return "Selamat Malam";
+}
+function getGreetingIcon() {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 11) return "☕";
+    if (hour >= 11 && hour < 15) return "☀️";
+    if (hour >= 15 && hour < 18) return "🌇";
+    return "🌙";
+}
 
 // ================= FUNGSI AUTENTIKASI =================
 auth.onAuthStateChanged((user) => {
@@ -192,7 +212,7 @@ return `
 <div class="desktop-global-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #e2e8f0;">
      <div style="display: flex; align-items: center; gap: 15px;">
          <i class="fas fa-bars desktop-menu-btn" onclick="toggleDesktopSidebar()" style="font-size: 1.4rem; color: #475569; cursor: pointer;" title="Mode Fokus (Tutup Sidebar)"></i>
-         <h2 class="header-title" style="margin: 0; font-size: 1.4rem; color: #1e293b;">Halo, ${userProfile.fullname || currentUser}! 👋</h2>
+         <h2 class="header-title" style="margin: 0; font-size: 1.4rem; color: #1e293b;">${getGreeting()}, ${userProfile.fullname || currentUser}! ${getGreetingIcon()}</h2>
      </div>
      
      <div class="desktop-bell" onclick="toggleNotif()" style="display: flex; align-items: center; gap: 10px; background: white; padding: 10px 16px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); cursor: pointer; border: 1px solid #e2e8f0; transition: 0.2s;">
@@ -227,7 +247,10 @@ return `
   </div>
   
   <div style="margin-bottom: 15px; display:flex; justify-content:space-between; align-items:center;">
-      <h3 style="margin:0; font-size:1.1rem; color:#1e293b;">Ringkasan Keuangan</h3>
+      <div style="display:flex; align-items:center; gap:10px;">
+          <h3 style="margin:0; font-size:1.1rem; color:#1e293b;">Ringkasan Keuangan</h3>
+          <i id="toggleEye" class="fas fa-eye" style="color:#94a3b8; cursor:pointer;" onclick="toggleHideBalance()" title="Sembunyikan/Tampilkan Saldo"></i>
+      </div>
       <span style="font-size:0.8rem; color:var(--primary); font-weight:700; cursor:pointer;" onclick="update()">Refresh</span>
   </div>
   
@@ -678,7 +701,7 @@ function saveProfile() {
     
     // Auto-update nama di Header
     let h2 = document.querySelector('.header-title');
-    if(h2) h2.innerHTML = `Halo, ${userProfile.fullname || currentUser}! 👋`;
+    if(h2) h2.innerHTML = `${getGreeting()}, ${userProfile.fullname || currentUser}! ${getGreetingIcon()}`;
 }
 
 // ================= FUNGSI KALKULATOR SAHAM =================
@@ -766,11 +789,6 @@ function renderLaporan() {
 // ================= FUNGSI NOTIFIKASI LONCENG =================
 function toggleNotif() {
     const el = document.getElementById('notifPanel');
-    
-    // Tampilkan tombol lonceng di header desktop jika layarnya besar
-    if(window.innerWidth > 768) {
-        document.getElementById('desktopBellWrap').style.display = 'block';
-    }
     
     if(el.style.display === 'block') {
         el.style.display = 'none';
@@ -1272,8 +1290,30 @@ function renderWedding() {
     }
 }
 
+// FITUR BARU: Format Hide/Show Saldo
+const formatRp = (angka) => {
+    if(isBalanceHidden) return "***.***";
+    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(angka);
+};
 
-const formatRp = (angka) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(angka);
+// FITUR BARU: Toggle Hide Balance
+function toggleHideBalance() {
+    isBalanceHidden = !isBalanceHidden;
+    let eyeIcon = document.getElementById("toggleEye");
+    if(eyeIcon) {
+        if(isBalanceHidden) {
+            eyeIcon.classList.remove("fa-eye");
+            eyeIcon.classList.add("fa-eye-slash");
+            eyeIcon.style.color = "#3b82f6";
+        } else {
+            eyeIcon.classList.remove("fa-eye-slash");
+            eyeIcon.classList.add("fa-eye");
+            eyeIcon.style.color = "#94a3b8";
+        }
+    }
+    update(); // Panggil update buat refresh angka di layar
+}
+
 
 function handleTypeChange() {
   let type = document.getElementById("type").value;
@@ -1748,7 +1788,11 @@ function triggerAnim(id, diff, invertColor = false) {
   el.className = "anim-float"; 
   void el.offsetWidth; 
   let sign = diff > 0 ? "+ " : "- ";
-  el.innerText = sign + formatRp(Math.abs(diff));
+  
+  // Format animasinya biar hide balance juga jalan
+  if(isBalanceHidden) el.innerText = sign + "***.***";
+  else el.innerText = sign + formatRp(Math.abs(diff));
+  
   let isGood = diff > 0;
   if (invertColor) isGood = diff < 0; 
   el.classList.add(isGood ? "anim-up" : "anim-down");
@@ -1863,9 +1907,15 @@ function update(){
   
   lastBalance = balance; lastWealth = wealth; lastDebt = totalDebt;
 
-  if(document.getElementById("balance")) document.getElementById("balance").innerText = balance.toLocaleString('id-ID');
-  if(document.getElementById("wealth")) document.getElementById("wealth").innerText = wealth.toLocaleString('id-ID');
-  if(document.getElementById("totalDebtDisplay")) document.getElementById("totalDebtDisplay").innerText = totalDebt.toLocaleString('id-ID');
+  if(document.getElementById("balance")) {
+      document.getElementById("balance").innerText = isBalanceHidden ? "***.***" : balance.toLocaleString('id-ID');
+  }
+  if(document.getElementById("wealth")) {
+      document.getElementById("wealth").innerText = isBalanceHidden ? "***.***" : wealth.toLocaleString('id-ID');
+  }
+  if(document.getElementById("totalDebtDisplay")) {
+      document.getElementById("totalDebtDisplay").innerText = isBalanceHidden ? "***.***" : totalDebt.toLocaleString('id-ID');
+  }
 
   const trxList = document.getElementById("trxList");
   if(trxList) {
@@ -1877,7 +1927,8 @@ function update(){
       let catLabel = fullCatName ? `<span style="background:#e2e8f0; padding:2px 8px; border-radius:12px; font-size:0.75rem; font-weight:600; margin-left:8px; display:inline-block; color:#475569;">${fullCatName}</span>` : "";
       let typeIcon = t.type === 'income' ? '<i class="fas fa-arrow-down text-success"></i>' : (t.type === 'expense' ? '<i class="fas fa-arrow-up text-danger"></i>' : '<i class="fas fa-exchange-alt text-primary"></i>');
       
-      trxList.innerHTML += `<tr><td style="color:#64748b;">${t.date}</td><td>${typeIcon}</td><td><strong style="color:#1e293b;">${t.desc}</strong>${catLabel}<br><small style="color:#94a3b8;">${t.walletName}</small></td><td style="font-weight:600; color:#1e293b;">${formatRp(t.amount)}</td><td style="text-align: center;"><button class="btn-danger" style="padding: 6px 10px;" onclick="deleteTransaction(${originalIndex})"><i class="fas fa-trash"></i></button></td></tr>`;
+      let amountDisplay = isBalanceHidden ? "Rp ***.***" : formatRp(t.amount);
+      trxList.innerHTML += `<tr><td style="color:#64748b;">${t.date}</td><td>${typeIcon}</td><td><strong style="color:#1e293b;">${t.desc}</strong>${catLabel}<br><small style="color:#94a3b8;">${t.walletName}</small></td><td style="font-weight:600; color:#1e293b;">${amountDisplay}</td><td style="text-align: center;"><button class="btn-danger" style="padding: 6px 10px;" onclick="deleteTransaction(${originalIndex})"><i class="fas fa-trash"></i></button></td></tr>`;
     });
   }
 
@@ -1903,16 +1954,24 @@ function update(){
         let catTotal = groupedAssets[cat].reduce((sum, item) => sum + item.value, 0);
         let catIcon = cat === 'Saham' ? 'fa-chart-line' : cat === 'Emas' ? 'fa-coins' : cat === 'Rekening Bank' ? 'fa-wallet' : 'fa-box';
         
-        let groupHTML = `<div class="accordion-header" onclick="toggleAccordion(this)"><span style="font-size: 0.95rem; font-weight: 700; color: #334155; display: flex; align-items: center;"><i class="fas ${catIcon} text-primary" style="margin-right:12px; font-size: 1.1rem;"></i> ${cat.toUpperCase()}</span><span style="font-weight: 600;">${formatRp(catTotal)} <i class="fas fa-chevron-down" style="font-size: 0.8em; margin-left:12px; color:#94a3b8;"></i></span></div><div class="accordion-content"><table style="margin-top: 0;"><tbody>`;
+        let totalDisplay = isBalanceHidden ? "Rp ***.***" : formatRp(catTotal);
+        
+        let groupHTML = `<div class="accordion-header" onclick="toggleAccordion(this)"><span style="font-size: 0.95rem; font-weight: 700; color: #334155; display: flex; align-items: center;"><i class="fas ${catIcon} text-primary" style="margin-right:12px; font-size: 1.1rem;"></i> ${cat.toUpperCase()}</span><span style="font-weight: 600;">${totalDisplay} <i class="fas fa-chevron-down" style="font-size: 0.8em; margin-left:12px; color:#94a3b8;"></i></span></div><div class="accordion-content"><table style="margin-top: 0;"><tbody>`;
 
         groupedAssets[cat].forEach(a => {
           let stockInfo = "";
+          let valDisplay = isBalanceHidden ? "Rp ***.***" : formatRp(a.value);
+          
           if (a.type === 'saham' && a.lot && a.avg) {
              let modal = a.lot * 100 * a.avg; let profitLoss = a.value - modal;
              let pct = ((profitLoss / modal) * 100).toFixed(2); let colorClass = profitLoss >= 0 ? 'text-success' : 'text-danger'; let sign = profitLoss >= 0 ? '+' : '';
-             stockInfo = `<br><small style="color:#64748b; font-size:0.8rem;">${a.lot} Lot | Avg: ${formatRp(a.avg)}</small><div class="${colorClass}" style="font-size: 0.8rem; font-weight:700;">${sign}${formatRp(profitLoss)} (${sign}${pct}%)</div>`;
+             
+             let avgDisplay = isBalanceHidden ? "Rp ***.***" : formatRp(a.avg);
+             let plDisplay = isBalanceHidden ? "Rp ***.***" : formatRp(profitLoss);
+             
+             stockInfo = `<br><small style="color:#64748b; font-size:0.8rem;">${a.lot} Lot | Avg: ${avgDisplay}</small><div class="${colorClass}" style="font-size: 0.8rem; font-weight:700;">${sign}${plDisplay} (${sign}${pct}%)</div>`;
           }
-          groupHTML += `<tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 12px 15px;"><strong style="color: #1e293b; font-size:0.95rem;">${a.name}</strong>${stockInfo}</td><td style="padding: 12px 15px; font-weight: 500; color: #475569;">${formatRp(a.value)}</td><td style="padding: 12px 15px; text-align: right;"><button class="btn-warning" style="padding: 6px 10px; margin-right: 5px;" onclick="updateStockValue(${a.originalIndex})" title="Edit Harga"><i class="fas fa-edit"></i></button><button class="btn-danger" style="padding: 6px 10px;" onclick="deleteAsset(${a.originalIndex})"><i class="fas fa-trash"></i></button></td></tr>`;
+          groupHTML += `<tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 12px 15px;"><strong style="color: #1e293b; font-size:0.95rem;">${a.name}</strong>${stockInfo}</td><td style="padding: 12px 15px; font-weight: 500; color: #475569;">${valDisplay}</td><td style="padding: 12px 15px; text-align: right;"><button class="btn-warning" style="padding: 6px 10px; margin-right: 5px;" onclick="updateStockValue(${a.originalIndex})" title="Edit Harga"><i class="fas fa-edit"></i></button><button class="btn-danger" style="padding: 6px 10px;" onclick="deleteAsset(${a.originalIndex})"><i class="fas fa-trash"></i></button></td></tr>`;
         });
         groupHTML += `</tbody></table></div>`; assetListContainer.innerHTML += groupHTML;
       }
@@ -1923,8 +1982,10 @@ function update(){
   if(debtList) {
     debtList.innerHTML = "";
     debts.forEach((d, i) => {
-      let status = d.remaining === 0 ? '<span class="text-success" style="font-weight:700; background: #dcfce7; padding: 4px 10px; border-radius: 12px; font-size: 0.85rem;"><i class="fas fa-check-circle"></i> Lunas</span>' : `<span style="font-weight:600; color:#1e293b;">${formatRp(d.remaining)}</span>`;
-      debtList.innerHTML += `<tr><td><strong style="color:#1e293b;">${d.name}</strong><br><small style="color:#64748b"><i class="far fa-calendar-alt"></i> Jatuh Tempo: ${d.date}</small></td><td style="color:#475569;">${formatRp(d.total)}</td><td>${status}</td><td style="display:flex; gap:8px;">${d.remaining > 0 ? `<button class="btn-success" style="padding: 6px 12px; font-weight: 600;" onclick="payDebt(${i})"><i class="fas fa-money-bill-wave"></i> Bayar</button>` : ''}<button class="btn-warning" style="padding: 6px 10px;" onclick="editDebt(${i})"><i class="fas fa-edit"></i></button><button class="btn-danger" style="padding: 6px 10px;" onclick="deleteDebt(${i})"><i class="fas fa-trash"></i></button></td></tr>`;
+      let status = d.remaining === 0 ? '<span class="text-success" style="font-weight:700; background: #dcfce7; padding: 4px 10px; border-radius: 12px; font-size: 0.85rem;"><i class="fas fa-check-circle"></i> Lunas</span>' : `<span style="font-weight:600; color:#1e293b;">${isBalanceHidden ? "Rp ***.***" : formatRp(d.remaining)}</span>`;
+      let tDisplay = isBalanceHidden ? "Rp ***.***" : formatRp(d.total);
+      
+      debtList.innerHTML += `<tr><td><strong style="color:#1e293b;">${d.name}</strong><br><small style="color:#64748b"><i class="far fa-calendar-alt"></i> Jatuh Tempo: ${d.date}</small></td><td style="color:#475569;">${tDisplay}</td><td>${status}</td><td style="display:flex; gap:8px;">${d.remaining > 0 ? `<button class="btn-success" style="padding: 6px 12px; font-weight: 600;" onclick="payDebt(${i})"><i class="fas fa-money-bill-wave"></i> Bayar</button>` : ''}<button class="btn-warning" style="padding: 6px 10px;" onclick="editDebt(${i})"><i class="fas fa-edit"></i></button><button class="btn-danger" style="padding: 6px 10px;" onclick="deleteDebt(${i})"><i class="fas fa-trash"></i></button></td></tr>`;
     });
   }
 
@@ -1946,6 +2007,9 @@ function update(){
       let percent = Math.min((currentAmount / g.target) * 100, 100).toFixed(1); 
       let isAchieved = currentAmount >= g.target;
       
+      let caDisplay = isBalanceHidden ? "Rp ***.***" : formatRp(Math.min(currentAmount, g.target));
+      let tgDisplay = isBalanceHidden ? "Rp ***.***" : formatRp(g.target);
+      
       goalList.innerHTML += `
         <div class="card" style="margin-bottom: 0; padding: 20px; border-color: ${isAchieved ? '#86efac' : 'var(--border)'}; background: ${isAchieved ? '#f0fdf4' : '#ffffff'};">
           <div class="progress-header" style="align-items: center; margin-bottom: 12px;">
@@ -1953,7 +2017,7 @@ function update(){
             <div style="display:flex; gap:6px;"><button style="padding: 4px 8px; background: #0ea5e9; color: white; border: none; border-radius: 6px; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='#0284c7'" onmouseout="this.style.background='#0ea5e9'" onclick="editGoalSource(${i})" title="Ganti/Tambah Sumber Dana"><i class="fas fa-coins"></i></button><button class="btn-warning" style="padding: 4px 8px; border-radius: 6px;" onclick="editGoal(${i})" title="Edit Nama & Nominal"><i class="fas fa-edit"></i></button><button class="btn-danger" style="padding: 4px 8px; border-radius: 6px;" onclick="deleteGoal(${i})" title="Hapus Target"><i class="fas fa-times"></i></button></div>
           </div>
           <div style="font-size: 0.85rem; color: #64748b; margin-bottom: 8px;">Sumber: <strong style="color: #475569;">${sourceLabel}</strong></div>
-          <div style="font-size: 0.95rem; color: #1e293b; margin-bottom: 12px;">Terkumpul: <strong>${formatRp(Math.min(currentAmount, g.target))}</strong> <span style="color:#94a3b8; font-size:0.85rem;">/ ${formatRp(g.target)}</span></div>
+          <div style="font-size: 0.95rem; color: #1e293b; margin-bottom: 12px;">Terkumpul: <strong>${caDisplay}</strong> <span style="color:#94a3b8; font-size:0.85rem;">/ ${tgDisplay}</span></div>
           <div class="progress" style="margin-bottom: 10px; height: 12px; background: #e2e8f0;"><div class="progress-bar" style="width:${percent}%; background: ${isAchieved ? 'var(--success)' : 'var(--primary)'}"></div></div>
           <div style="display: flex; justify-content: space-between; align-items: center;"><span style="font-weight: 700; font-size: 0.9rem; color: ${isAchieved ? 'var(--success)' : 'var(--primary)'}">${percent}% ${isAchieved ? 'Tercapai' : ''}</span>${isAchieved ? '<i class="fas fa-check-circle" style="color:var(--success); font-size:1.4rem;"></i>' : ''}</div>
         </div>
@@ -2019,17 +2083,27 @@ function renderBudgetList(list, ym) {
         b.subBudgets.forEach((sub, subIdx) => {
             let subSpent = transactions.filter(t => t.date.startsWith(ym) && t.type === 'expense' && t.category === b.category && t.subCategory === sub.name).reduce((acc, t) => acc + t.amount, 0);
             let subPercent = Math.min((subSpent / sub.amount) * 100, 100).toFixed(1); let subIsDanger = subSpent > sub.amount; let subColorCode = subIsDanger ? 'var(--danger)' : '#0ea5e9';
-            subHTML += `<div style="display:flex; justify-content:space-between; font-size: 0.85rem; margin-bottom: 6px; color:#475569;"><span style="display:flex; align-items:center;"><i class="fas fa-level-up-alt fa-rotate-90" style="margin-right:8px; color:#cbd5e1;"></i> ${sub.name} <button onclick="deleteSubBudget('${ym}', ${i}, ${subIdx})" style="background:none;border:none;color:#ef4444;cursor:pointer;padding:0;margin-left:8px;" title="Hapus Sub"><i class="fas fa-times"></i></button></span><strong style="color:${subIsDanger ? 'var(--danger)' : '#1e293b'}">${formatRp(subSpent)} <span style="color:#94a3b8; font-weight:400; font-size:0.75rem;">/ ${formatRp(sub.amount)}</span></strong></div><div class="progress" style="height: 6px; margin-bottom: 12px; background: ${subIsDanger ? '#fee2e2' : '#e0f2fe'};"><div class="progress-bar" style="width:${subPercent}%; background: ${subColorCode}"></div></div>`;
+            
+            let spDisplay = isBalanceHidden ? "Rp ***.***" : formatRp(subSpent);
+            let saDisplay = isBalanceHidden ? "Rp ***.***" : formatRp(sub.amount);
+            
+            subHTML += `<div style="display:flex; justify-content:space-between; font-size: 0.85rem; margin-bottom: 6px; color:#475569;"><span style="display:flex; align-items:center;"><i class="fas fa-level-up-alt fa-rotate-90" style="margin-right:8px; color:#cbd5e1;"></i> ${sub.name} <button onclick="deleteSubBudget('${ym}', ${i}, ${subIdx})" style="background:none;border:none;color:#ef4444;cursor:pointer;padding:0;margin-left:8px;" title="Hapus Sub"><i class="fas fa-times"></i></button></span><strong style="color:${subIsDanger ? 'var(--danger)' : '#1e293b'}">${spDisplay} <span style="color:#94a3b8; font-weight:400; font-size:0.75rem;">/ ${saDisplay}</span></strong></div><div class="progress" style="height: 6px; margin-bottom: 12px; background: ${subIsDanger ? '#fee2e2' : '#e0f2fe'};"><div class="progress-bar" style="width:${subPercent}%; background: ${subColorCode}"></div></div>`;
         });
         subHTML += `</div>`;
     }
     
-    container.innerHTML += `<div class="card" style="margin-bottom: 0; border: 1px solid ${borderCardColor}; border-left: 5px solid ${isDone ? 'var(--success)' : 'var(--primary)'}"><div class="progress-header" style="align-items: center; margin-bottom: 12px;"><strong style="font-size: 1.05rem; color: #1e293b;">${b.category} ${isDone ? '<span class="budget-badge badge-paid">✓ Terpenuhi</span>' : ''}</strong><div style="display:flex; gap:8px;"><button style="padding: 4px 8px; background: #e0f2fe; color: #0ea5e9; border: none; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer; display:flex; align-items:center; gap:4px;" onclick="addSubBudget('${ym}', ${i})"><i class="fas fa-plus"></i> Sub</button><button class="btn-danger" style="padding: 4px 8px; background: transparent; color: #cbd5e1; transition: color 0.2s;" onmouseover="this.style.color='var(--danger)'" onmouseout="this.style.color='#cbd5e1'" onclick="deleteBudget('${ym}', ${i})"><i class="fas fa-trash"></i></button></div></div><div style="font-size: 0.95rem; color: #475569; margin-bottom: 12px;">Terpakai: <strong style="color:#1e293b;">${formatRp(spent)}</strong> <span style="color:#94a3b8; font-size:0.85rem;">/ ${formatRp(b.amount)}</span></div><div class="progress" style="margin-bottom: 8px; background: ${bgLightColor};"><div class="progress-bar" style="width:${percent}%; background: ${barColor}"></div></div><div style="text-align: right; font-weight: 700; font-size: 0.85rem; color: ${barColor}">${percent}% ${isDanger ? ' (Over Budget!)' : ''}</div>${subHTML}</div>`;
+    let terpakaiDisplay = isBalanceHidden ? "Rp ***.***" : formatRp(spent);
+    let bAmountDisplay = isBalanceHidden ? "Rp ***.***" : formatRp(b.amount);
+    
+    container.innerHTML += `<div class="card" style="margin-bottom: 0; border: 1px solid ${borderCardColor}; border-left: 5px solid ${isDone ? 'var(--success)' : 'var(--primary)'}"><div class="progress-header" style="align-items: center; margin-bottom: 12px;"><strong style="font-size: 1.05rem; color: #1e293b;">${b.category} ${isDone ? '<span class="budget-badge badge-paid">✓ Terpenuhi</span>' : ''}</strong><div style="display:flex; gap:8px;"><button style="padding: 4px 8px; background: #e0f2fe; color: #0ea5e9; border: none; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer; display:flex; align-items:center; gap:4px;" onclick="addSubBudget('${ym}', ${i})"><i class="fas fa-plus"></i> Sub</button><button class="btn-danger" style="padding: 4px 8px; background: transparent; color: #cbd5e1; transition: color 0.2s;" onmouseover="this.style.color='var(--danger)'" onmouseout="this.style.color='#cbd5e1'" onclick="deleteBudget('${ym}', ${i})"><i class="fas fa-trash"></i></button></div></div><div style="font-size: 0.95rem; color: #475569; margin-bottom: 12px;">Terpakai: <strong style="color:#1e293b;">${terpakaiDisplay}</strong> <span style="color:#94a3b8; font-size:0.85rem;">/ ${bAmountDisplay}</span></div><div class="progress" style="margin-bottom: 8px; background: ${bgLightColor};"><div class="progress-bar" style="width:${percent}%; background: ${barColor}"></div></div><div style="text-align: right; font-weight: 700; font-size: 0.85rem; color: ${barColor}">${percent}% ${isDanger ? ' (Over Budget!)' : ''}</div>${subHTML}</div>`;
   });
   
   const statusCard = document.getElementById("budgetStatusCard"); const budgetVsLiquid = document.getElementById("budgetVsLiquid");
   if(statusCard && budgetVsLiquid){
-    budgetVsLiquid.innerHTML = `<span style="color:${totalRemainingPlanning > cash ? 'var(--danger)' : 'var(--success)'}">${formatRp(totalRemainingPlanning)}</span> <small style="color:#94a3b8">/ ${formatRp(cash)}</small>`;
+    let tpDisplay = isBalanceHidden ? "Rp ***.***" : formatRp(totalRemainingPlanning);
+    let cashDisplay = isBalanceHidden ? "Rp ***.***" : formatRp(cash);
+    
+    budgetVsLiquid.innerHTML = `<span style="color:${totalRemainingPlanning > cash ? 'var(--danger)' : 'var(--success)'}">${tpDisplay}</span> <small style="color:#94a3b8">/ ${cashDisplay}</small>`;
     statusCard.style.backgroundColor = totalRemainingPlanning > cash ? '#fff1f2' : '#f0fdf4';
     statusCard.style.borderColor = totalRemainingPlanning > cash ? '#fecaca' : '#bbf7d0';
     document.getElementById("budgetCardTitle").innerText = totalRemainingPlanning > 0 ? "Sisa Rencana Perlu Dana" : "Rencana Bulan Ini Beres!";
