@@ -209,27 +209,36 @@ return `
         </div>
 </div>
 
+<div class="mobile-only-header">
+   <div style="display:flex; align-items:center; gap:10px;">
+      <img src="logo.png" style="width:35px; height:35px; border-radius:8px; object-fit:cover;">
+      <strong style="font-size:1.2rem; color:#1e293b;">Pro-Tama Apps</strong>
+   </div>
+   <div style="display:flex; align-items:center; gap:15px;">
+       <i class="fas fa-eye toggle-eye-icon" style="font-size:1.4rem; color:#64748b; cursor:pointer;" onclick="toggleHideBalance()" title="Sembunyikan/Tampilkan Saldo"></i>
+       <i class="fas fa-bell" style="font-size:1.4rem; color:#64748b; cursor:pointer;" onclick="toggleNotif()"></i>
+   </div>
+</div>
+
 <div class="desktop-global-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #e2e8f0;">
      <div style="display: flex; align-items: center; gap: 15px;">
          <i class="fas fa-bars desktop-menu-btn" onclick="toggleDesktopSidebar()" style="font-size: 1.4rem; color: #475569; cursor: pointer;" title="Mode Fokus (Tutup Sidebar)"></i>
          <h2 class="header-title" style="margin: 0; font-size: 1.4rem; color: #1e293b;">${getGreeting()}, ${userProfile.fullname || currentUser}! ${getGreetingIcon()}</h2>
      </div>
      
-     <div class="desktop-bell" onclick="toggleNotif()" style="display: flex; align-items: center; gap: 10px; background: white; padding: 10px 16px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); cursor: pointer; border: 1px solid #e2e8f0; transition: 0.2s;">
-        <i class="fas fa-bell" style="font-size:1.2rem; color:var(--warning);"></i>
-        <span style="font-size: 0.85rem; font-weight: 700; color: #475569;">Notifikasi</span>
+     <div style="display: flex; align-items: center; gap: 10px;">
+        <div onclick="toggleHideBalance()" style="display: flex; align-items: center; justify-content: center; background: white; padding: 10px 14px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); cursor: pointer; border: 1px solid #e2e8f0; transition: 0.2s;" title="Sembunyikan/Tampilkan Saldo">
+           <i class="fas fa-eye toggle-eye-icon" style="font-size:1.2rem; color:#94a3b8;"></i>
+        </div>
+        
+        <div class="desktop-bell" onclick="toggleNotif()" style="display: flex; align-items: center; gap: 10px; background: white; padding: 10px 16px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); cursor: pointer; border: 1px solid #e2e8f0; transition: 0.2s;">
+           <i class="fas fa-bell" style="font-size:1.2rem; color:var(--warning);"></i>
+           <span style="font-size: 0.85rem; font-weight: 700; color: #475569;">Notifikasi</span>
+        </div>
      </div>
   </div>
 
 <div id="dashboard" class="page">
-  <div class="mobile-only-header">
-     <div style="display:flex; align-items:center; gap:10px;">
-        <img src="logo.png" style="width:35px; height:35px; border-radius:8px; object-fit:cover;">
-        <strong style="font-size:1.2rem; color:#1e293b;">Pro-Tama Apps</strong>
-     </div>
-     <i class="fas fa-bell" style="font-size:1.4rem; color:#64748b; cursor:pointer;" onclick="toggleNotif()"></i>
-  </div>
-
   <div class="mobile-banner">
      <img src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" alt="Banner">
      <div class="mobile-banner-text">Dashboard Pro-Tama Finance</div>
@@ -247,10 +256,7 @@ return `
   </div>
   
   <div style="margin-bottom: 15px; display:flex; justify-content:space-between; align-items:center;">
-      <div style="display:flex; align-items:center; gap:10px;">
-          <h3 style="margin:0; font-size:1.1rem; color:#1e293b;">Ringkasan Keuangan</h3>
-          <i id="toggleEye" class="fas fa-eye" style="color:#94a3b8; cursor:pointer;" onclick="toggleHideBalance()" title="Sembunyikan/Tampilkan Saldo"></i>
-      </div>
+      <h3 style="margin:0; font-size:1.1rem; color:#1e293b;">Ringkasan Keuangan</h3>
       <span style="font-size:0.8rem; color:var(--primary); font-weight:700; cursor:pointer;" onclick="update()">Refresh</span>
   </div>
   
@@ -1299,21 +1305,21 @@ const formatRp = (angka) => {
 // FITUR BARU: Toggle Hide Balance
 function toggleHideBalance() {
     isBalanceHidden = !isBalanceHidden;
-    let eyeIcon = document.getElementById("toggleEye");
-    if(eyeIcon) {
+    let eyeIcons = document.querySelectorAll(".toggle-eye-icon");
+    
+    eyeIcons.forEach(icon => {
         if(isBalanceHidden) {
-            eyeIcon.classList.remove("fa-eye");
-            eyeIcon.classList.add("fa-eye-slash");
-            eyeIcon.style.color = "#3b82f6";
+            icon.classList.remove("fa-eye");
+            icon.classList.add("fa-eye-slash");
+            icon.style.color = "#3b82f6";
         } else {
-            eyeIcon.classList.remove("fa-eye-slash");
-            eyeIcon.classList.add("fa-eye");
-            eyeIcon.style.color = "#94a3b8";
+            icon.classList.remove("fa-eye-slash");
+            icon.classList.add("fa-eye");
+            icon.style.color = "#94a3b8";
         }
-    }
-    update(); // Panggil update buat refresh angka di layar
+    });
+    update();
 }
-
 
 function handleTypeChange() {
   let type = document.getElementById("type").value;
@@ -1789,7 +1795,6 @@ function triggerAnim(id, diff, invertColor = false) {
   void el.offsetWidth; 
   let sign = diff > 0 ? "+ " : "- ";
   
-  // Format animasinya biar hide balance juga jalan
   if(isBalanceHidden) el.innerText = sign + "***.***";
   else el.innerText = sign + formatRp(Math.abs(diff));
   
