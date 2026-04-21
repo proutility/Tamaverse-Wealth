@@ -586,7 +586,10 @@ return `
       </div>
       
       <div class="card" style="overflow-x: auto; margin-bottom: 20px; border-top: 4px solid #3b82f6;">
-        <h4 style="margin-top:0; color:#1d4ed8; display: flex; align-items: center; gap: 8px;"><i class="fas fa-mars" style="color: #3b82f6;"></i> Daftar Keluarga Pria</h4>
+        <h4 onclick="toggleGuestList('Pria')" style="margin-top:0; color:#1d4ed8; display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+    <span style="display: flex; align-items: center; gap: 8px;"><i class="fas fa-mars" style="color: #3b82f6;"></i> Daftar Keluarga Pria</span>
+    <i id="icon-guest-Pria" class="fas fa-chevron-up" style="color: #94a3b8;"></i>
+    </h4>
         <table id="wedGuestListPria" style="min-width: 100%;">
           <thead><tr><th>Nama Tamu</th><th>Kota</th><th>Jumlah (Pax)</th><th>Status Undangan</th><th>Kehadiran</th><th style="width: 100px; text-align: center;">Aksi</th></tr></thead>
           <tbody id="wedGuestTbodyPria"></tbody>
@@ -594,7 +597,10 @@ return `
       </div>
 
       <div class="card" style="overflow-x: auto; margin-bottom: 20px; border-top: 4px solid #ec4899;">
-        <h4 style="margin-top:0; color:#be185d; display: flex; align-items: center; gap: 8px;"><i class="fas fa-venus" style="color: #ec4899;"></i> Daftar Keluarga Wanita</h4>
+        <h4 onclick="toggleGuestList('Wanita')" style="margin-top:0; color:#be185d; display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+    <span style="display: flex; align-items: center; gap: 8px;"><i class="fas fa-venus" style="color: #ec4899;"></i> Daftar Keluarga Wanita</span>
+    <i id="icon-guest-Wanita" class="fas fa-chevron-up" style="color: #94a3b8;"></i>
+    </h4>
         <table id="wedGuestListWanita" style="min-width: 100%;">
           <thead><tr><th>Nama Tamu</th><th>Kota</th><th>Jumlah (Pax)</th><th>Status Undangan</th><th>Kehadiran</th><th style="width: 100px; text-align: center;">Aksi</th></tr></thead>
           <tbody id="wedGuestTbodyWanita"></tbody>
@@ -602,7 +608,10 @@ return `
       </div>
       
       <div class="card" style="overflow-x: auto; margin-bottom: 20px; border-top: 4px solid #eab308;">
-        <h4 style="margin-top:0; color:#854d0e; display: flex; align-items: center; gap: 8px;"><i class="fas fa-star" style="color: #eab308;"></i> Daftar Tamu VIP</h4>
+        <h4 onclick="toggleGuestList('VIP')" style="margin-top:0; color:#854d0e; display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+    <span style="display: flex; align-items: center; gap: 8px;"><i class="fas fa-star" style="color: #eab308;"></i> Daftar Tamu VIP</span>
+    <i id="icon-guest-VIP" class="fas fa-chevron-up" style="color: #94a3b8;"></i>
+    </h4>
         <table id="wedGuestListVIP" style="min-width: 100%;">
           <thead><tr><th>Nama Tamu</th><th>Kota</th><th>Jumlah (Pax)</th><th>Status Undangan</th><th>Kehadiran</th><th style="width: 100px; text-align: center;">Aksi</th></tr></thead>
           <tbody id="wedGuestTbodyVIP"></tbody>
@@ -610,7 +619,10 @@ return `
       </div>
 
       <div class="card" style="overflow-x: auto; border-top: 4px solid #94a3b8;">
-        <h4 style="margin-top:0; color:#475569; display: flex; align-items: center; gap: 8px;"><i class="fas fa-users"></i> Daftar Tamu Reguler</h4>
+        <h4 onclick="toggleGuestList('Reguler')" style="margin-top:0; color:#475569; display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+    <span style="display: flex; align-items: center; gap: 8px;"><i class="fas fa-users"></i> Daftar Tamu Reguler</span>
+    <i id="icon-guest-Reguler" class="fas fa-chevron-up" style="color: #94a3b8;"></i>
+    </h4>
         <table id="wedGuestListReguler" style="min-width: 100%;">
           <thead><tr><th>Nama Tamu</th><th>Kota</th><th>Jumlah (Pax)</th><th>Status Undangan</th><th>Kehadiran</th><th style="width: 100px; text-align: center;">Aksi</th></tr></thead>
           <tbody id="wedGuestTbodyReguler"></tbody>
@@ -2121,5 +2133,22 @@ function renderBudgetList(list, ym) {
     document.getElementById("budgetCardTitle").innerText = totalRemainingPlanning > 0 ? "Sisa Rencana Perlu Dana" : "Rencana Bulan Ini Beres!";
   }
 }
-
+// ==========================================
+// FITUR BARU: MINIMIZE GUEST LIST WEDDING
+// ==========================================
+window.toggleGuestList = function(tipe) {
+    let tabel = document.getElementById("wedGuestList" + tipe);
+    let ikon = document.getElementById("icon-guest-" + tipe);
+    
+    // Cek kalau tabel lagi disembunyiin
+    if (tabel.style.display === "none") {
+        tabel.style.display = "table"; // Munculin tabel
+        ikon.classList.remove("fa-chevron-down");
+        ikon.classList.add("fa-chevron-up"); // Ubah panah ke atas
+    } else {
+        tabel.style.display = "none"; // Sembunyiin tabel
+        ikon.classList.remove("fa-chevron-up");
+        ikon.classList.add("fa-chevron-down"); // Ubah panah ke bawah
+    }
+};
 if (document.getElementById("barChart")) setTimeout(update, 100);
