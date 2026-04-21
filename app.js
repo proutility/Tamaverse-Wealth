@@ -187,7 +187,7 @@ return `
 <div class="main-content" style="position: relative; width: 100%; max-width: 100%; margin: 0 auto; padding-bottom: 50px;">
 
 <button class="hide-on-mobile" onclick="logout()" style="position: fixed; bottom: 30px; left: 30px; background: white; color: #ef4444; border: 1px solid #fecaca; padding: 12px 20px; border-radius: 12px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15); z-index: 9999; display: flex; align-items: center; gap: 8px; transition: all 0.2s ease;" onmouseover="this.style.background='#fef2f2'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='white'; this.style.transform='translateY(0)';">
-    <i class="fas fa-sign-out-alt" style="font-size: 1.2rem;"></i> Logout Akun
+    <i class="fas fa-sign-out-alt" style="font-size: 1.2rem;"></i> Logout
 </button>
 
 <div id="notifPanel" class="notif-panel">
@@ -587,10 +587,10 @@ return `
       
       <div class="card" style="overflow-x: auto; margin-bottom: 20px; border-top: 4px solid #3b82f6;">
         <h4 onclick="toggleGuestList('Pria')" style="margin-top:0; color:#1d4ed8; display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
-    <span style="display: flex; align-items: center; gap: 8px;"><i class="fas fa-mars" style="color: #3b82f6;"></i> Daftar Keluarga Pria</span>
-    <i id="icon-guest-Pria" class="fas fa-chevron-up" style="color: #94a3b8;"></i>
-    </h4>
-        <table id="wedGuestListPria" style="min-width: 100%;">
+            <span style="display: flex; align-items: center; gap: 8px;"><i class="fas fa-mars" style="color: #3b82f6;"></i> Daftar Keluarga Pria</span>
+            <i id="icon-guest-Pria" class="fas fa-chevron-down" style="color: #94a3b8;"></i>
+        </h4>
+        <table id="wedGuestListPria" style="min-width: 100%; display: none;">
           <thead><tr><th>Nama Tamu</th><th>Kota</th><th>Jumlah (Pax)</th><th>Status Undangan</th><th>Kehadiran</th><th style="width: 100px; text-align: center;">Aksi</th></tr></thead>
           <tbody id="wedGuestTbodyPria"></tbody>
         </table>
@@ -598,10 +598,10 @@ return `
 
       <div class="card" style="overflow-x: auto; margin-bottom: 20px; border-top: 4px solid #ec4899;">
         <h4 onclick="toggleGuestList('Wanita')" style="margin-top:0; color:#be185d; display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
-    <span style="display: flex; align-items: center; gap: 8px;"><i class="fas fa-venus" style="color: #ec4899;"></i> Daftar Keluarga Wanita</span>
-    <i id="icon-guest-Wanita" class="fas fa-chevron-up" style="color: #94a3b8;"></i>
-    </h4>
-        <table id="wedGuestListWanita" style="min-width: 100%;">
+            <span style="display: flex; align-items: center; gap: 8px;"><i class="fas fa-venus" style="color: #ec4899;"></i> Daftar Keluarga Wanita</span>
+            <i id="icon-guest-Wanita" class="fas fa-chevron-down" style="color: #94a3b8;"></i>
+        </h4>
+        <table id="wedGuestListWanita" style="min-width: 100%; display: none;">
           <thead><tr><th>Nama Tamu</th><th>Kota</th><th>Jumlah (Pax)</th><th>Status Undangan</th><th>Kehadiran</th><th style="width: 100px; text-align: center;">Aksi</th></tr></thead>
           <tbody id="wedGuestTbodyWanita"></tbody>
         </table>
@@ -609,10 +609,10 @@ return `
       
       <div class="card" style="overflow-x: auto; margin-bottom: 20px; border-top: 4px solid #eab308;">
         <h4 onclick="toggleGuestList('VIP')" style="margin-top:0; color:#854d0e; display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
-    <span style="display: flex; align-items: center; gap: 8px;"><i class="fas fa-star" style="color: #eab308;"></i> Daftar Tamu VIP</span>
-    <i id="icon-guest-VIP" class="fas fa-chevron-up" style="color: #94a3b8;"></i>
-    </h4>
-        <table id="wedGuestListVIP" style="min-width: 100%;">
+            <span style="display: flex; align-items: center; gap: 8px;"><i class="fas fa-star" style="color: #eab308;"></i> Daftar Tamu VIP</span>
+            <i id="icon-guest-VIP" class="fas fa-chevron-down" style="color: #94a3b8;"></i>
+        </h4>
+        <table id="wedGuestListVIP" style="min-width: 100%; display: none;">
           <thead><tr><th>Nama Tamu</th><th>Kota</th><th>Jumlah (Pax)</th><th>Status Undangan</th><th>Kehadiran</th><th style="width: 100px; text-align: center;">Aksi</th></tr></thead>
           <tbody id="wedGuestTbodyVIP"></tbody>
         </table>
@@ -620,10 +620,10 @@ return `
 
       <div class="card" style="overflow-x: auto; border-top: 4px solid #94a3b8;">
         <h4 onclick="toggleGuestList('Reguler')" style="margin-top:0; color:#475569; display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
-    <span style="display: flex; align-items: center; gap: 8px;"><i class="fas fa-users"></i> Daftar Tamu Reguler</span>
-    <i id="icon-guest-Reguler" class="fas fa-chevron-up" style="color: #94a3b8;"></i>
-    </h4>
-        <table id="wedGuestListReguler" style="min-width: 100%;">
+            <span style="display: flex; align-items: center; gap: 8px;"><i class="fas fa-users"></i> Daftar Tamu Reguler</span>
+            <i id="icon-guest-Reguler" class="fas fa-chevron-down" style="color: #94a3b8;"></i>
+        </h4>
+        <table id="wedGuestListReguler" style="min-width: 100%; display: none;">
           <thead><tr><th>Nama Tamu</th><th>Kota</th><th>Jumlah (Pax)</th><th>Status Undangan</th><th>Kehadiran</th><th style="width: 100px; text-align: center;">Aksi</th></tr></thead>
           <tbody id="wedGuestTbodyReguler"></tbody>
         </table>
