@@ -1728,28 +1728,31 @@ function deleteAsset(index) {
   } 
 }
 window.inlineEditStock = (i, field) => {
-  let ym = getEl("assetMonthFilter")?.value || defaultYM, a = assetsData[ym][i];
-  if (field === 'lot') {
-    let n = prompt("Edit Jumlah Lot untuk " + a.name + ":", a.lot);
-    if (n) {
-      n = parseInt(n.replace(/\D/g,''));
-      if (!isNaN(n) && n > 0) {
-        let curPrice = a.value / (a.lot * 100); // Ambil harga pasar saat ini per lembar
-        a.lot = n;
-        a.value = curPrice * n * 100; // Sesuaikan total saldo berdasarkan lot baru
-        save(); update();
-      }
-    }
-  } else if (field === 'avg') {
-    let n = prompt("Edit Average Harga Beli (Rp) untuk " + a.name + ":", a.avg);
-    if (n) {
-      n = parseFloat(n.replace(/,/g,'.'));
-      if (!isNaN(n) && n > 0) {
-        a.avg = n;
-        save(); update();
-      }
-    }
-  }
+  let filterEl = document.getElementById("assetMonthFilter");
+  let ym = filterEl ? filterEl.value : defaultYM;
+  let a = assetsData[ym][i];
+  
+  if (field === 'lot') {
+    let n = prompt("Edit Jumlah Lot untuk " + a.name + ":", a.lot);
+    if (n) {
+      n = parseInt(n.replace(/\D/g,''));
+      if (!isNaN(n) && n > 0) {
+        let curPrice = a.value / (a.lot * 100); // Ambil harga pasar saat ini per lembar
+        a.lot = n;
+        a.value = curPrice * n * 100; // Sesuaikan total saldo berdasarkan lot baru
+        save(); update();
+      }
+    }
+  } else if (field === 'avg') {
+    let n = prompt("Edit Average Harga Beli (Rp) untuk " + a.name + ":", a.avg);
+    if (n) {
+      n = parseFloat(n.replace(/,/g,'.'));
+      if (!isNaN(n) && n > 0) {
+        a.avg = n;
+        save(); update();
+      }
+    }
+  }
 };
 
 function copyPreviousMonthAssets() {
