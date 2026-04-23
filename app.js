@@ -2116,7 +2116,17 @@ function renderBudgetList(list, ym) {
     if (!list || list.length === 0) {
         const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
         let mName = monthNames[parseInt(ym.split('-')[1]) - 1];
+        
         container.innerHTML = `<div style="grid-column: span 2; text-align:center; padding: 50px 20px; background: white; border-radius: 16px; border: 1px dashed #cbd5e1;"><div style="width: 60px; height: 60px; background: #f1f5f9; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;"><i class="fas fa-clipboard-list" style="font-size: 1.5rem; color: #94a3b8;"></i></div><h3 style="margin: 0 0 5px; color:#334155;">Anggaran Kosong</h3><p style="color:#64748b; font-size: 0.95rem; margin-bottom:20px;">Belum ada rencana pengeluaran untuk bulan <b>${mName}</b>.</p><button class="action" style="margin: 0 auto; background: var(--success); box-shadow: 0 4px 6px rgba(34, 197, 94, 0.2);" onclick="copyPreviousMonthBudgets()"><i class="fas fa-copy"></i> Salin Data Bulan Sebelumnya</button></div>`;
+        
+        const sCardEmpty = document.getElementById("budgetStatusCard");
+        const bVsLEmpty = document.getElementById("budgetVsLiquid");
+        if(sCardEmpty && bVsLEmpty){
+            bVsLEmpty.innerHTML = `<span style="color:var(--success)">Rp 0</span> <small style="color:#94a3b8">/ ${formatRp(cash)}</small>`;
+            sCardEmpty.style.background = '#f0fdf4';
+            sCardEmpty.style.borderColor = '#bbf7d0';
+            document.getElementById("budgetCardTitle").innerText = "Sisa Rencana Perlu Dana";
+        }
         return;
     }
     
@@ -2141,7 +2151,7 @@ function renderBudgetList(list, ym) {
         
         let barColor = isOver ? 'var(--danger)' : (isFull ? 'var(--success)' : (pct >= 80 ? 'var(--warning)' : 'var(--primary)'));
         let bgCard = isOver ? '#fff1f2' : '#ffffff';
-        let statusTxt = isOver ? '<span style="color:var(--danger); font-size:0.75rem;">(Over Budget!)</span>' : (isFull ? '<span style="color:var(--success); font-size:0.75rem;">(Terpenuhi)</span>' : '');
+        let statusTxt = isOver ? '<span style="color:var(--danger); font-size:0.75rem; margin-left:8px;">(Over Budget!)</span>' : (isFull ? '<span class="budget-badge badge-paid" style="color:var(--success); font-size:0.8rem; margin-left:8px;">✓ Terpenuhi</span>' : '');
 
         let subHTML = '';
         if(b.subBudgets && b.subBudgets.length > 0) {
@@ -2149,8 +2159,8 @@ function renderBudgetList(list, ym) {
             b.subBudgets.forEach((sub, subIdx) => {
                 let sSpent = transactions.filter(t => t.date.startsWith(ym) && t.type === 'expense' && t.category === b.category && t.subCategory === sub.name).reduce((acc, t) => acc + t.amount, 0);
                 let sPct = sub.amount > 0 ? Math.round((sSpent / sub.amount) * 100) : 0;
-                subHTML += `<div style="display:flex; justify-content:space-between; font-size: 0.85rem; margin-bottom: 5px;"><span><i class="fas fa-level-up-alt fa-rotate-90" style="margin-right:8px; color:#cbd5e1;"></i> ${sub.name} <button onclick="deleteSubBudget('${ym}', ${i}, ${subIdx})" style="background:none;border:none;color:#ef4444;cursor:pointer;"><i class="fas fa-times"></i></button></span><strong>${formatRp(sSpent)} / ${formatRp(sub.amount)}</strong></div>
-                <div class="progress" style="height:6px; margin-bottom:10px;"><div class="progress-bar" style="width:${Math.min(sPct, 100)}%; background:${sSpent > sub.amount ? 'var(--danger)' : '#0ea5e9'}"></div></div>`;
+                subHTML += `<div style="display:flex; justify-content:space-between; font-size: 0.85rem; margin-bottom: 5px;"><span><i class="fas fa-level-up-alt fa-rotate-90" style="margin-right:8px; color:#cbd5e1;"></i> ${sub.name} <button onclick="deleteSubBudget('${ym}', ${i}, ${subIdx})" style="background:none;border:none;color:#ef4444;cursor:pointer;padding:0;margin-left:5px;"><i class="fas fa-times"></i></button></span><strong style="color:${sSpent > sub.amount ? 'var(--danger)' : (sSpent === sub.amount ? 'var(--success)' : '#1e293b')}">${formatRp(sSpent)} <span style="color:#94a3b8; font-size:0.75rem; font-weight:normal;">/ ${formatRp(sub.amount)}</span></strong></div>
+                <div class="progress" style="height:6px; margin-bottom:10px; background: ${sSpent > sub.amount ? '#fee2e2' : '#e0f2fe'};"><div class="progress-bar" style="width:${Math.min(sPct, 100)}%; background:${sSpent > sub.amount ? 'var(--danger)' : (sSpent === sub.amount ? 'var(--success)' : '#0ea5e9')}"></div></div>`;
             });
             subHTML += `</div>`;
         }
@@ -2158,18 +2168,31 @@ function renderBudgetList(list, ym) {
         container.innerHTML += `
             <div class="card" style="margin-bottom: 0; background: ${bgCard}; border-left: 5px solid ${barColor}">
                 <div class="progress-header" style="margin-bottom: 12px;">
-                    <strong style="font-size: 1.05rem;">${b.category} ${statusTxt}</strong>
+                    <strong style="font-size: 1.05rem; display:flex; align-items:center;">${b.category} ${statusTxt}</strong>
                     <div style="display:flex; gap:8px;">
                         <button style="padding: 4px 8px; background: #e0f2fe; color: #0ea5e9; border: none; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer; display:flex; align-items:center; gap:4px;" onclick="addSubBudget('${ym}', ${i})"><i class="fas fa-plus"></i> Sub</button>
                         <button class="btn-danger" style="padding: 4px 8px; background: transparent; color: #cbd5e1; transition: color 0.2s;" onmouseover="this.style.color='var(--danger)'" onmouseout="this.style.color='#cbd5e1'" onclick="deleteBudget('${ym}', ${i})"><i class="fas fa-trash"></i></button>
                     </div>
                 </div>
                 <div style="font-size: 0.95rem; margin-bottom: 10px;">Terpakai: <strong>${formatRp(spent)}</strong> <small style="color:#94a3b8">/ ${formatRp(target)}</small></div>
-                <div class="progress" style="margin-bottom: 8px;"><div class="progress-bar" style="width:${Math.min(pct, 100)}%; background: ${barColor}"></div></div>
+                <div class="progress" style="margin-bottom: 8px; background: ${isOver ? '#fee2e2' : '#f1f5f9'};"><div class="progress-bar" style="width:${Math.min(pct, 100)}%; background: ${barColor}"></div></div>
                 <div style="text-align: right; font-weight: 700; font-size: 0.85rem; color: ${barColor}">${pct}%</div>
                 ${subHTML}
             </div>`;
     });
+
+    const sCard = document.getElementById("budgetStatusCard");
+    const bVsL = document.getElementById("budgetVsLiquid");
+    if(sCard && bVsL) {
+        let sisaRencanaDana = Math.max(0, totalTargetBulanIni - totalRealisasiBulanIni);
+        let isWarning = sisaRencanaDana > cash;
+        bVsL.innerHTML = `<span style="color:${isWarning ? 'var(--danger)' : 'var(--success)'}">${formatRp(sisaRencanaDana)}</span> <small style="color:#94a3b8">/ ${formatRp(cash)}</small>`;
+        sCard.style.background = isWarning ? '#fff1f2' : '#f0fdf4';
+        sCard.style.borderColor = isWarning ? '#fecaca' : '#bbf7d0';
+        document.getElementById("budgetCardTitle").innerText = sisaRencanaDana > 0 ? "Sisa Rencana Perlu Dana" : "Rencana Bulan Ini Beres!";
+    }
+  } catch(e) { console.error("Render Error:", e); }
+}
 
     // Update Kartu Sisa Rencana Perlu Dana
     const sCard = document.getElementById("budgetStatusCard");
