@@ -1648,6 +1648,47 @@ function deleteSubBudget(ym, bIdx, subIdx) {
   if(confirm("Hapus sub kategori ini?")) { budgetsData[ym][bIdx].subBudgets.splice(subIdx, 1); save(); update(); }
 }
 
+window.inlineEditBudget = function(ym, bIdx, subIdx = null) {
+    let budgetList = budgetsData[ym];
+    if (!budgetList || !budgetList[bIdx]) return;
+
+    if (subIdx === null) {
+        // Edit Anggaran Utama
+        let b = budgetList[bIdx];
+        let newAmount = prompt(`Edit Batas Maksimal untuk ${b.category} (Rp):`, b.amount);
+        if (newAmount !== null) {
+            newAmount = parseInt(newAmount.replace(/\D/g, ''));
+            if (!isNaN(newAmount) && newAmount >= 0) {
+                b.amount = newAmount;
+                save();
+                update();
+            } else {
+                alert("Nominal nggak valid bro!");
+            }
+        }
+    } else {
+        // Edit Sub Anggaran
+        let sub = budgetList[bIdx].subBudgets[subIdx];
+        let newAmount = prompt(`Edit Batas Maksimal untuk ${sub.name} (Rp):`, sub.amount);
+        if (newAmount !== null) {
+            newAmount = parseInt(newAmount.replace(/\D/g, ''));
+            if (!isNaN(newAmount) && newAmount >= 0) {
+                // Cek biar sub-budget nggak ngelebihi batas induknya
+                let currentSubTotal = budgetList[bIdx].subBudgets.reduce((acc, curr, idx) => acc + (idx === subIdx ? 0 : curr.amount), 0);
+                if (currentSubTotal + newAmount > budgetList[bIdx].amount) {
+                    alert(`Gagal! Total Sub-Budget melebihi Batas Maksimal Kategori Utama (${formatRp(budgetList[bIdx].amount)}).`);
+                    return;
+                }
+                sub.amount = newAmount;
+                save();
+                update();
+            } else {
+                alert("Nominal nggak valid bro!");
+            }
+        }
+    }
+};
+
 function copyPreviousMonthBudgets() {
   let currentYM = document.getElementById("budgetMonthFilter") ? document.getElementById("budgetMonthFilter").value : defaultYM;
   if(!currentYM) currentYM = defaultYM;
@@ -2158,12 +2199,15 @@ function renderBudgetList(list, ym) {
             b.subBudgets.forEach((sub, subIdx) => {
                 let sSpent = transactions.filter(t => t.date.startsWith(ym) && t.type === 'expense' && t.category === b.category && t.subCategory === sub.name).reduce((acc, t) => acc + t.amount, 0);
                 let sPct = sub.amount > 0 ? Math.round((sSpent / sub.amount) * 100) : 0;
-                subHTML += `<div style="display:flex; justify-content:space-between; font-size: 0.85rem; margin-bottom: 5px;"><span><i class="fas fa-level-up-alt fa-rotate-90" style="margin-right:8px; color:#cbd5e1;"></i> ${sub.name} <button onclick="deleteSubBudget('${ym}', ${i}, ${subIdx})" style="background:none;border:none;color:#ef4444;cursor:pointer;padding:0;margin-left:5px;"><i class="fas fa-times"></i></button></span><strong style="color:${sSpent > sub.amount ? 'var(--danger)' : (sSpent === sub.amount ? 'var(--success)' : '#1e293b')}">${formatRp(sSpent)} <span style="color:#94a3b8; font-size:0.75rem; font-weight:normal;">/ ${formatRp(sub.amount)}</span></strong></div>
+                
+                // REVISI HTML SUB: Kasih sensor klik 2x di tulisan target sub-budget
+                subHTML += `<div style="display:flex; justify-content:space-between; font-size: 0.85rem; margin-bottom: 5px;"><span><i class="fas fa-level-up-alt fa-rotate-90" style="margin-right:8px; color:#cbd5e1;"></i> ${sub.name} <button onclick="deleteSubBudget('${ym}', ${i}, ${subIdx})" style="background:none;border:none;color:#ef4444;cursor:pointer;padding:0;margin-left:5px;"><i class="fas fa-times"></i></button></span><strong style="color:${sSpent > sub.amount ? 'var(--danger)' : (sSpent === sub.amount ? 'var(--success)' : '#1e293b')}">${formatRp(sSpent)} <span ondblclick="inlineEditBudget('${ym}', ${i}, ${subIdx})" title="Klik 2x Edit Rencana Sub" style="color:#94a3b8; font-size:0.75rem; font-weight:normal; cursor:pointer; border-bottom:1px dashed #cbd5e1;">/ ${formatRp(sub.amount)}</span></strong></div>
                 <div class="progress" style="height:6px; margin-bottom:10px; background: ${sSpent > sub.amount ? '#fee2e2' : '#e0f2fe'};"><div class="progress-bar" style="width:${Math.min(sPct, 100)}%; background:${sSpent > sub.amount ? 'var(--danger)' : (sSpent === sub.amount ? 'var(--success)' : '#0ea5e9')}"></div></div>`;
             });
             subHTML += `</div>`;
         }
 
+        // REVISI HTML UTAMA: Kasih sensor klik 2x di tulisan target utama
         container.innerHTML += `
             <div class="card" style="margin-bottom: 0; background: ${bgCard}; border-left: 5px solid ${barColor}">
                 <div class="progress-header" style="margin-bottom: 12px;">
@@ -2173,7 +2217,7 @@ function renderBudgetList(list, ym) {
                         <button class="btn-danger" style="padding: 4px 8px; background: transparent; color: #cbd5e1; transition: color 0.2s;" onmouseover="this.style.color='var(--danger)'" onmouseout="this.style.color='#cbd5e1'" onclick="deleteBudget('${ym}', ${i})"><i class="fas fa-trash"></i></button>
                     </div>
                 </div>
-                <div style="font-size: 0.95rem; margin-bottom: 10px;">Terpakai: <strong>${formatRp(spent)}</strong> <small style="color:#94a3b8">/ ${formatRp(target)}</small></div>
+                <div style="font-size: 0.95rem; margin-bottom: 10px;">Terpakai: <strong>${formatRp(spent)}</strong> <small ondblclick="inlineEditBudget('${ym}', ${i})" title="Klik 2x Edit Rencana" style="color:#94a3b8; cursor:pointer; border-bottom:1px dashed #cbd5e1;">/ ${formatRp(target)}</small></div>
                 <div class="progress" style="margin-bottom: 8px; background: ${isOver ? '#fee2e2' : '#f1f5f9'};"><div class="progress-bar" style="width:${Math.min(pct, 100)}%; background: ${barColor}"></div></div>
                 <div style="text-align: right; font-weight: 700; font-size: 0.85rem; color: ${barColor}">${pct}%</div>
                 ${subHTML}
