@@ -2228,6 +2228,10 @@ function renderBudgetList(list, ym) {
         let bgCard = isOver ? '#fff1f2' : '#ffffff';
         let statusTxt = isOver ? '<span style="color:var(--danger); font-size:0.75rem; margin-left:8px;">(Over Budget!)</span>' : (isFull ? '<span class="budget-badge badge-paid" style="color:var(--success); font-size:0.8rem; margin-left:8px;">✓ Terpenuhi</span>' : '');
 
+        // Hitung Sisa Kategori Utama
+        let sisaUtama = Math.max(0, target - spent);
+        let sisaUtamaDisplay = isBalanceHidden ? "Rp ***.***" : formatRp(sisaUtama);
+
         let subHTML = '';
         if(b.subBudgets && b.subBudgets.length > 0) {
             subHTML += `<div style="margin-top: 15px; border-top: 1px dashed #e2e8f0; padding-top: 12px;">`;
@@ -2235,8 +2239,13 @@ function renderBudgetList(list, ym) {
                 let sSpent = transactions.filter(t => t.date.startsWith(ym) && t.type === 'expense' && t.category === b.category && t.subCategory === sub.name).reduce((acc, t) => acc + t.amount, 0);
                 let sPct = sub.amount > 0 ? Math.round((sSpent / sub.amount) * 100) : 0;
                 
+                // Hitung Sisa Sub Kategori
+                let sisaSub = Math.max(0, sub.amount - sSpent);
+                let sisaSubDisplay = isBalanceHidden ? "Rp ***.***" : formatRp(sisaSub);
+                
                 subHTML += `<div style="display:flex; justify-content:space-between; font-size: 0.85rem; margin-bottom: 5px;"><span><i class="fas fa-level-up-alt fa-rotate-90" style="margin-right:8px; color:#cbd5e1;"></i> ${sub.name} <button onclick="deleteSubBudget('${ym}', ${i}, ${subIdx})" style="background:none;border:none;color:#ef4444;cursor:pointer;padding:0;margin-left:5px;"><i class="fas fa-times"></i></button></span><strong style="color:${sSpent > sub.amount ? 'var(--danger)' : (sSpent === sub.amount ? 'var(--success)' : '#1e293b')}">${formatRp(sSpent)} <span ondblclick="inlineEditBudget('${ym}', ${i}, ${subIdx})" title="Klik 2x Edit Rencana Sub" style="color:#94a3b8; font-size:0.75rem; font-weight:normal; cursor:pointer; border-bottom:1px dashed #cbd5e1;">/ ${formatRp(sub.amount)}</span></strong></div>
-                <div class="progress" style="height:6px; margin-bottom:10px; background: ${sSpent > sub.amount ? '#fee2e2' : '#e0f2fe'};"><div class="progress-bar" style="width:${Math.min(sPct, 100)}%; background:${sSpent > sub.amount ? 'var(--danger)' : (sSpent === sub.amount ? 'var(--success)' : '#0ea5e9')}"></div></div>`;
+                <div class="progress" style="height:6px; margin-bottom:4px; background: ${sSpent > sub.amount ? '#fee2e2' : '#e0f2fe'};"><div class="progress-bar" style="width:${Math.min(sPct, 100)}%; background:${sSpent > sub.amount ? 'var(--danger)' : (sSpent === sub.amount ? 'var(--success)' : '#0ea5e9')}"></div></div>
+                <div style="text-align: right; font-size: 0.75rem; color: #64748b; margin-bottom: 10px; font-weight: 500;">Sisa: <span style="color:${sisaSub > 0 ? '#1e293b' : 'var(--success)'}">${sisaSubDisplay}</span></div>`;
             });
             subHTML += `</div>`;
         }
@@ -2252,7 +2261,10 @@ function renderBudgetList(list, ym) {
                 </div>
                 <div style="font-size: 0.95rem; margin-bottom: 10px;">Terpakai: <strong>${formatRp(spent)}</strong> <small ondblclick="inlineEditBudget('${ym}', ${i})" title="Klik 2x Edit Rencana" style="color:#94a3b8; cursor:pointer; border-bottom:1px dashed #cbd5e1;">/ ${formatRp(target)}</small></div>
                 <div class="progress" style="margin-bottom: 8px; background: ${isOver ? '#fee2e2' : '#f1f5f9'};"><div class="progress-bar" style="width:${Math.min(pct, 100)}%; background: ${barColor}"></div></div>
-                <div style="text-align: right; font-weight: 700; font-size: 0.85rem; color: ${barColor}">${pct}%</div>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div style="font-size: 0.85rem; color: #64748b; font-weight:600;">Sisa: <span style="color:${sisaUtama > 0 ? '#1e293b' : 'var(--success)'};">${sisaUtamaDisplay}</span></div>
+                    <div style="text-align: right; font-weight: 700; font-size: 0.85rem; color: ${barColor}">${pct}%</div>
+                </div>
                 ${subHTML}
             </div>`;
     });
