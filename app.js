@@ -388,6 +388,10 @@ return `
   </div>
   
   <div class="grid-3" id="laporanSummary"></div>
+  <div class="card" style="margin-top:20px; display: flex; flex-direction: column; align-items: center;">
+      <h3 style="margin-bottom:15px; align-self: flex-start;">Alokasi Pengeluaran</h3>
+      <div class="chart-container" style="width:100%; max-width:400px; height:300px;"><canvas id="expenseDonutChart"></canvas></div>
+  </div>
   
   <div class="card" style="margin-top: 20px;">
       <h3 style="margin-bottom: 15px; color:#475569;">Top 5 Pengeluaran Terbesar Bulan Ini</h3>
@@ -423,6 +427,11 @@ return `
     <table id="tabelTransaksi" style="min-width: 100%;">
       <thead><tr><th>Tanggal</th><th>Jenis</th><th>Keterangan</th><th>Nominal</th><th style="width: 80px; text-align: center;">Aksi</th></tr></thead>
       <tbody id="trxList"></tbody>
+      <div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap;">
+      <input type="text" id="searchTrx" placeholder="Cari keterangan..." oninput="update()" style="flex:1; min-width:200px;">
+      <input type="month" id="filterMonthTrx" onchange="update()" style="flex:0.5; min-width:150px;">
+      <button class="btn-success" onclick="exportTrxToCSV()" style="padding:10px 15px;"><i class="fas fa-file-excel"></i> Export</button>
+  </div>
     </table>
   </div>
 </div>
@@ -770,6 +779,7 @@ function renderLaporan() {
                 exp += t.amount;
                 let cName = t.category || "Lainnya";
                 catExp[cName] = (catExp[cName] || 0) + t.amount;
+    renderExpenseDonut(catExp);
             }
         }
     });
@@ -2021,19 +2031,41 @@ function update(){
   }
 
   const trxList = document.getElementById("trxList");
-  if(trxList) {
-    trxList.innerHTML = "";
-    [...transactions].sort((a,b) => new Date(b.date) - new Date(a.date)).slice(0, 15).forEach((t, i) => {
-      let originalIndex = transactions.findIndex(orig => orig.id === t.id);
-      let fullCatName = t.category || "";
-      if (t.category && t.subCategory) fullCatName = `${t.category} - ${t.subCategory}`;
-      let catLabel = fullCatName ? `<span style="background:#e2e8f0; padding:2px 8px; border-radius:12px; font-size:0.75rem; font-weight:600; margin-left:8px; display:inline-block; color:#475569;">${fullCatName}</span>` : "";
-      let typeIcon = t.type === 'income' ? '<i class="fas fa-arrow-down text-success"></i>' : (t.type === 'expense' ? '<i class="fas fa-arrow-up text-danger"></i>' : '<i class="fas fa-exchange-alt text-primary"></i>');
-      
-      let amountDisplay = isBalanceHidden ? "Rp ***.***" : formatRp(t.amount);
-      trxList.innerHTML += `<tr><td style="color:#64748b;">${t.date}</td><td>${typeIcon}</td><td><strong style="color:#1e293b;">${t.desc}</strong>${catLabel}<br><small style="color:#94a3b8;">${t.walletName}</small></td><td style="font-weight:600; color:#1e293b;">${amountDisplay}</td><td style="text-align: center;"><button class="btn-danger" style="padding: 6px 10px;" onclick="deleteTransaction(${originalIndex})"><i class="fas fa-trash"></i></button></td></tr>`;
-    });
-  }
+    if(trxList) {
+        trxList.innerHTML = "";
+        let searchKeyword = document.getElementById("searchTrx")?.value.toLowerCase() || "";
+        let filterMonth = document.getElementById("filterMonthTrx")?.value || "";
+
+        transactions
+          .filter(t => {
+              let matchSearch = t.desc.toLowerCase().includes(searchKeyword);
+              let matchMonth = filterMonth === "" || t.date.startsWith(filterMonth);
+              return matchSearch && matchMonth;
+          })
+          .sort((a,b) => new Date(b.date) - new Date(a.date))
+          .slice(0, 20) // Nampilin 20 mutasi terakhir
+          .forEach((t) => {
+            let originalIndex = transactions.findIndex(orig => orig.id === t.id);
+            let typeIcon = t.type === 'income' ? '<i class="fas fa-arrow-down text-success"></i>' : (t.type === 'expense' ? '<i class="fas fa-arrow-up text-danger"></i>' : '<i class="fas fa-exchange-alt text-primary"></i>');
+            
+            trxList.innerHTML += `
+                <tr>
+                    <td style="color:#64748b;">${t.date}</td>
+                    <td>${typeIcon}</td>
+                    <td ondblclick="inlineEditTrx(${t.id}, 'desc')" style="cursor:pointer;" title="Klik 2x Edit Keterangan">
+                        <strong style="color:#1e293b;">${t.desc}</strong>
+                        ${t.category ? `<span style="background:#e2e8f0; padding:2px 8px; border-radius:12px; font-size:0.75rem; margin-left:8px;">${t.category}</span>` : ""}
+                        <br><small style="color:#94a3b8;">${t.walletName}</small>
+                    </td>
+                    <td ondblclick="inlineEditTrx(${t.id}, 'amount')" style="font-weight:600; cursor:pointer;" title="Klik 2x Edit Nominal">
+                        ${isBalanceHidden ? "Rp ***.***" : formatRp(t.amount)}
+                    </td>
+                    <td style="text-align: center;">
+                        <button class="btn-danger" style="padding: 6px 10px;" onclick="deleteTransaction(${originalIndex})"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>`;
+          });
+    }
 
  renderBudgetList(currentBudgets, budgetYM);
 
@@ -2259,4 +2291,71 @@ window.toggleGuestList = function(tipe) {
         ikon.classList.add("fa-chevron-down"); // Ubah panah ke bawah
     }
 };
+// 1. Fungsi Edit Mutasi (Klik 2x)
+window.inlineEditTrx = function(id, field) {
+    let trx = transactions.find(t => t.id === id);
+    if (!trx) return;
+    let oldVal = trx[field];
+    let newVal = prompt(`Edit ${field === 'amount' ? 'Nominal' : 'Keterangan'} Transaksi:`, oldVal);
+    
+    if (newVal !== null && newVal.trim() !== "") {
+        if (field === 'amount') {
+            let val = parseInt(newVal.replace(/\D/g, ''));
+            if (isNaN(val)) return alert("Angka nggak valid!");
+            // Logika auto-update saldo aset (khusus Income & Expense)
+            let diff = val - oldVal;
+            let assetYM = trx.date.substring(0, 7);
+            if (assetsData[assetYM]) {
+                let targetAsset = assetsData[assetYM].find(a => a.name === trx.walletName);
+                if (targetAsset) {
+                    if (trx.type === 'income') targetAsset.value += diff;
+                    else if (trx.type === 'expense') targetAsset.value -= diff;
+                }
+            }
+            trx.amount = val;
+        } else {
+            trx[field] = newVal.trim();
+        }
+        save(); update();
+    }
+};
+
+// 2. Fungsi Export Mutasi ke CSV
+window.exportTrxToCSV = function() {
+    if(transactions.length === 0) return alert("Data kosong!");
+    let csv = "Tanggal,Jenis,Keterangan,Kategori,Rekening,Nominal\n";
+    transactions.sort((a,b) => new Date(b.date) - new Date(a.date)).forEach(t => {
+        csv += `${t.date},${t.type},${t.desc.replace(/,/g," ")},${t.category || '-'},${t.walletName},${t.amount}\n`;
+    });
+    let a = document.createElement('a');
+    a.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
+    a.download = 'ProTama_Mutasi_Keuangan.csv';
+    a.click();
+};
+
+// 3. Fungsi Render Donut Chart Kategori di Laporan
+let expenseDonutChart;
+function renderExpenseDonut(dataObj) {
+    const ctx = document.getElementById('expenseDonutChart');
+    if (!ctx) return;
+    if (expenseDonutChart) expenseDonutChart.destroy();
+    
+    let labels = Object.keys(dataObj);
+    let values = Object.values(dataObj);
+    
+    if(labels.length === 0) { labels = ["Belum ada data"]; values = [1]; }
+
+    expenseDonutChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: values,
+                backgroundColor: ['#ef4444', '#f59e0b', '#3b82f6', '#10b981', '#8b5cf6', '#ec4899', '#06b6d4'],
+                borderWidth: 0
+            }]
+        },
+        options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+    });
+}
 if (document.getElementById("barChart")) setTimeout(update, 100);
