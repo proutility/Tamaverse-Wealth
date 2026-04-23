@@ -2116,16 +2116,15 @@ function renderBudgetList(list, ym) {
     if (!list || list.length === 0) {
         const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
         let mName = monthNames[parseInt(ym.split('-')[1]) - 1];
-        
         container.innerHTML = `<div style="grid-column: span 2; text-align:center; padding: 50px 20px; background: white; border-radius: 16px; border: 1px dashed #cbd5e1;"><div style="width: 60px; height: 60px; background: #f1f5f9; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;"><i class="fas fa-clipboard-list" style="font-size: 1.5rem; color: #94a3b8;"></i></div><h3 style="margin: 0 0 5px; color:#334155;">Anggaran Kosong</h3><p style="color:#64748b; font-size: 0.95rem; margin-bottom:20px;">Belum ada rencana pengeluaran untuk bulan <b>${mName}</b>.</p><button class="action" style="margin: 0 auto; background: var(--success); box-shadow: 0 4px 6px rgba(34, 197, 94, 0.2);" onclick="copyPreviousMonthBudgets()"><i class="fas fa-copy"></i> Salin Data Bulan Sebelumnya</button></div>`;
         
-        const sCardEmpty = document.getElementById("budgetStatusCard");
-        const bVsLEmpty = document.getElementById("budgetVsLiquid");
-        if(sCardEmpty && bVsLEmpty){
-            bVsLEmpty.innerHTML = `<span style="color:var(--success)">Rp 0</span> <small style="color:#94a3b8">/ ${formatRp(cash)}</small>`;
-            sCardEmpty.style.background = '#f0fdf4';
-            sCardEmpty.style.borderColor = '#bbf7d0';
-            document.getElementById("budgetCardTitle").innerText = "Sisa Rencana Perlu Dana";
+        const statusCard = document.getElementById("budgetStatusCard"); 
+        const budgetVsLiquid = document.getElementById("budgetVsLiquid");
+        if(statusCard && budgetVsLiquid){
+          budgetVsLiquid.innerHTML = `<span style="color:var(--success)">Rp 0</span> <small style="color:#94a3b8">/ ${formatRp(cash)}</small>`;
+          statusCard.style.backgroundColor = '#f0fdf4'; 
+          statusCard.style.borderColor = '#bbf7d0';
+          document.getElementById("budgetCardTitle").innerText = "Sisa Rencana Perlu Dana";
         }
         return;
     }
@@ -2187,20 +2186,6 @@ function renderBudgetList(list, ym) {
         let sisaRencanaDana = Math.max(0, totalTargetBulanIni - totalRealisasiBulanIni);
         let isWarning = sisaRencanaDana > cash;
         bVsL.innerHTML = `<span style="color:${isWarning ? 'var(--danger)' : 'var(--success)'}">${formatRp(sisaRencanaDana)}</span> <small style="color:#94a3b8">/ ${formatRp(cash)}</small>`;
-        sCard.style.background = isWarning ? '#fff1f2' : '#f0fdf4';
-        sCard.style.borderColor = isWarning ? '#fecaca' : '#bbf7d0';
-        document.getElementById("budgetCardTitle").innerText = sisaRencanaDana > 0 ? "Sisa Rencana Perlu Dana" : "Rencana Bulan Ini Beres!";
-    }
-  } catch(e) { console.error("Render Error:", e); }
-}
-
-    // Update Kartu Sisa Rencana Perlu Dana
-    const sCard = document.getElementById("budgetStatusCard");
-    const bVsL = document.getElementById("budgetVsLiquid");
-    if(sCard && bVsL) {
-        let sisaRencanaDana = Math.max(0, totalTargetBulanIni - totalRealisasiBulanIni);
-        let isWarning = sisaRencanaDana > cash;
-        bVsL.innerHTML = `<span style="color:${isWarning ? 'var(--danger)' : 'var(--success)'}">${formatRp(sisaRencanaDana)}</span> <small>/ ${formatRp(cash)}</small>`;
         sCard.style.background = isWarning ? '#fff1f2' : '#f0fdf4';
         sCard.style.borderColor = isWarning ? '#fecaca' : '#bbf7d0';
         document.getElementById("budgetCardTitle").innerText = sisaRencanaDana > 0 ? "Sisa Rencana Perlu Dana" : "Rencana Bulan Ini Beres!";
