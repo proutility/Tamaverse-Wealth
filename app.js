@@ -824,56 +824,65 @@ function toggleNotif() {
 }
 
 function renderNotifs() {
-    let html = "";
-    let today = new Date();
-    let currentDay = today.getDate();
-    let ym = defaultYM;
-    
-    // 1. Cek Pemasukan Terakhir (Bulan ini)
-    let recentIncomes = transactions.filter(t => t.type === 'income' && t.date.startsWith(ym)).sort((a,b) => new Date(b.date) - new Date(a.date));
-    if(recentIncomes.length > 0) {
-        html += `<div class="notif-item success"><i class="fas fa-check-circle" style="color:#22c55e;"></i><div><strong>Pemasukan Masuk!</strong><br><span style="color:#64748b;">${recentIncomes[0].desc} sebesar ${formatRp(recentIncomes[0].amount)} udah mendarat di rekening.</span></div></div>`;
-    }
+    try {
+        let html = "";
+        let today = new Date();
+        let currentDay = today.getDate();
+        let ym = defaultYM;
+        
+        // 1. Cek Pemasukan Terakhir (Bulan ini)
+        let recentIncomes = transactions.filter(t => t.type === 'income' && t.date.startsWith(ym)).sort((a,b) => new Date(b.date) - new Date(a.date));
+        if(recentIncomes.length > 0) {
+            html += `<div class="notif-item success"><i class="fas fa-check-circle" style="color:#22c55e;"></i><div><strong>Pemasukan Masuk!</strong><br><span style="color:#64748b;">${recentIncomes[0].desc} sebesar ${formatRp(recentIncomes[0].amount)} udah mendarat di rekening.</span></div></div>`;
+        }
 
-    // 2. Cek Hutang/Cicilan Jatuh Tempo <= 7 hari
-    debts.filter(d => d.remaining > 0).forEach(d => {
-        let dueDay = parseInt(d.date.split('-')[2]);
-        if(!isNaN(dueDay)) {
-            let diff = dueDay - currentDay;
-            let isPaid = transactions.some(t => t.type === 'expense' && t.desc.toLowerCase().includes(d.name.toLowerCase()) && t.date.startsWith(ym));
-            
-            if(!isPaid) {
-                if(diff === 0 || diff < 0) {
-                    html += `<div class="notif-item danger"><i class="fas fa-exclamation-circle" style="color:#ef4444;"></i><div><strong>Cicilan Jatuh Tempo!</strong><br><span style="color:#64748b;">Segera bayar ${d.name} (${formatRp(d.remaining)}).</span></div></div>`;
-                } else if(diff > 0 && diff <= 5) {
-                    html += `<div class="notif-item warning"><i class="fas fa-clock" style="color:#eab308;"></i><div><strong>H-${diff} Jatuh Tempo</strong><br><span style="color:#64748b;">Siapin dana buat bayar ${d.name}.</span></div></div>`;
+        // 2. Cek Hutang/Cicilan Jatuh Tempo <= 7 hari
+        debts.filter(d => d.remaining > 0).forEach(d => {
+            let dueDay = parseInt(d.date.split('-')[2]);
+            if(!isNaN(dueDay)) {
+                let diff = dueDay - currentDay;
+                let isPaid = transactions.some(t => t.type === 'expense' && t.desc.toLowerCase().includes(d.name.toLowerCase()) && t.date.startsWith(ym));
+                
+                if(!isPaid) {
+                    if(diff === 0 || diff < 0) {
+                        html += `<div class="notif-item danger"><i class="fas fa-exclamation-circle" style="color:#ef4444;"></i><div><strong>Cicilan Jatuh Tempo!</strong><br><span style="color:#64748b;">Segera bayar ${d.name} (${formatRp(d.remaining)}).</span></div></div>`;
+                    } else if(diff > 0 && diff <= 5) {
+                        html += `<div class="notif-item warning"><i class="fas fa-clock" style="color:#eab308;"></i><div><strong>H-${diff} Jatuh Tempo</strong><br><span style="color:#64748b;">Siapin dana buat bayar ${d.name}.</span></div></div>`;
+                    }
                 }
             }
-        }
-    });
+        });
 
-    // 3. Cek Budget Over > 80%
-    let currentBudgets = getBudgetsFor(ym);
-    let spentThisMonth = {};
-    transactions.filter(t => t.date.startsWith(ym) && t.type === 'expense').forEach(t => {
-        spentThisMonth[t.category] = (spentThisMonth[t.category] || 0) + t.amount;
-    });
+        // 3. Cek Budget Over > 80%
+        let currentBudgets = getBudgetsFor(ym);
+        let spentThisMonth = {};
+        transactions.filter(t => t.date.startsWith(ym) && t.type === 'expense').forEach(t => {
+            spentThisMonth[t.category] = (spentThisMonth[t.category] || 0) + t.amount;
+        });
 
-    currentBudgets.forEach(b => {
-        let spent = spentThisMonth[b.category] || 0;
-        let pct = (spent / b.amount) * 100;
-        if(pct > 100) { // <--- DIUBAH: Cuma yang murni LEBIH dari 100% yang disuruh ngerem
-            html += `<div class="notif-item danger"><i class="fas fa-times-circle" style="color:#ef4444;"></i><div><strong>Overbudget: ${b.category}</strong><br><span style="color:#64748b;">Pengeluaran lo udah tembus ${pct.toFixed(0)}% dari target!</span></div></div>`;
-        } else if(pct === 100) { // <--- DIUBAH: Pas 100% dipuji
-            html += `<div class="notif-item success"><i class="fas fa-check-circle" style="color:#22c55e;"></i><div><strong>Anggaran Terpenuhi: ${b.category}</strong><br><span style="color:#64748b;">Mantap! Pengeluaran lo pas 100% sesuai target.</span></div></div>`;
-        } else if(pct >= 80) {
-            html += `<div class="notif-item warning"><i class="fas fa-exclamation-triangle" style="color:#eab308;"></i><div><strong>Warning Budget: ${b.category}</strong><br><span style="color:#64748b;">Pengeluaran udah ${pct.toFixed(0)}%. Ngerem dikit bro!</span></div></div>`;
-        }
-    });
+        currentBudgets.forEach(b => {
+            let spent = spentThisMonth[b.category] || 0;
+            let target = b.amount || 0;
+            if(target > 0) {
+                // Pake Math.round biar ga ada koma siluman
+                let pct = Math.round((spent / target) * 100);
+                
+                if(pct > 100) { 
+                    html += `<div class="notif-item danger"><i class="fas fa-times-circle" style="color:#ef4444;"></i><div><strong>Overbudget: ${b.category}</strong><br><span style="color:#64748b;">Pengeluaran lo udah tembus ${pct}% dari target!</span></div></div>`;
+                } else if(pct === 100) { 
+                    html += `<div class="notif-item success"><i class="fas fa-check-circle" style="color:#22c55e;"></i><div><strong>Anggaran Terpenuhi: ${b.category}</strong><br><span style="color:#64748b;">Mantap! Pengeluaran lo pas 100% sesuai target.</span></div></div>`;
+                } else if(pct >= 80) {
+                    html += `<div class="notif-item warning"><i class="fas fa-exclamation-triangle" style="color:#eab308;"></i><div><strong>Warning Budget: ${b.category}</strong><br><span style="color:#64748b;">Pengeluaran udah ${pct}%. Ngerem dikit bro!</span></div></div>`;
+                }
+            }
+        });
 
-    if(html === "") html = `<div style="text-align:center; padding:20px; color:#94a3b8; font-size:0.85rem;">Belum ada notifikasi baru bro. Santai dulu! ☕</div>`;
-    
-    document.getElementById('notifBody').innerHTML = html;
+        if(html === "") html = `<div style="text-align:center; padding:20px; color:#94a3b8; font-size:0.85rem;">Belum ada notifikasi baru bro. Santai dulu! ☕</div>`;
+        
+        document.getElementById('notifBody').innerHTML = html;
+    } catch(e) {
+        console.error("Error Notif:", e);
+    }
 }
 // ==========================================
 // FUNGSI WEDDING PLANNER
@@ -2114,103 +2123,105 @@ function update(){
 }
 
 function renderBudgetList(list, ym) {
-  const container = document.getElementById("budgetList"); 
-  if(!container) return;
-  container.innerHTML = "";
-  
-  let bMonthAssets = getAssetsFor(ym); let cash = 0; bMonthAssets.forEach(a => { if(a.type === 'rekening') cash += a.value; });
+    try {
+        const container = document.getElementById("budgetList"); 
+        if(!container) return;
+        container.innerHTML = "";
+        
+        let bMonthAssets = getAssetsFor(ym); 
+        let cash = 0; 
+        bMonthAssets.forEach(a => { if(a.type === 'rekening') cash += a.value; });
 
-  if (list.length === 0) {
-    const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-    let [year, month] = ym.split('-'); let mName = monthNames[parseInt(month) - 1];
+        if (!list || list.length === 0) {
+            const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+            let parts = ym.split('-'); let year = parts[0]; let month = parts[1];
+            let mName = monthNames[parseInt(month) - 1] || month;
 
-    container.innerHTML = `<div style="grid-column: span 2; text-align:center; padding: 50px 20px; background: white; border-radius: 16px; border: 1px dashed #cbd5e1;"><div style="width: 60px; height: 60px; background: #f1f5f9; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;"><i class="fas fa-clipboard-list" style="font-size: 1.5rem; color: #94a3b8;"></i></div><h3 style="margin: 0 0 5px; color:#334155;">Anggaran Kosong</h3><p style="color:#64748b; font-size: 0.95rem; margin-bottom:20px;">Belum ada rencana pengeluaran untuk bulan <b>${mName} ${year}</b>.</p><button class="action" style="margin: 0 auto; background: var(--success); box-shadow: 0 4px 6px rgba(34, 197, 94, 0.2);" onclick="copyPreviousMonthBudgets()"><i class="fas fa-copy"></i> Salin Data Bulan Sebelumnya</button></div>`;
-    const statusCard = document.getElementById("budgetStatusCard"); const budgetVsLiquid = document.getElementById("budgetVsLiquid");
-    if(statusCard && budgetVsLiquid){
-      budgetVsLiquid.innerHTML = `<span style="color:var(--success)">Rp 0</span> <small style="color:#94a3b8">/ ${formatRp(cash)}</small>`;
-      statusCard.style.backgroundColor = '#f0fdf4'; statusCard.style.borderColor = '#bbf7d0';
-      document.getElementById("budgetCardTitle").innerText = "Sisa Rencana Perlu Dana";
-    }
-    return;
-  }
-  
-  let spentThisMonth = {};
-  transactions.filter(t => t.date.startsWith(ym) && t.type === 'expense').forEach(t => { spentThisMonth[t.category] = (spentThisMonth[t.category] || 0) + t.amount; });
-
-  let totalSemuaAnggaran = 0;
-  let totalSemuaPengeluaran = 0;
-
-  list.forEach((b, i) => {
-    let spent = spentThisMonth[b.category] || 0;
-    
-    // Hitung total buat yang di atas
-    totalSemuaAnggaran += b.amount;
-    totalSemuaPengeluaran += spent;
-    
-    let actualPercent = (spent / b.amount) * 100;
-    let displayPercent = actualPercent.toFixed(1);
-    let barPercent = Math.min(actualPercent, 100).toFixed(1);
-    
-    let isWarning = actualPercent >= 80 && actualPercent < 100; 
-    let isDanger = actualPercent > 100; 
-    let isDone = actualPercent === 100; 
-    let isFullOrOver = spent >= b.amount;
-    
-    let barColor = isDanger ? 'var(--danger)' : (isWarning ? 'var(--warning)' : 'var(--primary)'); 
-    if(isDone) barColor = 'var(--success)';
-    
-    let bgLightColor = isDanger ? '#fee2e2' : (isWarning ? '#fef08a' : '#f1f5f9'); 
-    let borderCardColor = isDanger ? '#fca5a5' : 'var(--border)';
-    
-    let subHTML = '';
-    if(b.subBudgets && b.subBudgets.length > 0) {
-        subHTML += `<div style="margin-top: 15px; border-top: 1px dashed var(--border); padding-top: 12px;">`;
-        b.subBudgets.forEach((sub, subIdx) => {
-            let subSpent = transactions.filter(t => t.date.startsWith(ym) && t.type === 'expense' && t.category === b.category && t.subCategory === sub.name).reduce((acc, t) => acc + t.amount, 0);
-            
-            let subActualPct = (subSpent / sub.amount) * 100;
-            let subBarPct = Math.min(subActualPct, 100).toFixed(1);
-            let subIsDanger = subSpent > sub.amount; 
-            let subIsDone = subSpent === sub.amount;
-            let subColorCode = subIsDanger ? 'var(--danger)' : (subIsDone ? 'var(--success)' : '#0ea5e9');
-            
-            let spDisplay = isBalanceHidden ? "Rp ***.***" : formatRp(subSpent);
-            let saDisplay = isBalanceHidden ? "Rp ***.***" : formatRp(sub.amount);
-            
-            subHTML += `<div style="display:flex; justify-content:space-between; font-size: 0.85rem; margin-bottom: 6px; color:#475569;"><span style="display:flex; align-items:center;"><i class="fas fa-level-up-alt fa-rotate-90" style="margin-right:8px; color:#cbd5e1;"></i> ${sub.name} <button onclick="deleteSubBudget('${ym}', ${i}, ${subIdx})" style="background:none;border:none;color:#ef4444;cursor:pointer;padding:0;margin-left:8px;" title="Hapus Sub"><i class="fas fa-times"></i></button></span><strong style="color:${subIsDanger ? 'var(--danger)' : (subIsDone ? 'var(--success)' : '#1e293b')}">${spDisplay} <span style="color:#94a3b8; font-weight:400; font-size:0.75rem;">/ ${saDisplay}</span></strong></div><div class="progress" style="height: 6px; margin-bottom: 12px; background: ${subIsDanger ? '#fee2e2' : '#e0f2fe'};"><div class="progress-bar" style="width:${subBarPct}%; background: ${subColorCode}"></div></div>`;
+            container.innerHTML = `<div style="grid-column: span 2; text-align:center; padding: 50px 20px; background: white; border-radius: 16px; border: 1px dashed #cbd5e1;"><div style="width: 60px; height: 60px; background: #f1f5f9; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;"><i class="fas fa-clipboard-list" style="font-size: 1.5rem; color: #94a3b8;"></i></div><h3 style="margin: 0 0 5px; color:#334155;">Anggaran Kosong</h3><p style="color:#64748b; font-size: 0.95rem; margin-bottom:20px;">Belum ada rencana pengeluaran untuk bulan <b>${mName} ${year}</b>.</p><button class="action" style="margin: 0 auto; background: var(--success); box-shadow: 0 4px 6px rgba(34, 197, 94, 0.2);" onclick="copyPreviousMonthBudgets()"><i class="fas fa-copy"></i> Salin Data Bulan Sebelumnya</button></div>`;
+            const statusCard = document.getElementById("budgetStatusCard"); const budgetVsLiquid = document.getElementById("budgetVsLiquid");
+            if(statusCard && budgetVsLiquid){
+                budgetVsLiquid.innerHTML = `<span style="color:var(--success)">Rp 0</span> <small style="color:#94a3b8">/ ${formatRp(cash)}</small>`;
+                statusCard.style.backgroundColor = '#f0fdf4'; statusCard.style.borderColor = '#bbf7d0';
+                document.getElementById("budgetCardTitle").innerText = "Sisa Rencana Perlu Dana";
+            }
+            return;
+        }
+        
+        let spentThisMonth = {};
+        transactions.filter(t => t.date.startsWith(ym) && t.type === 'expense').forEach(t => { 
+            spentThisMonth[t.category] = (spentThisMonth[t.category] || 0) + t.amount; 
         });
-        subHTML += `</div>`;
-    }
-    
-    let terpakaiDisplay = isBalanceHidden ? "Rp ***.***" : formatRp(spent);
-    let bAmountDisplay = isBalanceHidden ? "Rp ***.***" : formatRp(b.amount);
-    
-    let statusText = isDanger ? ' (Over Budget!)' : (isDone ? ' (Terpenuhi)' : '');
 
-    container.innerHTML += `<div class="card" style="margin-bottom: 0; border: 1px solid ${borderCardColor}; border-left: 5px solid ${isFullOrOver ? (isDanger ? 'var(--danger)' : 'var(--success)') : 'var(--primary)'}"><div class="progress-header" style="align-items: center; margin-bottom: 12px;"><strong style="font-size: 1.05rem; color: #1e293b;">${b.category} ${isDone ? '<span class="budget-badge badge-paid" style="color:var(--success); font-size:0.8rem; margin-left:5px;">✓ Terpenuhi</span>' : ''}</strong><div style="display:flex; gap:8px;"><button style="padding: 4px 8px; background: #e0f2fe; color: #0ea5e9; border: none; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer; display:flex; align-items:center; gap:4px;" onclick="addSubBudget('${ym}', ${i})"><i class="fas fa-plus"></i> Sub</button><button class="btn-danger" style="padding: 4px 8px; background: transparent; color: #cbd5e1; transition: color 0.2s;" onmouseover="this.style.color='var(--danger)'" onmouseout="this.style.color='#cbd5e1'" onclick="deleteBudget('${ym}', ${i})"><i class="fas fa-trash"></i></button></div></div><div style="font-size: 0.95rem; color: #475569; margin-bottom: 12px;">Terpakai: <strong style="color:#1e293b;">${terpakaiDisplay}</strong> <span style="color:#94a3b8; font-size:0.85rem;">/ ${bAmountDisplay}</span></div><div class="progress" style="margin-bottom: 8px; background: ${bgLightColor};"><div class="progress-bar" style="width:${barPercent}%; background: ${barColor}"></div></div><div style="text-align: right; font-weight: 700; font-size: 0.85rem; color: ${barColor}">${displayPercent}% ${statusText}</div>${subHTML}</div>`;
-  });
-  
-  const statusCard = document.getElementById("budgetStatusCard"); 
-  const budgetVsLiquid = document.getElementById("budgetVsLiquid");
-  
-  if(statusCard && budgetVsLiquid){
-    // Logika baru untuk kartu yang di atas (Sisa Rencana Perlu Dana)
-    // Sisa rencana = Total Target Semua Kategori - Total Yang Udah Keluar
-    let sisaRencanaDana = Math.max(0, totalSemuaAnggaran - totalSemuaPengeluaran);
-    
-    let tpDisplay = isBalanceHidden ? "Rp ***.***" : formatRp(sisaRencanaDana);
-    let cashDisplay = isBalanceHidden ? "Rp ***.***" : formatRp(cash);
-    
-    // Peringatan kalau sisa rencana yang harus dibayar masih lebih besar dari duit kas lo sekarang
-    let isWarningKas = sisaRencanaDana > cash;
-    
-    budgetVsLiquid.innerHTML = `<span style="color:${isWarningKas ? 'var(--danger)' : 'var(--success)'}">${tpDisplay}</span> <small style="color:#94a3b8">/ ${cashDisplay}</small>`;
-    
-    statusCard.style.backgroundColor = isWarningKas ? '#fff1f2' : '#f0fdf4';
-    statusCard.style.borderColor = isWarningKas ? '#fecaca' : '#bbf7d0';
-    
-    document.getElementById("budgetCardTitle").innerText = sisaRencanaDana > 0 ? "Sisa Rencana Perlu Dana" : "Rencana Bulan Ini Beres!";
-  }
+        let totalSemuaAnggaran = 0;
+        let totalSemuaPengeluaran = 0;
+
+        list.forEach((b, i) => {
+            let spent = spentThisMonth[b.category] || 0;
+            let target = b.amount || 0;
+            
+            totalSemuaAnggaran += target;
+            totalSemuaPengeluaran += spent;
+            
+            let actualPercent = target > 0 ? Math.round((spent / target) * 100) : 0;
+            let displayPercent = actualPercent;
+            let barPercent = Math.min(actualPercent, 100);
+            
+            let isWarning = actualPercent >= 80 && actualPercent < 100; 
+            let isDanger = actualPercent > 100; 
+            let isDone = actualPercent === 100; 
+            let isFullOrOver = spent >= target;
+            
+            let barColor = isDanger ? 'var(--danger)' : (isWarning ? 'var(--warning)' : 'var(--primary)'); 
+            if(isDone) barColor = 'var(--success)';
+            
+            let bgLightColor = isDanger ? '#fee2e2' : (isWarning ? '#fef08a' : '#f1f5f9'); 
+            let borderCardColor = isDanger ? '#fca5a5' : 'var(--border)';
+            
+            let subHTML = '';
+            if(b.subBudgets && b.subBudgets.length > 0) {
+                subHTML += `<div style="margin-top: 15px; border-top: 1px dashed var(--border); padding-top: 12px;">`;
+                b.subBudgets.forEach((sub, subIdx) => {
+                    let subTarget = sub.amount || 0;
+                    let subSpent = transactions.filter(t => t.date.startsWith(ym) && t.type === 'expense' && t.category === b.category && t.subCategory === sub.name).reduce((acc, t) => acc + t.amount, 0);
+                    
+                    let subActualPct = subTarget > 0 ? Math.round((subSpent / subTarget) * 100) : 0;
+                    let subBarPct = Math.min(subActualPct, 100);
+                    let subIsDanger = subActualPct > 100; 
+                    let subIsDone = subActualPct === 100;
+                    let subColorCode = subIsDanger ? 'var(--danger)' : (subIsDone ? 'var(--success)' : '#0ea5e9');
+                    
+                    let spDisplay = isBalanceHidden ? "Rp ***.***" : formatRp(subSpent);
+                    let saDisplay = isBalanceHidden ? "Rp ***.***" : formatRp(subTarget);
+                    
+                    subHTML += `<div style="display:flex; justify-content:space-between; font-size: 0.85rem; margin-bottom: 6px; color:#475569;"><span style="display:flex; align-items:center;"><i class="fas fa-level-up-alt fa-rotate-90" style="margin-right:8px; color:#cbd5e1;"></i> ${sub.name} <button onclick="deleteSubBudget('${ym}', ${i}, ${subIdx})" style="background:none;border:none;color:#ef4444;cursor:pointer;padding:0;margin-left:8px;" title="Hapus Sub"><i class="fas fa-times"></i></button></span><strong style="color:${subIsDanger ? 'var(--danger)' : (subIsDone ? 'var(--success)' : '#1e293b')}">${spDisplay} <span style="color:#94a3b8; font-weight:400; font-size:0.75rem;">/ ${saDisplay}</span></strong></div><div class="progress" style="height: 6px; margin-bottom: 12px; background: ${subIsDanger ? '#fee2e2' : '#e0f2fe'};"><div class="progress-bar" style="width:${subBarPct}%; background: ${subColorCode}"></div></div>`;
+                });
+                subHTML += `</div>`;
+            }
+            
+            let terpakaiDisplay = isBalanceHidden ? "Rp ***.***" : formatRp(spent);
+            let bAmountDisplay = isBalanceHidden ? "Rp ***.***" : formatRp(target);
+            let statusText = isDanger ? ' (Over Budget!)' : (isDone ? ' (Terpenuhi)' : '');
+
+            container.innerHTML += `<div class="card" style="margin-bottom: 0; border: 1px solid ${borderCardColor}; border-left: 5px solid ${isFullOrOver ? (isDanger ? 'var(--danger)' : 'var(--success)') : 'var(--primary)'}"><div class="progress-header" style="align-items: center; margin-bottom: 12px;"><strong style="font-size: 1.05rem; color: #1e293b;">${b.category} ${isDone ? '<span class="budget-badge badge-paid" style="color:var(--success); font-size:0.8rem; margin-left:5px;">✓ Terpenuhi</span>' : ''}</strong><div style="display:flex; gap:8px;"><button style="padding: 4px 8px; background: #e0f2fe; color: #0ea5e9; border: none; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer; display:flex; align-items:center; gap:4px;" onclick="addSubBudget('${ym}', ${i})"><i class="fas fa-plus"></i> Sub</button><button class="btn-danger" style="padding: 4px 8px; background: transparent; color: #cbd5e1; transition: color 0.2s;" onmouseover="this.style.color='var(--danger)'" onmouseout="this.style.color='#cbd5e1'" onclick="deleteBudget('${ym}', ${i})"><i class="fas fa-trash"></i></button></div></div><div style="font-size: 0.95rem; color: #475569; margin-bottom: 12px;">Terpakai: <strong style="color:#1e293b;">${terpakaiDisplay}</strong> <span style="color:#94a3b8; font-size:0.85rem;">/ ${bAmountDisplay}</span></div><div class="progress" style="margin-bottom: 8px; background: ${bgLightColor};"><div class="progress-bar" style="width:${barPercent}%; background: ${barColor}"></div></div><div style="text-align: right; font-weight: 700; font-size: 0.85rem; color: ${barColor}">${displayPercent}% ${statusText}</div>${subHTML}</div>`;
+        });
+        
+        const statusCard = document.getElementById("budgetStatusCard"); 
+        const budgetVsLiquid = document.getElementById("budgetVsLiquid");
+        
+        if(statusCard && budgetVsLiquid){
+            let sisaRencanaDana = Math.max(0, totalSemuaAnggaran - totalSemuaPengeluaran);
+            let tpDisplay = isBalanceHidden ? "Rp ***.***" : formatRp(sisaRencanaDana);
+            let cashDisplay = isBalanceHidden ? "Rp ***.***" : formatRp(cash);
+            let isWarningKas = sisaRencanaDana > cash;
+            
+            budgetVsLiquid.innerHTML = `<span style="color:${isWarningKas ? 'var(--danger)' : 'var(--success)'}">${tpDisplay}</span> <small style="color:#94a3b8">/ ${cashDisplay}</small>`;
+            statusCard.style.backgroundColor = isWarningKas ? '#fff1f2' : '#f0fdf4';
+            statusCard.style.borderColor = isWarningKas ? '#fecaca' : '#bbf7d0';
+            document.getElementById("budgetCardTitle").innerText = sisaRencanaDana > 0 ? "Sisa Rencana Perlu Dana" : "Rencana Bulan Ini Beres!";
+        }
+    } catch(e) {
+        console.error("Error Render Budget:", e);
+    }
 }
 // ==========================================
 // FITUR BARU: MINIMIZE GUEST LIST WEDDING
