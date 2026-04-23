@@ -2168,7 +2168,7 @@ function renderBudgetList(list, ym) {
           statusCard.style.borderColor = '#bbf7d0';
           document.getElementById("budgetCardTitle").innerText = "Ringkasan Anggaran Bulan Ini";
           let descEl = document.querySelector("#budgetStatusCard p");
-          if(descEl) descEl.innerText = "Total Pengeluaran (Mutasi) vs Total Rencana Anggaran";
+          if(descEl) descEl.innerHTML = `Total Pengeluaran (Mutasi) vs Total Rencana Anggaran<br><span style="color: #3b82f6; font-weight: 600; font-size: 0.85rem;"><i class="fas fa-wallet"></i> Saldo Kas Saat Ini: ${formatRp(cash)}</span>`;
         }
         return;
     }
@@ -2228,7 +2228,6 @@ function renderBudgetList(list, ym) {
     const sCard = document.getElementById("budgetStatusCard");
     const bVsL = document.getElementById("budgetVsLiquid");
     if(sCard && bVsL) {
-        // REVISI TOTAL: Sekarang nampilin Total Realisasi / Total Rencana
         let isWarning = totalRealisasiBulanIni > totalTargetBulanIni;
         
         bVsL.innerHTML = `<span style="color:${isWarning ? 'var(--danger)' : 'var(--success)'}">${formatRp(totalRealisasiBulanIni)}</span> <small style="color:#94a3b8">/ ${formatRp(totalTargetBulanIni)}</small>`;
@@ -2238,7 +2237,7 @@ function renderBudgetList(list, ym) {
         
         document.getElementById("budgetCardTitle").innerText = "Ringkasan Anggaran Bulan Ini";
         let descEl = document.querySelector("#budgetStatusCard p");
-        if(descEl) descEl.innerText = "Total Pengeluaran (Mutasi) vs Total Rencana Anggaran";
+        if(descEl) descEl.innerHTML = `Total Pengeluaran (Mutasi) vs Total Rencana Anggaran<br><span style="color: #3b82f6; font-weight: 600; font-size: 0.85rem;"><i class="fas fa-wallet"></i> Saldo Kas Saat Ini: ${formatRp(cash)}</span>`;
     }
   } catch(e) { console.error("Render Error:", e); }
 }
