@@ -1994,7 +1994,7 @@ function update(){
     });
   }
 
-  (currentBudgets, budgetYM);
+ renderBudgetList(currentBudgets, budgetYM);
 
   const assetListContainer = document.getElementById("assetListContainer");
   if(assetListContainer) {
