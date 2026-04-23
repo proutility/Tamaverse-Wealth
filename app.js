@@ -77,6 +77,10 @@ let currentGuestSort = 'newest';
 // FITUR BARU: Variabel untuk Sembunyikan Saldo
 let isBalanceHidden = false;
 
+// Variabel untuk Fitur PIN Lock
+let currentPinInput = "";
+let tempSetupPin = "";
+
 let nowDt = new Date();
 let defaultYM = nowDt.getFullYear() + "-" + String(nowDt.getMonth() + 1).padStart(2, '0');
 
@@ -167,8 +171,14 @@ function loadDataFromFirebase() {
     }
     assets = getAssetsFor(defaultYM);
     
-    document.getElementById("app").innerHTML = mainApp();
-    setTimeout(() => { showPage('dashboard'); update(); }, 100);
+    // --- CEGATAN PIN KEAMANAN ---
+    currentPinInput = "";
+    if (userProfile.pin) {
+        renderPinScreen('verify'); // Kalau udah punya PIN, suruh masukin
+    } else {
+        renderPinScreen('setup'); // Kalau baru pertama, suruh bikin PIN
+    }
+
   }).catch((error) => {
     alert("Gagal narik data dari server bro!");
   });
@@ -2455,5 +2465,99 @@ function renderExpenseDonut(dataObj) {
         },
         options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
     });
+}
+// ==========================================
+// FUNGSI PIN KEAMANAN (M-BANKING STYLE)
+// ==========================================
+function renderPinScreen(mode) {
+    let title = mode === 'setup' ? "Buat PIN Keamanan" : "Masukkan PIN Anda";
+    let subtitle = mode === 'setup' ? "Buat 6 digit PIN untuk mengunci aplikasi Pro-Tama Finance Anda." : "Aplikasi terkunci. Masukkan 6 digit PIN Anda.";
+    
+    if (mode === 'setup_confirm') {
+        title = "Konfirmasi PIN";
+        subtitle = "Masukkan kembali 6 digit PIN yang baru saja dibuat.";
+    }
+
+    let dots = '';
+    for(let i=0; i<6; i++) {
+        let active = i < currentPinInput.length ? 'background: #3b82f6; transform: scale(1.2);' : 'background: #cbd5e1;';
+        dots += `<div style="width: 16px; height: 16px; border-radius: 50%; ${active} transition: all 0.2s ease;"></div>`;
+    }
+
+    let html = `
+    <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: #f8fafc; z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Inter', sans-serif;">
+        
+        <div style="text-align: center; margin-bottom: 30px;">
+            <div style="width: 70px; height: 70px; background: #e0f2fe; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;">
+                <i class="fas fa-lock" style="font-size: 2.5rem; color: #3b82f6;"></i>
+            </div>
+            <h2 style="margin: 0 0 10px 0; color: #1e293b; font-size: 1.6rem;">${title}</h2>
+            <p style="color: #64748b; font-size: 0.95rem; max-width: 280px; margin: 0 auto; line-height: 1.5;">${subtitle}</p>
+        </div>
+        
+        <div style="display: flex; gap: 15px; margin-bottom: 40px; height: 20px; align-items: center;">
+            ${dots}
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; max-width: 300px; width: 100%;">
+            ${[1,2,3,4,5,6,7,8,9].map(n => `<button onclick="handlePinPress('${n}', '${mode}')" style="width: 75px; height: 75px; border-radius: 50%; border: none; background: white; font-size: 1.8rem; font-weight: 600; color: #1e293b; box-shadow: 0 4px 10px rgba(0,0,0,0.06); cursor: pointer; transition: 0.1s;" onmousedown="this.style.background='#f1f5f9'; this.style.transform='scale(0.95)'" onmouseup="this.style.background='white'; this.style.transform='scale(1)'">${n}</button>`).join('')}
+            <button style="background: transparent; border: none;"></button>
+            <button onclick="handlePinPress('0', '${mode}')" style="width: 75px; height: 75px; border-radius: 50%; border: none; background: white; font-size: 1.8rem; font-weight: 600; color: #1e293b; box-shadow: 0 4px 10px rgba(0,0,0,0.06); cursor: pointer; transition: 0.1s;" onmousedown="this.style.background='#f1f5f9'; this.style.transform='scale(0.95)'" onmouseup="this.style.background='white'; this.style.transform='scale(1)'">0</button>
+            <button onclick="handlePinDelete('${mode}')" style="width: 75px; height: 75px; border-radius: 50%; border: none; background: transparent; font-size: 1.5rem; color: #94a3b8; cursor: pointer; transition: 0.1s;" onmousedown="this.style.color='#ef4444'; this.style.transform='scale(0.95)'" onmouseup="this.style.color='#94a3b8'; this.style.transform='scale(1)'"><i class="fas fa-backspace"></i></button>
+        </div>
+
+        <button onclick="logout()" style="margin-top: 50px; background: transparent; border: none; color: #ef4444; font-weight: 600; font-size: 1rem; cursor: pointer; display: flex; align-items: center; gap: 8px;"><i class="fas fa-sign-out-alt"></i> Ganti Akun</button>
+    </div>
+    `;
+    document.getElementById("app").innerHTML = html;
+}
+
+function handlePinPress(num, mode) {
+    if (currentPinInput.length < 6) {
+        currentPinInput += num;
+        renderPinScreen(mode);
+        if (currentPinInput.length === 6) {
+            setTimeout(() => processPin(mode), 150); // Kasih delay dikit biar buletan terakhir nyala dulu
+        }
+    }
+}
+
+function handlePinDelete(mode) {
+    if (currentPinInput.length > 0) {
+        currentPinInput = currentPinInput.slice(0, -1);
+        renderPinScreen(mode);
+    }
+}
+
+function processPin(mode) {
+    if (mode === 'setup') {
+        tempSetupPin = currentPinInput;
+        currentPinInput = "";
+        renderPinScreen('setup_confirm');
+    } else if (mode === 'setup_confirm') {
+        if (currentPinInput === tempSetupPin) {
+            userProfile.pin = currentPinInput;
+            save(); // Simpan PIN ke Firebase
+            Swal.fire({ text: 'PIN Keamanan berhasil dipasang!', icon: 'success', timer: 1500, showConfirmButton: false });
+            unlockApp();
+        } else {
+            Swal.fire({ text: 'PIN tidak cocok! Ulangi dari awal.', icon: 'error' });
+            currentPinInput = "";
+            renderPinScreen('setup');
+        }
+    } else if (mode === 'verify') {
+        if (currentPinInput === userProfile.pin) {
+            unlockApp();
+        } else {
+            Swal.fire({ text: 'PIN Salah!', icon: 'error', timer: 1500, showConfirmButton: false });
+            currentPinInput = "";
+            renderPinScreen('verify');
+        }
+    }
+}
+
+function unlockApp() {
+    document.getElementById("app").innerHTML = mainApp();
+    setTimeout(() => { showPage('dashboard'); update(); }, 100);
 }
 if (document.getElementById("barChart")) setTimeout(update, 100);
