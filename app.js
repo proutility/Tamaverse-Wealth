@@ -178,6 +178,14 @@ function loadDataFromFirebase() {
     } else {
         renderPinScreen('setup'); // Kalau baru pertama, suruh bikin PIN
     }
+// Tambahin ini di dalem loadDataFromFirebase
+if ("Notification" in window) {
+    Notification.requestPermission().then(permission => {
+        if (permission === "granted") {
+            console.log("Izin notifikasi diberikan!");
+        }
+    });
+}
 
   }).catch((error) => {
     alert("Gagal narik data dari server bro!");
@@ -936,23 +944,32 @@ function renderNotifs() {
         let currentDay = today.getDate();
         let ym = defaultYM;
         
+        // 1. Notif Pemasukan
         let recentIncomes = transactions.filter(t => t.type === 'income' && t.date.startsWith(ym)).sort((a,b) => new Date(b.date) - new Date(a.date));
         if(recentIncomes.length > 0) {
-            html += `<div class="notif-item success"><i class="fas fa-check-circle" style="color:#22c55e;"></i><div><strong>Pemasukan Masuk!</strong><br><span style="color:#64748b;">${recentIncomes[0].desc} (${formatRp(recentIncomes[0].amount)})</span></div></div>`;
+            let msg = `${recentIncomes[0].desc} (${formatRp(recentIncomes[0].amount)})`;
+            html += `<div class="notif-item success"><i class="fas fa-check-circle" style="color:#22c55e;"></i><div><strong>Pemasukan Masuk!</strong><br><span style="color:#64748b;">${msg}</span></div></div>`;
+            // Trigger Pop-up HP
+            if(!window.lastNotifIncome || window.lastNotifIncome !== recentIncomes[0].id) {
+                sendSystemNotification("Cuan Masuk! 💰", msg);
+                window.lastNotifIncome = recentIncomes[0].id;
+            }
         }
 
+        // 2. Notif Cicilan
         debts.filter(d => d.remaining > 0).forEach(d => {
             let dueDay = parseInt(d.date.split('-')[2]);
             if(!isNaN(dueDay)) {
                 let diff = dueDay - currentDay;
                 let isPaid = transactions.some(t => t.type === 'expense' && t.desc.toLowerCase().includes(d.name.toLowerCase()) && t.date.startsWith(ym));
-                if(!isPaid) {
-                    if(diff <= 0) html += `<div class="notif-item danger"><i class="fas fa-exclamation-circle" style="color:#ef4444;"></i><div><strong>Cicilan Jatuh Tempo!</strong><br><span style="color:#64748b;">Segera bayar ${d.name}.</span></div></div>`;
-                    else if(diff <= 5) html += `<div class="notif-item warning"><i class="fas fa-clock" style="color:#eab308;"></i><div><strong>H-${diff} Jatuh Tempo</strong><br><span style="color:#64748b;">Siapin dana buat ${d.name}.</span></div></div>`;
+                if(!isPaid && diff <= 0) {
+                   html += `<div class="notif-item danger"><i class="fas fa-exclamation-circle" style="color:#ef4444;"></i><div><strong>Tagihan!</strong><br><span style="color:#64748b;">Bayar ${d.name} sekarang!</span></div></div>`;
+                   sendSystemNotification("Tagihan Jatuh Tempo! ⚠️", `Waktunya bayar ${d.name} bro.`);
                 }
             }
         });
 
+        // 3. Notif Overbudget
         let currentBudgets = getBudgetsFor(ym);
         let spentThisMonth = {};
         transactions.filter(t => t.date.startsWith(ym) && t.type === 'expense').forEach(t => {
@@ -964,8 +981,10 @@ function renderNotifs() {
             let target = b.amount || 0;
             if(target > 0) {
                 let pct = Math.round((spent / target) * 100);
-                if(pct > 100) html += `<div class="notif-item danger"><i class="fas fa-times-circle" style="color:#ef4444;"></i><div><strong>Overbudget: ${b.category}</strong><br><span style="color:#64748b;">Udah tembus ${pct}%!</span></div></div>`;
-                else if(pct === 100) html += `<div class="notif-item success"><i class="fas fa-check-circle" style="color:#22c55e;"></i><div><strong>Terpenuhi: ${b.category}</strong><br><span style="color:#64748b;">Anggaran sudah terpakai 100%.</span></div></div>`;
+                if(pct > 100) {
+                    html += `<div class="notif-item danger"><i class="fas fa-times-circle" style="color:#ef4444;"></i><div><strong>Overbudget: ${b.category}</strong></div></div>`;
+                    sendSystemNotification("Anggaran Jebol! 🔥", `Kategori ${b.category} lo udah tembus ${pct}%!`);
+                }
             }
         });
         document.getElementById('notifBody').innerHTML = html || `<div style="text-align:center; padding:20px; color:#94a3b8; font-size:0.85rem;">Belum ada notifikasi baru bro. ☕</div>`;
@@ -2469,7 +2488,11 @@ function renderExpenseDonut(dataObj) {
 // ==========================================
 // FUNGSI PIN KEAMANAN (M-BANKING STYLE)
 // ==========================================
+let currentPinMode = ""; // Tambahan variabel buat deteksi layar PIN aktif
+
 function renderPinScreen(mode) {
+    currentPinMode = mode; // Kunci mode saat ini (biar keyboard tau lagi di mode apa)
+    
     let title = mode === 'setup' ? "Buat PIN Keamanan" : "Masukkan PIN Anda";
     let subtitle = mode === 'setup' ? "Buat 6 digit PIN untuk mengunci aplikasi Pro-Tama Finance Anda." : "Aplikasi terkunci. Masukkan 6 digit PIN Anda.";
     
@@ -2557,7 +2580,45 @@ function processPin(mode) {
 }
 
 function unlockApp() {
+    currentPinMode = ""; // Matiin sensor keyboard supaya nggak kepencet di background
     document.getElementById("app").innerHTML = mainApp();
     setTimeout(() => { showPage('dashboard'); update(); }, 100);
+}
+
+// ==========================================
+// SENSOR KEYBOARD KHUSUS LAPTOP/PC
+// ==========================================
+window.addEventListener('keydown', function(e) {
+    // Cuma jalanin sensor keyboard kalau layar PIN lagi aktif
+    if (currentPinMode !== "") { 
+        if (e.key >= '0' && e.key <= '9') {
+            handlePinPress(e.key, currentPinMode);
+        } else if (e.key === 'Backspace') {
+            handlePinDelete(currentPinMode);
+        }
+    }
+});
+// ==========================================
+// FUNGSI TRIGGER NOTIFIKASI SYSTEM HP (POP-UP)
+// ==========================================
+function sendSystemNotification(title, message) {
+    if (!("Notification" in window)) return;
+
+    if (Notification.permission === "granted") {
+        // Jika pakai Service Worker (PWA)
+        if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+            navigator.serviceWorker.ready.then(registration => {
+                registration.showNotification(title, {
+                    body: message,
+                    icon: 'logo.png', // Pastikan logo.png ada di folder GitHub lo
+                    badge: 'logo.png',
+                    vibrate: [200, 100, 200]
+                });
+            });
+        } else {
+            // Fallback kalau SW belum siap
+            new Notification(title, { body: message, icon: 'logo.png' });
+        }
+    }
 }
 if (document.getElementById("barChart")) setTimeout(update, 100);
