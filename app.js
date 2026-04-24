@@ -263,7 +263,7 @@ return `
 
   <div class="mobile-menu-grid">
      <div class="menu-btn" onclick="showPage('aset')"><div class="icon-box" style="background:#e0f2fe; color:#0284c7;"><i class="fas fa-home"></i></div><span>Asetku</span></div>
-     <div class="menu-btn" onclick="showPage('anggaran')"><div class="icon-box" style="background:#dcfce7; color:#16a34a;"><i class="fas fa-file-invoice-dollar"></i></div><span>Anggaran</span></div>
+     <div class="menu-btn" onclick="showPage('budgeting')"><div class="icon-box" style="background:#dcfce7; color:#16a34a;"><i class="fas fa-file-invoice-dollar"></i></div><span>Budgeting</span></div>
      <div class="menu-btn" onclick="showPage('transaksi')"><div class="icon-box" style="background:#fef9c3; color:#ca8a04;"><i class="fas fa-exchange-alt"></i></div><span>Mutasi</span></div>
      <div class="menu-btn" onclick="showPage('target')"><div class="icon-box" style="background:#f3e8ff; color:#9333ea;"><i class="fas fa-bullseye"></i></div><span>Target</span></div>
      <div class="menu-btn" onclick="showPage('wedding')"><div class="icon-box" style="background:#fce7f3; color:#db2777;"><i class="fas fa-ring"></i></div><span>Wedding</span></div>
@@ -752,11 +752,45 @@ return `
 
 `;
 }
+// ==========================================
+// FITUR BARU: ANIMASI TRANSISI & ICON KATEGORI
+// ==========================================
+// 1. Suntik CSS Animasi ke dalam web
+document.head.insertAdjacentHTML("beforeend", `<style>
+  .page-transition {
+      animation: fadeSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+  }
+</style>`);
 
+// 2. Kamus Icon Kategori Otomatis
+function getCatIcon(catName) {
+    let c = catName ? catName.toLowerCase() : "";
+    if (c.includes('pokok') || c.includes('makan') || c.includes('belanja')) return '<i class="fas fa-shopping-basket" style="color: #3b82f6;"></i>';
+    if (c.includes('transport') || c.includes('bensin')) return '<i class="fas fa-gas-pump" style="color: #f59e0b;"></i>';
+    if (c.includes('cicilan') || c.includes('tagihan') || c.includes('hutang')) return '<i class="fas fa-file-invoice-dollar" style="color: #ef4444;"></i>';
+    if (c.includes('hiburan') || c.includes('date') || c.includes('nonton')) return '<i class="fas fa-ticket-alt" style="color: #8b5cf6;"></i>';
+    if (c.includes('gaji') || c.includes('bonus') || c.includes('dividen')) return '<i class="fas fa-hand-holding-usd" style="color: #10b981;"></i>';
+    if (c.includes('kuota') || c.includes('pulsa') || c.includes('internet')) return '<i class="fas fa-wifi" style="color: #06b6d4;"></i>';
+    if (c.includes('nikah') || c.includes('wedding')) return '<i class="fas fa-ring" style="color: #ec4899;"></i>';
+    return '<i class="fas fa-tag" style="color: #94a3b8;"></i>'; // Icon Default
+}
 // ================= FUNGSI NAVIGASI & MENU (UPDATE) =================
 function showPage(p){
-  document.querySelectorAll(".page").forEach(x => x.style.display="none");
-  document.getElementById(p).style.display="block";
+  document.querySelectorAll(".page").forEach(x => {
+      x.style.display="none";
+      x.classList.remove("page-transition"); // Reset animasi lama
+  });
+  
+  let targetPage = document.getElementById(p);
+  targetPage.style.display="block";
+  
+  // Pancing reflow biar animasinya keputar ulang
+  void targetPage.offsetWidth; 
+  targetPage.classList.add("page-transition");
   
   document.querySelectorAll(".bottom-nav .nav-item").forEach(btn => btn.classList.remove("active"));
   if(document.getElementById("botnav-" + p)) document.getElementById("botnav-" + p).classList.add("active");
@@ -2145,7 +2179,7 @@ function update(){
       document.getElementById("totalDebtDisplay").innerText = isBalanceHidden ? "***.***" : totalDebt.toLocaleString('id-ID');
   }
 
-  const trxList = document.getElementById("trxList");
+ const trxList = document.getElementById("trxList");
     if(trxList) {
         trxList.innerHTML = "";
         let searchKeyword = document.getElementById("searchTrx")?.value.toLowerCase() || "";
@@ -2158,21 +2192,24 @@ function update(){
               return matchSearch && matchMonth;
           })
           .sort((a,b) => new Date(b.date) - new Date(a.date))
-          .slice(0, 20) // Nampilin 20 mutasi terakhir
+          .slice(0, 20) 
           .forEach((t) => {
             let originalIndex = transactions.findIndex(orig => orig.id === t.id);
             let typeIcon = t.type === 'income' ? '<i class="fas fa-arrow-down text-success"></i>' : (t.type === 'expense' ? '<i class="fas fa-arrow-up text-danger"></i>' : '<i class="fas fa-exchange-alt text-primary"></i>');
             
+            // FITUR BARU: Tambahin Icon Kategori di badge
+            let catBadge = t.category ? `<span style="background:#f1f5f9; border: 1px solid #e2e8f0; padding:3px 10px; border-radius:12px; font-size:0.75rem; font-weight:600; margin-left:8px; display:inline-flex; align-items:center; gap:5px; color:#475569;">${getCatIcon(t.category)} ${t.category}</span>` : "";
+
             trxList.innerHTML += `
-                <tr>
+                <tr style="transition: background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
                     <td style="color:#64748b;">${t.date}</td>
                     <td>${typeIcon}</td>
                     <td ondblclick="inlineEditTrx(${t.id}, 'desc')" style="cursor:pointer;" title="Klik 2x Edit Keterangan">
                         <strong style="color:#1e293b;">${t.desc}</strong>
-                        ${t.category ? `<span style="background:#e2e8f0; padding:2px 8px; border-radius:12px; font-size:0.75rem; margin-left:8px;">${t.category}</span>` : ""}
+                        ${catBadge}
                         <br><small style="color:#94a3b8;">${t.walletName}</small>
                     </td>
-                    <td ondblclick="inlineEditTrx(${t.id}, 'amount')" style="font-weight:600; cursor:pointer;" title="Klik 2x Edit Nominal">
+                    <td ondblclick="inlineEditTrx(${t.id}, 'amount')" style="font-weight:700; cursor:pointer;" title="Klik 2x Edit Nominal">
                         ${isBalanceHidden ? "Rp ***.***" : formatRp(t.amount)}
                     </td>
                     <td style="text-align: center;">
