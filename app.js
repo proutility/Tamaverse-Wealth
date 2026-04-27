@@ -351,51 +351,102 @@ return `
 </div>
 
 <div id="kalkulator" class="page" style="display:none;">
-    <div class="card" style="max-width:800px; margin:0 auto; background: #f8fafc; border: 1px solid #e2e8f0; padding: 25px;">
-      <h3 style="color:#0ea5e9; margin-top: 0; margin-bottom: 25px; display: flex; align-items: center; gap: 10px;">
-        <i class="fas fa-calculator"></i> Average Down Calculator
-      </h3>
-      
-      <div style="display:flex; gap:30px; flex-wrap:wrap;">
-        <div style="flex:1; min-width: 250px; display: flex; flex-direction: column; gap: 15px;">
-          <div style="background: white; padding: 15px; border-radius: 8px; border: 1px solid #cbd5e1;">
-              <label style="font-size: 0.8rem; font-weight: 700; color: #64748b;">POSISI AWAL SAAT INI</label>
-              <div style="display:flex; gap:10px; margin-top: 10px;">
-                  <input type="number" id="calcLot1" placeholder="Jumlah Lot" style="flex: 1; width: 100%;">
-                  <input type="number" id="calcPrice1" placeholder="Harga Beli (Rp)" style="flex: 1; width: 100%;">
-              </div>
-          </div>
-          
-          <div style="background: white; padding: 15px; border-radius: 8px; border: 1px solid #cbd5e1;">
-              <label style="font-size: 0.8rem; font-weight: 700; color: #64748b;">RENCANA TOP UP</label>
-              <div style="display:flex; gap:10px; margin-top: 10px;">
-                  <input type="number" id="calcLot2" placeholder="Jumlah Lot" style="flex: 1; width: 100%;">
-                  <input type="number" id="calcPrice2" placeholder="Harga Target (Rp)" style="flex: 1; width: 100%;">
-              </div>
-          </div>
-          
-          <button class="action" onclick="calculateAvg()" style="width: 100%; justify-content: center; padding: 12px; font-size: 1rem; margin-top: 5px;">
-            <i class="fas fa-magic"></i> Hitung Average
-          </button>
+  <div class="header-with-picker" style="margin-bottom: 20px;">
+    <h2 class="header-title">Kalkulator Saham</h2>
+  </div>
+
+  <div class="card" style="border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 10px rgba(0,0,0,0.02); padding: 30px; margin-bottom: 25px;">
+    <h3 style="color:#1e293b; margin-top: 0; margin-bottom: 25px; display: flex; align-items: center; gap: 12px; font-size: 1.2rem;">
+      <div style="width: 42px; height: 42px; background: #e0f2fe; color: #0284c7; border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 2px 4px rgba(255,255,255,0.5);"><i class="fas fa-calculator"></i></div> 
+      Average Down Calculator
+    </h3>
+    
+    <div style="display:flex; gap:30px; flex-wrap:wrap;">
+      <div style="flex:1; min-width: 250px; display: flex; flex-direction: column; gap: 20px;">
+        <div style="background: #f8fafc; padding: 20px; border-radius: 14px; border: 1px solid #f1f5f9;">
+            <label style="font-size: 0.75rem; font-weight: 800; color: #64748b; letter-spacing: 0.5px;">POSISI AWAL SAAT INI</label>
+            <div style="display:flex; gap:10px; margin-top: 12px;">
+                <input type="number" id="calcLot1" placeholder="Jumlah Lot" style="flex: 1; width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #cbd5e1; outline: none; transition: 0.2s;" onfocus="this.style.borderColor='#3b82f6'">
+                <input type="number" id="calcPrice1" placeholder="Harga Beli (Rp)" style="flex: 1; width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #cbd5e1; outline: none; transition: 0.2s;" onfocus="this.style.borderColor='#3b82f6'">
+            </div>
         </div>
         
-        <div style="flex:1; min-width: 250px; background:#ffffff; padding:25px; border-radius:12px; border: 1px solid #cbd5e1; display: flex; flex-direction: column; justify-content: center; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
-          <span style="font-size: 0.85rem; color:#64748b; font-weight: 700; text-transform: uppercase;">Average Baru Anda</span>
-          <h2 id="resAvg" style="color:#0ea5e9; font-size: 2.4rem; margin: 5px 0 25px 0;">Rp 0</h2>
-          
-          <div style="display: flex; justify-content: space-between; border-top: 1px solid #f1f5f9; padding-top: 15px;">
-              <div>
-                  <span style="font-size: 0.75rem; color:#64748b; font-weight: 600;">TOTAL LOT</span>
-                  <div id="resLot" style="font-weight:bold; font-size: 1.1rem; color: #1e293b; margin-top: 4px;">0 Lot</div>
-              </div>
-              <div style="text-align: right;">
-                  <span style="font-size: 0.75rem; color:#64748b; font-weight: 600;">MODAL TAMBAHAN</span>
-                  <div id="resFunds" style="color:#ef4444; font-weight:bold; font-size: 1.1rem; margin-top: 4px;">Rp 0</div>
-              </div>
-          </div>
+        <div style="background: #f8fafc; padding: 20px; border-radius: 14px; border: 1px solid #f1f5f9;">
+            <label style="font-size: 0.75rem; font-weight: 800; color: #64748b; letter-spacing: 0.5px;">RENCANA TOP UP</label>
+            <div style="display:flex; gap:10px; margin-top: 12px;">
+                <input type="number" id="calcLot2" placeholder="Jumlah Lot" style="flex: 1; width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #cbd5e1; outline: none; transition: 0.2s;" onfocus="this.style.borderColor='#3b82f6'">
+                <input type="number" id="calcPrice2" placeholder="Harga Target (Rp)" style="flex: 1; width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #cbd5e1; outline: none; transition: 0.2s;" onfocus="this.style.borderColor='#3b82f6'">
+            </div>
+        </div>
+        
+        <button onclick="calculateAvg()" style="width: 100%; padding: 14px; border-radius: 10px; font-weight: 700; background: #3b82f6; color: white; border: none; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); cursor: pointer; transition: 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+          <i class="fas fa-magic"></i> Hitung Average
+        </button>
+      </div>
+      
+      <div style="flex:1; min-width: 250px; background: linear-gradient(135deg, #f0f9ff, #e0f2fe); padding:30px; border-radius:16px; border: 1px solid #bae6fd; display: flex; flex-direction: column; justify-content: center; box-shadow: 0 10px 25px rgba(2, 132, 199, 0.05);">
+        <span style="font-size: 0.8rem; color:#0369a1; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Average Baru Anda</span>
+        <h2 id="resAvg" style="color:#0284c7; font-size: 2.8rem; font-weight: 800; margin: 5px 0 25px 0; text-shadow: 0 2px 4px rgba(2,132,199,0.1);">Rp 0</h2>
+        
+        <div style="display: flex; justify-content: space-between; border-top: 1px dashed #7dd3fc; padding-top: 20px;">
+            <div>
+                <span style="font-size: 0.75rem; color:#0284c7; font-weight: 700;">TOTAL LOT</span>
+                <div id="resLot" style="font-weight:800; font-size: 1.2rem; color: #0f172a; margin-top: 4px;">0 Lot</div>
+            </div>
+            <div style="text-align: right;">
+                <span style="font-size: 0.75rem; color:#0284c7; font-weight: 700;">MODAL TAMBAHAN</span>
+                <div id="resFunds" style="color:#ef4444; font-weight:800; font-size: 1.2rem; margin-top: 4px;">Rp 0</div>
+            </div>
         </div>
       </div>
     </div>
+  </div>
+
+  <div class="card" style="border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 10px rgba(0,0,0,0.02); padding: 30px;">
+    <h3 style="color:#1e293b; margin-top: 0; margin-bottom: 25px; display: flex; align-items: center; gap: 12px; font-size: 1.2rem;">
+      <div style="width: 42px; height: 42px; background: #dcfce7; color: #16a34a; border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 2px 4px rgba(255,255,255,0.5);"><i class="fas fa-chart-line"></i></div> 
+      Profit / Loss Calculator (TP & SL)
+    </h3>
+    
+    <div style="display:flex; gap:30px; flex-wrap:wrap;">
+      <div style="flex:1; min-width: 250px; display: flex; flex-direction: column; gap: 20px;">
+        <div style="background: #f8fafc; padding: 20px; border-radius: 14px; border: 1px solid #f1f5f9;">
+            <label style="font-size: 0.75rem; font-weight: 800; color: #64748b; letter-spacing: 0.5px;">SIMULASI TRANSAKSI</label>
+            <div style="display:flex; gap:10px; margin-top: 12px;">
+                <input type="number" id="calcLotPL" placeholder="Jumlah Lot" style="flex: 1; width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #cbd5e1; outline: none; transition: 0.2s;" onfocus="this.style.borderColor='#3b82f6'">
+                <input type="number" id="calcBuyPrice" placeholder="Harga Beli (Rp)" style="flex: 1; width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #cbd5e1; outline: none; transition: 0.2s;" onfocus="this.style.borderColor='#3b82f6'">
+            </div>
+            <div style="margin-top: 10px;">
+                <input type="number" id="calcSellPrice" placeholder="Harga Jual / Target (Rp)" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #cbd5e1; outline: none; transition: 0.2s;" onfocus="this.style.borderColor='#3b82f6'">
+            </div>
+        </div>
+        
+        <button onclick="calculatePL()" style="width: 100%; padding: 14px; border-radius: 10px; font-weight: 700; background: #3b82f6; color: white; border: none; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); cursor: pointer; transition: 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+          <i class="fas fa-bullseye"></i> Hitung Profit / Loss
+        </button>
+      </div>
+      
+      <div style="flex:1; min-width: 250px; background: #ffffff; padding:30px; border-radius:16px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; justify-content: center; box-shadow: 0 10px 25px rgba(0,0,0,0.03);">
+        <span style="font-size: 0.8rem; color:#64748b; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Estimasi Profit / Loss</span>
+        <div style="display: flex; align-items: baseline; gap: 12px; margin: 5px 0 25px 0;">
+            <h2 id="resPLNominal" style="color:#1e293b; font-size: 2.4rem; font-weight: 800; margin: 0; letter-spacing: -0.5px;">Rp 0</h2>
+            <span id="resPLPercent" style="font-size: 1.1rem; font-weight: 800; padding: 6px 12px; border-radius: 8px; background: #f1f5f9; color: #475569;">0.00%</span>
+        </div>
+        
+        <div style="display: flex; justify-content: space-between; border-top: 1px dashed #cbd5e1; padding-top: 20px;">
+            <div>
+                <span style="font-size: 0.75rem; color:#64748b; font-weight: 700;">MODAL AWAL</span>
+                <div id="resModalAwal" style="font-weight:800; font-size: 1.1rem; color: #475569; margin-top: 4px;">Rp 0</div>
+            </div>
+            <div style="text-align: right;">
+                <span style="font-size: 0.75rem; color:#64748b; font-weight: 700;">TOTAL UANG KEMBALI</span>
+                <div id="resTotalReturn" style="color:#0f172a; font-weight:800; font-size: 1.2rem; margin-top: 4px;">Rp 0</div>
+            </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
     <div class="card" style="max-width:800px; margin:20px auto 0 auto; background: #f8fafc; border: 1px solid #e2e8f0; padding: 25px;">
       <h3 style="color:#10b981; margin-top: 0; margin-bottom: 25px; display: flex; align-items: center; gap: 10px;">
