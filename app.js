@@ -498,7 +498,7 @@ return `
   </div>
 </div>
 
-<div id="anggaran" class="page" style="display:none;">
+<div id="budgeting" class="page" style="display:none;">
   <div class="header-with-picker">
     <h2 class="header-title">Anggaran Bulanan</h2>
     <div class="month-picker-capsule" onclick="try{document.getElementById('budgetMonthFilter').showPicker()}catch(e){}">
