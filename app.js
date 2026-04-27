@@ -467,36 +467,48 @@ return `
   <div class="header-with-picker">
     <h2 class="header-title">Mutasi Keuangan</h2>
   </div>
-  <div class="card">
-    <div class="form-group">
-      <select id="type" style="flex: 0.5; min-width: 180px;" onchange="handleTypeChange()">
-        <option value="income">Pemasukan 📈</option>
-        <option value="expense">Pengeluaran 📉</option>
-        <option value="beli_aset">Beli Saham/Aset 🛒</option>
-        <option value="jual_aset">Jual Saham/Aset 💰</option>
-        <option value="transfer">Transfer Bank 🔄</option>
-      </select>
-      <select id="walletSelect" style="flex: 1;"><option value="">-- Rekening Sumber --</option></select>
-      <select id="assetTargetSelect" style="flex: 1; display: none;"><option value="">-- Target Aset --</option></select>
-      <select id="trxCategory" style="flex: 1;" onchange="handleTrxCategoryChange()"></select>
-      <select id="trxSubCategory" style="flex: 1; display: none;"></select>
-      <input type="text" id="customTrxCategory" placeholder="Ketik kategori baru..." style="flex: 1; display: none;">
-      <input type="number" id="amount" placeholder="Nominal (Rp)">
-      <input type="text" id="desc" placeholder="Keterangan">
-      <input type="date" id="date" onchange="updateDropdowns()">
-      <button class="action" onclick="addTransaction()"><i class="fas fa-plus"></i> Proses Transaksi</button>
+  
+  <div class="card" style="border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px rgba(0,0,0,0.02); padding: 25px;">
+    <div class="form-group" style="display: flex; flex-direction: column; gap: 15px;">
+       <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+          <select id="type" style="flex: 1; min-width: 160px; padding: 12px; border-radius: 10px;" onchange="handleTypeChange()">
+            <option value="income">Pemasukan 📈</option>
+            <option value="expense">Pengeluaran 📉</option>
+            <option value="beli_aset">Beli Saham/Aset 🛒</option>
+            <option value="jual_aset">Jual Saham/Aset 💰</option>
+            <option value="transfer">Transfer Bank 🔄</option>
+          </select>
+          <select id="walletSelect" style="flex: 1.5; min-width: 160px; padding: 12px; border-radius: 10px;"><option value="">-- Rekening Sumber --</option></select>
+          <select id="assetTargetSelect" style="flex: 1.5; min-width: 160px; padding: 12px; border-radius: 10px; display: none;"><option value="">-- Target Aset --</option></select>
+       </div>
+       <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+          <select id="trxCategory" style="flex: 1.5; min-width: 160px; padding: 12px; border-radius: 10px;" onchange="handleTrxCategoryChange()"></select>
+          <select id="trxSubCategory" style="flex: 1.5; min-width: 160px; padding: 12px; border-radius: 10px; display: none;"></select>
+          <input type="text" id="customTrxCategory" placeholder="Ketik kategori baru..." style="flex: 1.5; min-width: 160px; padding: 12px; border-radius: 10px; display: none;">
+          <input type="number" id="amount" placeholder="Nominal (Rp)" style="flex: 1; min-width: 160px; padding: 12px; border-radius: 10px;">
+       </div>
+       <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: stretch;">
+          <input type="text" id="desc" placeholder="Keterangan transaksi..." style="flex: 2; min-width: 200px; padding: 12px; border-radius: 10px;">
+          <input type="date" id="date" onchange="updateDropdowns()" style="flex: 0.8; min-width: 140px; padding: 12px; border-radius: 10px; border: 1px solid #cbd5e1; outline: none;">
+          <button class="btn-success" onclick="addTransaction()" style="flex: 1; min-width: 160px; border-radius: 10px; font-weight: 700; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2);"><i class="fas fa-plus-circle"></i> Proses Transaksi</button>
+       </div>
     </div>
   </div>
-  <div class="card" style="overflow-x: auto;">
-    <table id="tabelTransaksi" style="min-width: 100%;">
-      <thead><tr><th>Tanggal</th><th>Jenis</th><th>Keterangan</th><th>Nominal</th><th style="width: 80px; text-align: center;">Aksi</th></tr></thead>
-      <tbody id="trxList"></tbody>
-      <div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap;">
-      <input type="text" id="searchTrx" placeholder="Cari keterangan..." oninput="update()" style="flex:1; min-width:200px;">
-      <input type="month" id="filterMonthTrx" onchange="update()" style="flex:0.5; min-width:150px;">
-      <button class="btn-success" onclick="exportTrxToCSV()" style="padding:10px 15px;"><i class="fas fa-file-excel"></i> Export</button>
+
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap: 15px; padding: 0 5px;">
+      <h3 style="margin:0; color:#1e293b; font-size: 1.15rem; font-weight: 800;">Riwayat Transaksi</h3>
+      <div style="display:flex; gap:12px; align-items: center; flex-wrap:wrap;">
+          <div style="position: relative;">
+              <i class="fas fa-search" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8;"></i>
+              <input type="text" id="searchTrx" placeholder="Cari mutasi..." oninput="update()" style="padding: 10px 10px 10px 40px; width: 200px; border-radius: 10px; border: 1px solid #cbd5e1; outline: none; transition: 0.2s;" onfocus="this.style.borderColor='#3b82f6'">
+          </div>
+          <input type="month" id="filterMonthTrx" onchange="update()" style="border-radius: 10px; border: 1px solid #cbd5e1; padding: 9px 14px; color: #475569; font-weight: 500; outline: none;">
+          <button onclick="exportTrxToCSV()" style="background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; padding: 10px 18px; border-radius: 10px; font-weight: 600; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='#f0fdf4'"><i class="fas fa-file-excel"></i> Export</button>
+      </div>
   </div>
-    </table>
+  
+  <div class="card" style="padding: 0; overflow: hidden; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
+      <div id="trxList" style="display: flex; flex-direction: column;"></div>
   </div>
 </div>
 
@@ -2205,38 +2217,65 @@ function update(){
         let searchKeyword = document.getElementById("searchTrx")?.value.toLowerCase() || "";
         let filterMonth = document.getElementById("filterMonthTrx")?.value || "";
 
-        transactions
+        let filteredTrx = transactions
           .filter(t => {
               let matchSearch = t.desc.toLowerCase().includes(searchKeyword);
               let matchMonth = filterMonth === "" || t.date.startsWith(filterMonth);
               return matchSearch && matchMonth;
           })
-          .sort((a,b) => new Date(b.date) - new Date(a.date))
-          .slice(0, 20) 
-          .forEach((t) => {
-            let originalIndex = transactions.findIndex(orig => orig.id === t.id);
-            let typeIcon = t.type === 'income' ? '<i class="fas fa-arrow-down text-success"></i>' : (t.type === 'expense' ? '<i class="fas fa-arrow-up text-danger"></i>' : '<i class="fas fa-exchange-alt text-primary"></i>');
-            
-            // FITUR BARU: Tambahin Icon Kategori di badge
-            let catBadge = t.category ? `<span style="background:#f1f5f9; border: 1px solid #e2e8f0; padding:3px 10px; border-radius:12px; font-size:0.75rem; font-weight:600; margin-left:8px; display:inline-flex; align-items:center; gap:5px; color:#475569;">${getCatIcon(t.category)} ${t.category}</span>` : "";
+          .sort((a,b) => new Date(b.date) - new Date(a.date));
 
-            trxList.innerHTML += `
-                <tr style="transition: background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
-                    <td style="color:#64748b;">${t.date}</td>
-                    <td>${typeIcon}</td>
-                    <td ondblclick="inlineEditTrx(${t.id}, 'desc')" style="cursor:pointer;" title="Klik 2x Edit Keterangan">
-                        <strong style="color:#1e293b;">${t.desc}</strong>
-                        ${catBadge}
-                        <br><small style="color:#94a3b8;">${t.walletName}</small>
-                    </td>
-                    <td ondblclick="inlineEditTrx(${t.id}, 'amount')" style="font-weight:700; cursor:pointer;" title="Klik 2x Edit Nominal">
-                        ${isBalanceHidden ? "Rp ***.***" : formatRp(t.amount)}
-                    </td>
-                    <td style="text-align: center;">
-                        <button class="btn-danger" style="padding: 6px 10px;" onclick="deleteTransaction(${originalIndex})"><i class="fas fa-trash"></i></button>
-                    </td>
-                </tr>`;
-          });
+        if (filteredTrx.length === 0) {
+            trxList.innerHTML = `<div style="text-align:center; padding: 50px 20px; color:#94a3b8;"><i class="fas fa-receipt" style="font-size: 3rem; margin-bottom: 15px; color: #cbd5e1;"></i><br>Belum ada riwayat transaksi di bulan ini bro.</div>`;
+        } else {
+            filteredTrx.slice(0, 50).forEach((t) => {
+                let originalIndex = transactions.findIndex(orig => orig.id === t.id);
+                
+                // Styling visual bedasarkan jenis mutasi
+                let isIncome = t.type === 'income' || t.type === 'jual_aset';
+                let isExpense = t.type === 'expense' || t.type === 'beli_aset';
+                let isTransfer = t.type === 'transfer';
+                
+                let amountColor = isIncome ? '#16a34a' : (isExpense ? '#1e293b' : '#0ea5e9');
+                let sign = isIncome ? '+' : (isExpense ? '-' : '');
+                
+                // Cari icon kategori (kalau nggak ada, pake icon default)
+                let displayIcon = getCatIcon(t.category);
+                if (isTransfer) displayIcon = `<i class="fas fa-exchange-alt" style="color: #0ea5e9;"></i>`;
+                else if (t.type === 'beli_aset') displayIcon = `<i class="fas fa-shopping-cart" style="color: #ef4444;"></i>`;
+                else if (t.type === 'jual_aset') displayIcon = `<i class="fas fa-hand-holding-usd" style="color: #16a34a;"></i>`;
+
+                let catBadge = t.category ? `<span style="background:#f8fafc; border: 1px solid #e2e8f0; padding:2px 8px; border-radius:6px; font-size:0.7rem; font-weight:600; color:#64748b;">${t.category}</span>` : "";
+                
+                let amountStr = isBalanceHidden ? "Rp ***.***" : formatRp(t.amount);
+
+                trxList.innerHTML += `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; border-bottom: 1px solid #f1f5f9; transition: background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+                        <div style="display: flex; align-items: center; gap: 16px;">
+                            <div style="width: 45px; height: 45px; border-radius: 12px; background: #f1f5f9; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
+                                ${displayIcon}
+                            </div>
+                            <div>
+                                <div ondblclick="inlineEditTrx(${t.id}, 'desc')" style="cursor:pointer;" title="Klik 2x Edit Keterangan">
+                                    <strong style="color:#1e293b; font-size: 1.05rem; display:block; margin-bottom: 4px;">${t.desc}</strong>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                                    <span style="font-size: 0.8rem; color: #94a3b8;"><i class="far fa-calendar-alt"></i> ${t.date}</span>
+                                    <span style="font-size: 0.8rem; color: #64748b; font-weight: 500;"><i class="fas fa-wallet" style="color:#cbd5e1;"></i> ${t.walletName}</span>
+                                    ${catBadge}
+                                </div>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 18px;">
+                            <div ondblclick="inlineEditTrx(${t.id}, 'amount')" style="font-weight:800; font-size: 1.15rem; color: ${amountColor}; cursor:pointer; text-align: right;" title="Klik 2x Edit Nominal">
+                                ${sign}${amountStr}
+                            </div>
+                            <button style="background: transparent; color: #cbd5e1; border: none; cursor: pointer; transition: 0.2s; padding: 5px; font-size: 1.1rem;" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#cbd5e1'" onclick="deleteTransaction(${originalIndex})" title="Hapus Mutasi"><i class="fas fa-trash-alt"></i></button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
     }
 
  renderBudgetList(currentBudgets, budgetYM);
