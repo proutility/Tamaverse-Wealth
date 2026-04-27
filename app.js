@@ -274,7 +274,6 @@ return `
   </div>
   
   <div id="debtReminderContainer"></div>
-<div id="financialHealthContainer" style="margin-bottom: 25px;"></div>
   
   <div class="grid-3" style="margin-bottom: 25px;">
     <div class="card card-saldo" style="position: relative; border: none; box-shadow: 0 10px 25px rgba(37, 99, 235, 0.35);">
@@ -306,6 +305,8 @@ return `
     </div>
   </div>
 </div>
+
+<div id="financialHealthContainer" style="margin-top: 25px;"></div>
 
 <div id="profil" class="page" style="display:none;">
   <div class="header-with-picker">
