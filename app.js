@@ -588,130 +588,131 @@ return `
 </div>
 
 <div id="wedding" class="page" style="display:none;">
-  <div class="header-with-picker">
-    <h2 class="header-title" style="display: flex; align-items: center; gap: 10px;">
-        <i class="fas fa-ring" style="color: #f472b6;"></i> Wedding Planner
+  <div class="header-with-picker" style="margin-bottom: 20px;">
+    <h2 class="header-title" style="display: flex; align-items: center; gap: 12px; font-size: 1.5rem;">
+        <div style="width: 45px; height: 45px; background: linear-gradient(135deg, #fbcfe8, #f472b6); color: white; border-radius: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(244, 114, 182, 0.3);"><i class="fas fa-ring"></i></div> 
+        Wedding Planner
     </h2>
   </div>
-  <div class="wedding-tab">
-      <button id="wed-tab-budget" class="active" onclick="switchWedTab('budget')">Budgeting</button>
-      <button id="wed-tab-vendor" onclick="switchWedTab('vendor')">Vendor Tracker</button>
-      <button id="wed-tab-guest" onclick="switchWedTab('guest')">Guest List</button>
+
+  <div style="display: flex; gap: 8px; background: #f1f5f9; padding: 6px; border-radius: 16px; margin-bottom: 25px; overflow-x: auto; white-space: nowrap; border: 1px solid #e2e8f0;">
+      <button id="wed-tab-budget" class="wed-tab-btn" onclick="switchWedTab('budget')" style="flex:1; padding: 12px 20px; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; transition: 0.3s; background: white; color: #db2777; box-shadow: 0 2px 8px rgba(0,0,0,0.05); font-size: 0.95rem;"><i class="fas fa-calculator" style="margin-right:6px;"></i> Budgeting</button>
+      <button id="wed-tab-vendor" class="wed-tab-btn" onclick="switchWedTab('vendor')" style="flex:1; padding: 12px 20px; border-radius: 12px; border: none; font-weight: 600; cursor: pointer; transition: 0.3s; background: transparent; color: #64748b; font-size: 0.95rem;"><i class="fas fa-store" style="margin-right:6px;"></i> Vendor Tracker</button>
+      <button id="wed-tab-guest" class="wed-tab-btn" onclick="switchWedTab('guest')" style="flex:1; padding: 12px 20px; border-radius: 12px; border: none; font-weight: 600; cursor: pointer; transition: 0.3s; background: transparent; color: #64748b; font-size: 0.95rem;"><i class="fas fa-users" style="margin-right:6px;"></i> Guest List</button>
   </div>
- <div id="wed-content-budget" class="wed-content">
-      <div class="card" style="background: #eff6ff; border-color: #bfdbfe; margin-bottom: 15px;">
-         <h3 style="margin:0; color:#1d4ed8; display:flex; justify-content:space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-             <span><i class="fas fa-bullseye"></i> Patokan Maksimal (Dari Target):</span>
-             <strong id="wedMaxBudget" style="font-size: 1.5rem;">Rp 0</strong>
+
+  <div id="wed-content-budget" class="wed-content">
+      <div class="card" style="background: linear-gradient(135deg, #f0f9ff, #e0f2fe); border: 1px solid #bae6fd; margin-bottom: 20px; border-radius: 16px; padding: 20px; box-shadow: 0 4px 10px rgba(14, 165, 233, 0.05);">
+         <h3 style="margin:0; color:#0369a1; display:flex; justify-content:space-between; align-items: center; flex-wrap: wrap; gap: 10px; font-weight: 700;">
+             <span style="display: flex; align-items: center; gap: 10px;"><div style="width:32px; height:32px; background:white; border-radius:8px; display:flex; align-items:center; justify-content:center; color:#0ea5e9;"><i class="fas fa-bullseye"></i></div> Patokan Maksimal (Dari Target):</span>
+             <strong id="wedMaxBudget" style="font-size: 1.6rem; color: #0284c7;">Rp 0</strong>
          </h3>
       </div>
-      <div class="card">
-        <div class="form-group">
-          <input id="wedBudgetItem" placeholder="Item (Catering, Mas Kawin, dll)" style="flex: 1;">
-          <input type="number" id="wedBudgetTarget" placeholder="Alokasi (Rp)" style="flex: 1;">
-          <input id="wedBudgetNotes" placeholder="Keterangan / Link Toko" style="flex: 1.5;">
-          <button class="action" onclick="addWedBudget()"><i class="fas fa-plus"></i> Tambah</button>
+      <div class="card" style="border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px rgba(0,0,0,0.02); padding: 25px;">
+        <div class="form-group" style="display: flex; flex-wrap: wrap; gap: 15px;">
+          <input id="wedBudgetItem" placeholder="Item (Catering, Venue, dll)" style="flex: 1.5; min-width: 180px; padding: 12px; border-radius: 10px;">
+          <input type="number" id="wedBudgetTarget" placeholder="Alokasi Target (Rp)" style="flex: 1; min-width: 150px; padding: 12px; border-radius: 10px;">
+          <input id="wedBudgetNotes" placeholder="Keterangan / Link IG Vendor" style="flex: 2; min-width: 200px; padding: 12px; border-radius: 10px;">
+          <button class="btn-success" onclick="addWedBudget()" style="flex: 1; min-width: 150px; border-radius: 10px; font-weight: 700; background: #db2777; box-shadow: 0 4px 10px rgba(219, 39, 119, 0.2);"><i class="fas fa-plus"></i> Tambah Item</button>
         </div>
       </div>
       <div id="wedBudgetContainer"></div>
   </div>
   
   <div id="wed-content-vendor" class="wed-content" style="display:none;">
-      <div class="card">
-        <div class="form-group">
-          <input id="wedVendorName" placeholder="Nama Vendor" style="flex: 1;">
-          <input id="wedVendorService" placeholder="Layanan (MUA, Dekor, Venue)" style="flex: 1;">
-          <select id="wedVendorStatus" style="flex: 0.5;">
+      <div class="card" style="border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px rgba(0,0,0,0.02); padding: 25px;">
+        <div class="form-group" style="display: flex; flex-wrap: wrap; gap: 15px;">
+          <input id="wedVendorName" placeholder="Nama Vendor" style="flex: 1.5; min-width: 160px; padding: 12px; border-radius: 10px;">
+          <input id="wedVendorService" placeholder="Layanan (MUA, Dekor)" style="flex: 1.5; min-width: 160px; padding: 12px; border-radius: 10px;">
+          <select id="wedVendorStatus" style="flex: 1; min-width: 150px; padding: 12px; border-radius: 10px;">
               <option value="Tanya">Baru Nanya / Survei</option>
               <option value="DP">Sudah DP</option>
               <option value="Lunas">Lunas</option>
           </select>
-          <button class="action" onclick="addWedVendor()"><i class="fas fa-plus"></i> Tambah Vendor</button>
+          <button class="btn-success" onclick="addWedVendor()" style="flex: 1; min-width: 150px; border-radius: 10px; font-weight: 700; background: #8b5cf6; box-shadow: 0 4px 10px rgba(139, 92, 246, 0.2);"><i class="fas fa-plus"></i> Tambah Vendor</button>
         </div>
       </div>
-      <div class="card" style="overflow-x: auto;">
-        <table id="wedVendorList" style="min-width: 100%;">
-          <thead><tr><th>Nama Vendor</th><th>Layanan</th><th>Plus / Minus</th><th>Status</th><th style="width: 100px; text-align: center;">Aksi</th></tr></thead>
+      <div class="card" style="overflow-x: auto; border-radius: 16px; border: 1px solid #e2e8f0; padding: 0;">
+        <table id="wedVendorList" style="min-width: 100%; margin: 0;">
+          <thead style="background: #f8fafc;"><tr><th style="padding:15px;">Nama Vendor</th><th>Layanan</th><th>Plus / Minus</th><th>Status</th><th style="width: 100px; text-align: center;">Aksi</th></tr></thead>
           <tbody id="wedVendorTbody"></tbody>
         </table>
       </div>
   </div>
   
   <div id="wed-content-guest" class="wed-content" style="display:none;">
-      <div class="card" style="background: #f0fdf4; border-color: #bbf7d0; margin-bottom: 15px;">
-         <h3 style="margin:0; color:#15803d; display:flex; justify-content:space-between; align-items:center;">
-             <span>Total Tamu Diundang:</span>
-             <div style="text-align:right;">
-                <strong id="wedTotalGuests" style="font-size: 1.5rem;">0 Orang</strong>
-                <div style="margin-top: 8px;">
-                   <button class="btn-success" onclick="exportGuestsToCSV()" style="font-size:0.8rem; padding:6px 12px; cursor:pointer;"><i class="fas fa-file-excel"></i> Download Excel</button>
-                </div>
+      <div class="card" style="background: linear-gradient(135deg, #f0fdf4, #dcfce7); border: 1px solid #bbf7d0; margin-bottom: 20px; border-radius: 16px; padding: 20px; box-shadow: 0 4px 10px rgba(22, 163, 74, 0.05);">
+         <h3 style="margin:0; color:#15803d; display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; gap:10px;">
+             <span style="display: flex; align-items: center; gap: 10px;"><div style="width:32px; height:32px; background:white; border-radius:8px; display:flex; align-items:center; justify-content:center; color:#16a34a;"><i class="fas fa-users"></i></div> Total Tamu Diundang:</span>
+             <div style="text-align:right; display:flex; align-items:center; gap: 15px;">
+                <strong id="wedTotalGuests" style="font-size: 1.5rem; color: #166534;">0 Orang</strong>
+                <button onclick="exportGuestsToCSV()" style="background: white; color: #16a34a; border: 1px solid #bbf7d0; padding: 8px 14px; border-radius: 8px; font-weight: 600; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05);"><i class="fas fa-file-excel"></i> Export</button>
              </div>
          </h3>
       </div>
-      <div class="card">
-        <div class="form-group">
-          <input id="wedGuestName" placeholder="Nama Tamu / Keluarga" style="flex: 1.5;">
-          <input id="wedGuestCity" placeholder="Kota / Domisili" style="flex: 1;">
-          <select id="wedGuestType" style="flex: 0.5;">
+      <div class="card" style="border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px rgba(0,0,0,0.02); padding: 25px;">
+        <div class="form-group" style="display: flex; flex-wrap: wrap; gap: 15px;">
+          <input id="wedGuestName" placeholder="Nama Tamu / Keluarga" style="flex: 2; min-width: 180px; padding: 12px; border-radius: 10px;">
+          <input id="wedGuestCity" placeholder="Kota Domisili" style="flex: 1.5; min-width: 140px; padding: 12px; border-radius: 10px;">
+          <select id="wedGuestType" style="flex: 1.5; min-width: 150px; padding: 12px; border-radius: 10px;">
               <option value="Keluarga Pria">Keluarga Pria</option>
               <option value="Keluarga Wanita">Keluarga Wanita</option>
               <option value="VIP">VIP</option>
               <option value="Reguler">Reguler</option>
           </select>
-          <input type="number" id="wedGuestCount" placeholder="Jumlah Orang" style="flex: 0.5;" value="1">
-          <button class="action" onclick="addWedGuest()"><i class="fas fa-plus"></i> Tambah Tamu</button>
+          <input type="number" id="wedGuestCount" placeholder="Jml (Pax)" style="flex: 0.8; min-width: 90px; padding: 12px; border-radius: 10px;" value="1">
+          <button class="btn-success" onclick="addWedGuest()" style="flex: 1; min-width: 140px; border-radius: 10px; font-weight: 700; background: #10b981; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2);"><i class="fas fa-user-plus"></i> Tambah</button>
         </div>
       </div>
 
       <div style="display:flex; justify-content:flex-end; margin-bottom: 15px;">
-          <select id="guestSortSelect" onchange="changeGuestSort(this.value)" style="padding: 8px 15px; border-radius: 8px; border: 1px solid #cbd5e1; background: white; font-weight: 600; color: #475569; outline: none; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+          <select id="guestSortSelect" onchange="changeGuestSort(this.value)" style="padding: 10px 18px; border-radius: 10px; border: 1px solid #cbd5e1; background: white; font-weight: 600; color: #475569; outline: none; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
               <option value="newest">Urutkan: Paling Baru</option>
-              <option value="name">Urutkan: Abjad Nama (A-Z)</option>
-              <option value="city">Urutkan: Kota Domisili (A-Z)</option>
+              <option value="name">Urutkan: Abjad (A-Z)</option>
+              <option value="city">Urutkan: Kota (A-Z)</option>
           </select>
       </div>
       
-      <div class="card" style="overflow-x: auto; margin-bottom: 20px; border-top: 4px solid #3b82f6;">
+      <div class="card" style="overflow-x: auto; margin-bottom: 20px; border-top: 4px solid #3b82f6; border-radius: 16px;">
         <h4 onclick="toggleGuestList('Pria')" style="margin-top:0; color:#1d4ed8; display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
             <span style="display: flex; align-items: center; gap: 8px;"><i class="fas fa-mars" style="color: #3b82f6;"></i> Daftar Keluarga Pria</span>
             <i id="icon-guest-Pria" class="fas fa-chevron-down" style="color: #94a3b8;"></i>
         </h4>
         <table id="wedGuestListPria" style="min-width: 100%; display: none;">
-          <thead><tr><th>Nama Tamu</th><th>Kota</th><th>Jumlah (Pax)</th><th>Status Undangan</th><th>Kehadiran</th><th style="width: 100px; text-align: center;">Aksi</th></tr></thead>
+          <thead style="background:#f8fafc;"><tr><th style="padding:15px;">Nama Tamu</th><th>Kota</th><th>Jumlah (Pax)</th><th>Status Undangan</th><th>Kehadiran</th><th style="width: 100px; text-align: center;">Aksi</th></tr></thead>
           <tbody id="wedGuestTbodyPria"></tbody>
         </table>
       </div>
 
-      <div class="card" style="overflow-x: auto; margin-bottom: 20px; border-top: 4px solid #ec4899;">
+      <div class="card" style="overflow-x: auto; margin-bottom: 20px; border-top: 4px solid #ec4899; border-radius: 16px;">
         <h4 onclick="toggleGuestList('Wanita')" style="margin-top:0; color:#be185d; display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
             <span style="display: flex; align-items: center; gap: 8px;"><i class="fas fa-venus" style="color: #ec4899;"></i> Daftar Keluarga Wanita</span>
             <i id="icon-guest-Wanita" class="fas fa-chevron-down" style="color: #94a3b8;"></i>
         </h4>
         <table id="wedGuestListWanita" style="min-width: 100%; display: none;">
-          <thead><tr><th>Nama Tamu</th><th>Kota</th><th>Jumlah (Pax)</th><th>Status Undangan</th><th>Kehadiran</th><th style="width: 100px; text-align: center;">Aksi</th></tr></thead>
+          <thead style="background:#f8fafc;"><tr><th style="padding:15px;">Nama Tamu</th><th>Kota</th><th>Jumlah (Pax)</th><th>Status Undangan</th><th>Kehadiran</th><th style="width: 100px; text-align: center;">Aksi</th></tr></thead>
           <tbody id="wedGuestTbodyWanita"></tbody>
         </table>
       </div>
       
-      <div class="card" style="overflow-x: auto; margin-bottom: 20px; border-top: 4px solid #eab308;">
+      <div class="card" style="overflow-x: auto; margin-bottom: 20px; border-top: 4px solid #eab308; border-radius: 16px;">
         <h4 onclick="toggleGuestList('VIP')" style="margin-top:0; color:#854d0e; display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
             <span style="display: flex; align-items: center; gap: 8px;"><i class="fas fa-star" style="color: #eab308;"></i> Daftar Tamu VIP</span>
             <i id="icon-guest-VIP" class="fas fa-chevron-down" style="color: #94a3b8;"></i>
         </h4>
         <table id="wedGuestListVIP" style="min-width: 100%; display: none;">
-          <thead><tr><th>Nama Tamu</th><th>Kota</th><th>Jumlah (Pax)</th><th>Status Undangan</th><th>Kehadiran</th><th style="width: 100px; text-align: center;">Aksi</th></tr></thead>
+          <thead style="background:#f8fafc;"><tr><th style="padding:15px;">Nama Tamu</th><th>Kota</th><th>Jumlah (Pax)</th><th>Status Undangan</th><th>Kehadiran</th><th style="width: 100px; text-align: center;">Aksi</th></tr></thead>
           <tbody id="wedGuestTbodyVIP"></tbody>
         </table>
       </div>
 
-      <div class="card" style="overflow-x: auto; border-top: 4px solid #94a3b8;">
+      <div class="card" style="overflow-x: auto; border-top: 4px solid #94a3b8; border-radius: 16px;">
         <h4 onclick="toggleGuestList('Reguler')" style="margin-top:0; color:#475569; display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
             <span style="display: flex; align-items: center; gap: 8px;"><i class="fas fa-users"></i> Daftar Tamu Reguler</span>
             <i id="icon-guest-Reguler" class="fas fa-chevron-down" style="color: #94a3b8;"></i>
         </h4>
         <table id="wedGuestListReguler" style="min-width: 100%; display: none;">
-          <thead><tr><th>Nama Tamu</th><th>Kota</th><th>Jumlah (Pax)</th><th>Status Undangan</th><th>Kehadiran</th><th style="width: 100px; text-align: center;">Aksi</th></tr></thead>
+          <thead style="background:#f8fafc;"><tr><th style="padding:15px;">Nama Tamu</th><th>Kota</th><th>Jumlah (Pax)</th><th>Status Undangan</th><th>Kehadiran</th><th style="width: 100px; text-align: center;">Aksi</th></tr></thead>
           <tbody id="wedGuestTbodyReguler"></tbody>
         </table>
       </div>
@@ -1058,12 +1059,23 @@ function renderNotifs() {
         document.getElementById('notifBody').innerHTML = html || `<div style="text-align:center; padding:20px; color:#94a3b8; font-size:0.85rem;">Belum ada notifikasi baru bro. ☕</div>`;
     } catch(e) { console.error(e); }
 }
-// ==========================================
-// FUNGSI WEDDING PLANNER
-// ==========================================
 function switchWedTab(tabName) {
-    document.querySelectorAll('.wedding-tab button').forEach(btn => btn.classList.remove('active'));
-    document.getElementById('wed-tab-' + tabName).classList.add('active');
+    // Reset semua tab
+    document.querySelectorAll('.wed-tab-btn').forEach(btn => {
+        btn.style.background = 'transparent';
+        btn.style.color = '#64748b';
+        btn.style.boxShadow = 'none';
+        btn.style.fontWeight = '600';
+    });
+    
+    // Aktifin tab yang diklik
+    let activeBtn = document.getElementById('wed-tab-' + tabName);
+    if(activeBtn) {
+        activeBtn.style.background = 'white';
+        activeBtn.style.color = '#db2777';
+        activeBtn.style.boxShadow = '0 2px 8px rgba(0,0,0,0.05)';
+        activeBtn.style.fontWeight = '700';
+    }
     
     document.querySelectorAll('.wed-content').forEach(content => content.style.display = 'none');
     document.getElementById('wed-content-' + tabName).style.display = 'block';
@@ -1396,15 +1408,15 @@ function renderWedding() {
             `;
         });
         
-        budgetHTML += `
-            <div class="card" style="background: #0f172a; color: white; border: none; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-top: 10px;">
+       budgetHTML += `
+            <div class="card" style="background: linear-gradient(135deg, #fdf2f8, #fce7f3); border: 1px solid #fbcfe8; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-top: 25px; border-radius: 16px; padding: 25px; box-shadow: 0 10px 25px rgba(219, 39, 119, 0.1);">
                 <div>
-                    <h3 style="margin: 0; color: #94a3b8; font-size: 0.8rem; text-transform: uppercase;">Total Keseluruhan Target</h3>
-                    <h2 style="margin: 0; font-size: 1.6rem; color: #f8fafc;">${formatRp(totalAlokasi)}</h2>
+                    <h3 style="margin: 0; color: #9d174d; font-size: 0.85rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;"><i class="fas fa-calculator" style="margin-right: 6px;"></i> Total Target Alokasi</h3>
+                    <h2 style="margin: 5px 0 0 0; font-size: 1.8rem; color: #831843; font-weight: 800;">${formatRp(totalAlokasi)}</h2>
                 </div>
                 <div style="text-align: right;">
-                    <h3 style="margin: 0; color: #94a3b8; font-size: 0.8rem; text-transform: uppercase;">Total Realisasi (Terpakai)</h3>
-                    <h2 style="margin: 0; font-size: 1.6rem; ${totalRealisasi > maxBudget && maxBudget > 0 ? 'color: #ef4444;' : 'color: #22c55e;'}">${formatRp(totalRealisasi)}</h2>
+                    <h3 style="margin: 0; color: #9d174d; font-size: 0.85rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;"><i class="fas fa-shopping-bag" style="margin-right: 6px;"></i> Total Realisasi (Terpakai)</h3>
+                    <h2 style="margin: 5px 0 0 0; font-size: 1.8rem; font-weight: 800; ${totalRealisasi > maxBudget && maxBudget > 0 ? 'color: #e11d48;' : 'color: #059669;'}">${formatRp(totalRealisasi)}</h2>
                 </div>
             </div>
         `;
