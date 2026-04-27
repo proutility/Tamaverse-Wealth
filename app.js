@@ -2843,7 +2843,7 @@ function renderPinScreen(mode) {
 
             <div style="text-align: center; margin-bottom: 40px;">
                 <div style="width: 60px; height: 60px; background: #e0f2fe; color: #0ea5e9; border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; box-shadow: inset 0 2px 4px rgba(255,255,255,0.5);">
-                    <i class="fas ${mode.includes('setup') ? 'fa-shield-alt' : 'fa-lock-open'} " style="font-size: 1.8rem;"></i>
+                    <i class="fas ${mode.includes('setup') ? 'fa-shield-alt' : 'fa-lock'} " style="font-size: 1.8rem;"></i>
                 </div>
                 <h2 style="margin: 0 0 8px 0; color: #1e293b; font-size: 1.5rem; font-weight: 700; letter-spacing: -0.5px;">${title}</h2>
                 <p style="color: #64748b; font-size: 0.9rem; line-height: 1.5; margin: 0; font-weight: 400;">${subtitle}</p>
