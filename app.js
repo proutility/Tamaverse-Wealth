@@ -261,36 +261,69 @@ return `
      <div class="mobile-banner-text">Dashboard Pro-Tama Finance</div>
   </div>
 
-  <div class="mobile-menu-grid">
-     <div class="menu-btn" onclick="showPage('aset')"><div class="icon-box" style="background:#e0f2fe; color:#0284c7;"><i class="fas fa-home"></i></div><span>Asetku</span></div>
-     <div class="menu-btn" onclick="showPage('budgeting')"><div class="icon-box" style="background:#dcfce7; color:#16a34a;"><i class="fas fa-file-invoice-dollar"></i></div><span>Budgeting</span></div>
-     <div class="menu-btn" onclick="showPage('transaksi')"><div class="icon-box" style="background:#fef9c3; color:#ca8a04;"><i class="fas fa-exchange-alt"></i></div><span>Mutasi</span></div>
-     <div class="menu-btn" onclick="showPage('target')"><div class="icon-box" style="background:#f3e8ff; color:#9333ea;"><i class="fas fa-bullseye"></i></div><span>Target</span></div>
-     <div class="menu-btn" onclick="showPage('wedding')"><div class="icon-box" style="background:#fce7f3; color:#db2777;"><i class="fas fa-ring"></i></div><span>Wedding</span></div>
-     <div class="menu-btn" onclick="showPage('hutang')"><div class="icon-box" style="background:#fee2e2; color:#dc2626;"><i class="fas fa-hand-holding-usd"></i></div><span>Hutang</span></div>
-     <div class="menu-btn" onclick="showPage('kalkulator')"><div class="icon-box" style="background:#e0e7ff; color:#7c3aed;"><i class="fas fa-calculator"></i></div><span>Saham</span></div>
-     <div class="menu-btn" onclick="showPage('laporan')"><div class="icon-box" style="background:#ccfbf1; color:#0d9488;"><i class="fas fa-chart-line"></i></div><span>Laporan</span></div>
+  <div class="mobile-menu-grid" style="gap: 15px; margin-bottom: 30px;">
+     <div class="menu-btn-modern" onclick="showPage('aset')">
+         <div class="icon-box-modern" style="background: linear-gradient(135deg, #38bdf8, #0284c7); box-shadow: 0 6px 15px rgba(2, 132, 199, 0.3);"><i class="fas fa-coins"></i></div>
+         <span style="font-weight:700; color:#334155; font-size: 0.9rem;">Asetku</span>
+     </div>
+     
+     <div class="menu-btn-modern" onclick="showPage('budgeting')">
+         <div class="icon-box-modern" style="background: linear-gradient(135deg, #4ade80, #16a34a); box-shadow: 0 6px 15px rgba(22, 163, 74, 0.3);"><i class="fas fa-chart-pie"></i></div>
+         <span style="font-weight:700; color:#334155; font-size: 0.9rem;">Budgeting</span>
+     </div>
+     
+     <div class="menu-btn-modern" onclick="showPage('transaksi')">
+         <div class="icon-box-modern" style="background: linear-gradient(135deg, #facc15, #ca8a04); box-shadow: 0 6px 15px rgba(202, 138, 4, 0.3);"><i class="fas fa-exchange-alt"></i></div>
+         <span style="font-weight:700; color:#334155; font-size: 0.9rem;">Mutasi</span>
+     </div>
+     
+     <div class="menu-btn-modern" onclick="showPage('target')">
+         <div class="icon-box-modern" style="background: linear-gradient(135deg, #c084fc, #7c3aed); box-shadow: 0 6px 15px rgba(124, 58, 237, 0.3);"><i class="fas fa-bullseye"></i></div>
+         <span style="font-weight:700; color:#334155; font-size: 0.9rem;">Target</span>
+     </div>
+     
+     <div class="menu-btn-modern" onclick="showPage('wedding')">
+         <div class="icon-box-modern" style="background: linear-gradient(135deg, #f472b6, #db2777); box-shadow: 0 6px 15px rgba(219, 39, 119, 0.3);"><i class="fas fa-ring"></i></div>
+         <span style="font-weight:700; color:#334155; font-size: 0.9rem;">Wedding</span>
+     </div>
+     
+     <div class="menu-btn-modern" onclick="showPage('hutang')">
+         <div class="icon-box-modern" style="background: linear-gradient(135deg, #f87171, #dc2626); box-shadow: 0 6px 15px rgba(220, 38, 38, 0.3);"><i class="fas fa-hand-holding-usd"></i></div>
+         <span style="font-weight:700; color:#334155; font-size: 0.9rem;">Hutang</span>
+     </div>
+     
+     <div class="menu-btn-modern" onclick="showPage('kalkulator')">
+         <div class="icon-box-modern" style="background: linear-gradient(135deg, #818cf8, #4f46e5); box-shadow: 0 6px 15px rgba(79, 70, 229, 0.3);"><i class="fas fa-chart-line"></i></div>
+         <span style="font-weight:700; color:#334155; font-size: 0.9rem;">Saham</span>
+     </div>
+     
+     <div class="menu-btn-modern" onclick="showPage('laporan')">
+         <div class="icon-box-modern" style="background: linear-gradient(135deg, #2dd4bf, #0891b2); box-shadow: 0 6px 15px rgba(8, 145, 178, 0.3);"><i class="fas fa-file-invoice"></i></div>
+         <span style="font-weight:700; color:#334155; font-size: 0.9rem;">Laporan</span>
+     </div>
   </div>
   
-  <div style="margin-bottom: 15px; display:flex; justify-content:space-between; align-items:center;">
-      <h3 style="margin:0; font-size:1.1rem; color:#1e293b;">Ringkasan Keuangan</h3>
-      <span style="font-size:0.8rem; color:var(--primary); font-weight:700; cursor:pointer;" onclick="update()">Refresh</span>
+  <div style="margin-bottom: 20px; display:flex; justify-content:space-between; align-items:center;">
+      <h3 style="margin:0; font-size:1.2rem; color:#1e293b; font-weight: 800;">Ringkasan Keuangan</h3>
+      <span style="font-size:0.85rem; color:var(--primary); font-weight:700; cursor:pointer; background: #e0f2fe; padding: 6px 12px; border-radius: 8px;" onclick="update()"><i class="fas fa-sync-alt"></i> Refresh</span>
   </div>
   
   <div id="debtReminderContainer"></div>
   
-  <div class="grid-3">
-    <div class="card" style="position: relative;">
-      <h3><i class="fas fa-wallet text-primary"></i> Saldo Kas (Liquid)</h3>
-      <h2 style="position: relative;">Rp <span id="balance">0</span> <span id="balanceAnim" class="anim-float" style="right: 20px; top: 25px;"></span></h2>
+  <div class="grid-3" style="margin-bottom: 25px;">
+    <div class="card card-saldo" style="position: relative; border: none; box-shadow: 0 10px 25px rgba(37, 99, 235, 0.35);">
+      <h3 style="display:flex; align-items:center; margin-bottom: 5px; font-weight: 600; font-size: 1rem;"><div class="icon-glass"><i class="fas fa-wallet"></i></div> Saldo Kas (Liquid)</h3>
+      <h2 style="position: relative; font-size: 2.2rem; margin: 15px 0 5px 0; font-weight: 800;">Rp <span id="balance">0</span> <span id="balanceAnim" class="anim-float" style="right: 20px; top: 25px;"></span></h2>
     </div>
-    <div class="card" style="position: relative;">
-      <h3><i class="fas fa-gem text-success"></i> Total Kekayaan Bersih</h3>
-      <h2 style="position: relative;">Rp <span id="wealth">0</span> <span id="wealthAnim" class="anim-float" style="right: 20px; top: 25px;"></span></h2>
+    
+    <div class="card card-kekayaan" style="position: relative; border: none; box-shadow: 0 10px 25px rgba(5, 150, 105, 0.35);">
+      <h3 style="display:flex; align-items:center; margin-bottom: 5px; font-weight: 600; font-size: 1rem;"><div class="icon-glass"><i class="fas fa-gem"></i></div> Total Kekayaan Bersih</h3>
+      <h2 style="position: relative; font-size: 2.2rem; margin: 15px 0 5px 0; font-weight: 800;">Rp <span id="wealth">0</span> <span id="wealthAnim" class="anim-float" style="right: 20px; top: 25px;"></span></h2>
     </div>
-    <div class="card" style="position: relative;">
-      <h3><i class="fas fa-file-invoice-dollar text-danger"></i> Total Hutang</h3>
-      <h2 style="position: relative;">Rp <span id="totalDebtDisplay">0</span> <span id="debtAnim" class="anim-float" style="right: 20px; top: 25px;"></span></h2>
+    
+    <div class="card card-hutang" style="position: relative; border: none; box-shadow: 0 10px 25px rgba(220, 38, 38, 0.35);">
+      <h3 style="display:flex; align-items:center; margin-bottom: 5px; font-weight: 600; font-size: 1rem;"><div class="icon-glass"><i class="fas fa-file-invoice-dollar"></i></div> Total Hutang</h3>
+      <h2 style="position: relative; font-size: 2.2rem; margin: 15px 0 5px 0; font-weight: 800;">Rp <span id="totalDebtDisplay">0</span> <span id="debtAnim" class="anim-float" style="right: 20px; top: 25px;"></span></h2>
     </div>
   </div>
   <div class="grid-2">
@@ -764,6 +797,25 @@ document.head.insertAdjacentHTML("beforeend", `<style>
       from { opacity: 0; transform: translateY(15px); }
       to { opacity: 1; transform: translateY(0); }
   }
+  // FITUR BARU: CSS UNTUK KARTU GRADIENT & COLORFUL
+document.head.insertAdjacentHTML("beforeend", `<style>
+  /* CSS Kartu Ringkasan Gradient */
+  .card-saldo { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white !important; }
+  .card-saldo h3, .card-saldo h2, .card-saldo span, .card-saldo i { color: white !important; }
+  
+  .card-kekayaan { background: linear-gradient(135deg, #10b981, #047857); color: white !important; }
+  .card-kekayaan h3, .card-kekayaan h2, .card-kekayaan span, .card-kekayaan i { color: white !important; }
+  
+  .card-hutang { background: linear-gradient(135deg, #ef4444, #b91c1c); color: white !important; }
+  .card-hutang h3, .card-hutang h2, .card-hutang span, .card-hutang i { color: white !important; }
+  
+  .icon-glass { background: rgba(255,255,255,0.2); width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-right: 12px; font-size: 1.3rem; box-shadow: inset 0 2px 4px rgba(255,255,255,0.3); }
+  
+  /* CSS Menu Kotak Modern */
+  .menu-btn-modern { background: white; border-radius: 20px; padding: 18px 5px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; transition: all 0.3s ease; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; }
+  .menu-btn-modern:hover { transform: translateY(-5px); box-shadow: 0 12px 20px rgba(0,0,0,0.08); }
+  .icon-box-modern { width: 55px; height: 55px; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; color: white; margin-bottom: 10px; }
+</style>`);
 </style>`);
 
 // 2. Kamus Icon Kategori Otomatis
