@@ -2396,29 +2396,33 @@ function renderBudgetList(list, ym) {
     if(!container) return;
     container.innerHTML = "";
     
+    // 1. Dapetin info Saldo Kas bulan ini
     let bMonthAssets = getAssetsFor(ym); 
     let cash = 0; 
     bMonthAssets.forEach(a => { if(a.type === 'rekening') cash += a.value; });
 
+    // 2. Tampilan Aset Kosong (Minimalis)
     if (!list || list.length === 0) {
         const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
         let mName = monthNames[parseInt(ym.split('-')[1]) - 1];
         
         container.innerHTML = `<div style="grid-column: span 2; text-align:center; padding: 50px 20px; background: white; border-radius: 16px; border: 1px dashed #cbd5e1;"><div style="width: 60px; height: 60px; background: #f1f5f9; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;"><i class="fas fa-clipboard-list" style="font-size: 1.5rem; color: #94a3b8;"></i></div><h3 style="margin: 0 0 5px; color:#334155;">Anggaran Kosong</h3><p style="color:#64748b; font-size: 0.95rem; margin-bottom:20px;">Belum ada rencana pengeluaran untuk bulan <b>${mName}</b>.</p><button class="action" style="margin: 0 auto; background: var(--success); box-shadow: 0 4px 6px rgba(34, 197, 94, 0.2);" onclick="copyPreviousMonthBudgets()"><i class="fas fa-copy"></i> Salin Data Bulan Sebelumnya</button></div>`;
         
+        // Update Ringkasan Klien
         const statusCard = document.getElementById("budgetStatusCard"); 
         const budgetVsLiquid = document.getElementById("budgetVsLiquid");
         if(statusCard && budgetVsLiquid){
           budgetVsLiquid.innerHTML = `<span style="color:var(--success)">Rp 0</span> <small style="color:#94a3b8">/ Rp 0</small>`;
           statusCard.style.backgroundColor = '#f0fdf4'; 
           statusCard.style.borderColor = '#bbf7d0';
-          document.getElementById("budgetCardTitle").innerText = "Ringkasan Anggaran Bulan Ini";
+          document.getElementById("budgetCardTitle").innerText = "Ringkasan Anggaran";
           let descEl = document.querySelector("#budgetStatusCard p");
-          if(descEl) descEl.innerHTML = `Total Pengeluaran (Mutasi) vs Total Rencana Anggaran<br><span style="color: #3b82f6; font-weight: 600; font-size: 0.85rem;"><i class="fas fa-wallet"></i> Saldo Kas Saat Ini: ${formatRp(cash)}</span>`;
+          if(descEl) descEl.innerHTML = `Terpakai vs Rencana Anggaran<br><span style="color: #3b82f6; font-weight: 600; font-size: 0.85rem;"><i class="fas fa-wallet"></i> Saldo Kas Saat Ini: ${formatRp(cash)}</span>`;
         }
         return;
     }
     
+    // 3. Itung spent
     let spentThisMonth = {};
     transactions.filter(t => t.date.startsWith(ym) && t.type === 'expense').forEach(t => { 
         spentThisMonth[t.category] = (spentThisMonth[t.category] || 0) + t.amount; 
@@ -2427,75 +2431,94 @@ function renderBudgetList(list, ym) {
     let totalTargetBulanIni = 0;
     let totalRealisasiBulanIni = 0;
 
+    // 4. Generate Kartu Anggaran (Design Baru)
     list.forEach((b, i) => {
         let spent = spentThisMonth[b.category] || 0;
         let target = b.amount || 0;
-        
         totalTargetBulanIni += target;
         totalRealisasiBulanIni += spent;
         
         let pct = target > 0 ? Math.round((spent / target) * 100) : 0;
         let isOver = pct > 100;
-        let isFull = pct === 100;
+        let barColor = isOver ? '#ef4444' : (pct >= 80 ? '#f59e0b' : '#3b82f6');
         
-        let barColor = isOver ? 'var(--danger)' : (isFull ? 'var(--success)' : (pct >= 80 ? 'var(--warning)' : 'var(--primary)'));
-        let bgCard = isOver ? '#fff1f2' : '#ffffff';
-        let statusTxt = isOver ? '<span style="color:var(--danger); font-size:0.75rem; margin-left:8px;">(Over Budget!)</span>' : (isFull ? '<span class="budget-badge badge-paid" style="color:var(--success); font-size:0.8rem; margin-left:8px;">✓ Terpenuhi</span>' : '');
-
-        // Hitung Sisa Kategori Utama
         let sisaUtama = Math.max(0, target - spent);
         let sisaUtamaDisplay = isBalanceHidden ? "Rp ***.***" : formatRp(sisaUtama);
 
-        let subHTML = '';
+        // Header Item (Cari Icon)
+        let catIcon = getCatIcon(b.category);
+
+        // HTML KARTU INDUK (Desain Card Modern)
+        let cardHTML = `
+            <div style="background: white; border: 1px solid #e2e8f0; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
+                <div style="padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="width: 38px; height: 38px; background: #e0f2fe; color: #0284c7; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; box-shadow: inset 0 2px 4px rgba(255,255,255,0.5);">
+                            ${catIcon}
+                        </div>
+                        <strong style="color: #1e293b; font-size: 1.1rem; display:flex; align-items:center;">${b.category} ${isOver ? '<span style="color:#ef4444; font-size:0.75rem; margin-left:8px;">(Over!)</span>' : ''}</strong>
+                    </div>
+                    <div style="display:flex; gap:8px;">
+                        <button style="padding: 6px 10px; background: #e0f2fe; color: #0ea5e9; border: none; border-radius: 8px; font-size: 0.75rem; font-weight: 600; cursor: pointer; display:flex; align-items:center; gap:4px;" onclick="addSubBudget('${ym}', ${i})"><i class="fas fa-plus"></i> Sub</button>
+                        <button class="btn-danger" style="background: transparent; color: #cbd5e1; transition: 0.2s;" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#cbd5e1'" onclick="deleteBudget('${ym}', ${i})"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+                <div style="padding: 20px; display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center;">
+                    <div style="font-size: 1rem; color: #475569;">Terpakai: <strong style="color: #1e293b; font-size: 1.1rem;">${formatRp(spent)}</strong> <small ondblclick="inlineEditBudget('${ym}', ${i})" title="Klik 2x Edit Rencana" style="color:#94a3b8; cursor:pointer; border-bottom:1px dashed #cbd5e1;">/ ${formatRp(target)}</small></div>
+                    <div style="font-weight: 800; font-size: 1.6rem; color: ${barColor}">${pct}%</div>
+                    <div class="progress" style="grid-column: span 2; height: 12px; background: ${isOver ? '#fee2e2' : '#f1f5f9'};">
+                        <div class="progress-bar" style="width:${Math.min(pct, 100)}%; background: ${barColor}"></div>
+                    </div>
+                    <div style="font-size: 0.9rem; color: #64748b; font-weight: 600;">Sisa Kategori: <span style="color:${sisaUtama > 0 ? '#1e293b' : '#16a34a'};">${sisaUtamaDisplay}</span></div>
+                </div>
+                <div style="padding: 0 10px 20px 10px; display: flex; flex-direction: column; gap: 8px;">
+        `;
+
+        // Generate Sub-Anggaran (Desain Row Card Minimalis)
         if(b.subBudgets && b.subBudgets.length > 0) {
-            subHTML += `<div style="margin-top: 15px; border-top: 1px dashed #e2e8f0; padding-top: 12px;">`;
             b.subBudgets.forEach((sub, subIdx) => {
                 let sSpent = transactions.filter(t => t.date.startsWith(ym) && t.type === 'expense' && t.category === b.category && t.subCategory === sub.name).reduce((acc, t) => acc + t.amount, 0);
                 let sPct = sub.amount > 0 ? Math.round((sSpent / sub.amount) * 100) : 0;
-                
-                // Hitung Sisa Sub Kategori
+                let sIsOver = sSpent > sub.amount;
+                let sBarColor = sIsOver ? '#ef4444' : '#0ea5e9';
+
                 let sisaSub = Math.max(0, sub.amount - sSpent);
                 let sisaSubDisplay = isBalanceHidden ? "Rp ***.***" : formatRp(sisaSub);
                 
-                subHTML += `<div style="display:flex; justify-content:space-between; font-size: 0.85rem; margin-bottom: 5px;"><span><i class="fas fa-level-up-alt fa-rotate-90" style="margin-right:8px; color:#cbd5e1;"></i> ${sub.name} <button onclick="deleteSubBudget('${ym}', ${i}, ${subIdx})" style="background:none;border:none;color:#ef4444;cursor:pointer;padding:0;margin-left:5px;"><i class="fas fa-times"></i></button></span><strong style="color:${sSpent > sub.amount ? 'var(--danger)' : (sSpent === sub.amount ? 'var(--success)' : '#1e293b')}">${formatRp(sSpent)} <span ondblclick="inlineEditBudget('${ym}', ${i}, ${subIdx})" title="Klik 2x Edit Rencana Sub" style="color:#94a3b8; font-size:0.75rem; font-weight:normal; cursor:pointer; border-bottom:1px dashed #cbd5e1;">/ ${formatRp(sub.amount)}</span></strong></div>
-                <div class="progress" style="height:6px; margin-bottom:4px; background: ${sSpent > sub.amount ? '#fee2e2' : '#e0f2fe'};"><div class="progress-bar" style="width:${Math.min(sPct, 100)}%; background:${sSpent > sub.amount ? 'var(--danger)' : (sSpent === sub.amount ? 'var(--success)' : '#0ea5e9')}"></div></div>
-                <div style="text-align: right; font-size: 0.75rem; color: #64748b; margin-bottom: 10px; font-weight: 500;">Sisa: <span style="color:${sisaSub > 0 ? '#1e293b' : 'var(--success)'}">${sisaSubDisplay}</span></div>`;
-            });
-            subHTML += `</div>`;
-        }
-
-        container.innerHTML += `
-            <div class="card" style="margin-bottom: 0; background: ${bgCard}; border-left: 5px solid ${barColor}">
-                <div class="progress-header" style="margin-bottom: 12px;">
-                    <strong style="font-size: 1.05rem; display:flex; align-items:center;">${b.category} ${statusTxt}</strong>
-                    <div style="display:flex; gap:8px;">
-                        <button style="padding: 4px 8px; background: #e0f2fe; color: #0ea5e9; border: none; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer; display:flex; align-items:center; gap:4px;" onclick="addSubBudget('${ym}', ${i})"><i class="fas fa-plus"></i> Sub</button>
-                        <button class="btn-danger" style="padding: 4px 8px; background: transparent; color: #cbd5e1; transition: color 0.2s;" onmouseover="this.style.color='var(--danger)'" onmouseout="this.style.color='#cbd5e1'" onclick="deleteBudget('${ym}', ${i})"><i class="fas fa-trash"></i></button>
+                cardHTML += `
+                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 16px; display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center;">
+                        <i class="fas fa-chevron-right" style="color: #cbd5e1; font-size: 0.8rem;"></i>
+                        <div>
+                            <strong style="color: #1e293b; font-size: 0.95rem;">${sub.name}</strong>
+                            <div style="font-size: 0.8rem; color: #64748b; display:flex; align-items:center;">
+                                <strong style="color:${sIsOver ? '#ef4444' : '#475569'}">${formatRp(sSpent)}</strong> <span ondblclick="inlineEditBudget('${ym}', ${i}, ${subIdx})" title="Klik 2x Edit Rencana Sub" style="margin-left:4px; border-bottom:1px dashed #cbd5e1; cursor:pointer;">/ ${formatRp(sub.amount)}</span>
+                                <span style="margin-left:8px; font-weight:600; color:#cbd5e1; font-size:0.75rem;">| Sisa: <span style="color:#64748b">${sisaSubDisplay}</span></span>
+                            </div>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <div style="text-align:right; font-size:0.8rem; font-weight:700; color:${sBarColor}">${sPct}%</div>
+                            <button style="background:transparent; border:none; color:#cbd5e1; cursor:pointer; transition:0.2s;" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#cbd5e1'" onclick="deleteSubBudget('${ym}', ${i}, ${subIdx})"><i class="fas fa-trash"></i></button>
+                        </div>
                     </div>
-                </div>
-                <div style="font-size: 0.95rem; margin-bottom: 10px;">Terpakai: <strong>${formatRp(spent)}</strong> <small ondblclick="inlineEditBudget('${ym}', ${i})" title="Klik 2x Edit Rencana" style="color:#94a3b8; cursor:pointer; border-bottom:1px dashed #cbd5e1;">/ ${formatRp(target)}</small></div>
-                <div class="progress" style="margin-bottom: 8px; background: ${isOver ? '#fee2e2' : '#f1f5f9'};"><div class="progress-bar" style="width:${Math.min(pct, 100)}%; background: ${barColor}"></div></div>
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <div style="font-size: 0.85rem; color: #64748b; font-weight:600;">Sisa: <span style="color:${sisaUtama > 0 ? '#1e293b' : 'var(--success)'};">${sisaUtamaDisplay}</span></div>
-                    <div style="text-align: right; font-weight: 700; font-size: 0.85rem; color: ${barColor}">${pct}%</div>
-                </div>
-                ${subHTML}
-            </div>`;
+                `;
+            });
+        }
+        
+        cardHTML += `</div></div>`; // Tutup kartu induk
+        container.innerHTML += cardHTML;
     });
 
+    // 5. Update Kartu Ringkasan (Budget vs Liquid)
     const sCard = document.getElementById("budgetStatusCard");
     const bVsL = document.getElementById("budgetVsLiquid");
     if(sCard && bVsL) {
         let isWarning = totalRealisasiBulanIni > totalTargetBulanIni;
-        
-        bVsL.innerHTML = `<span style="color:${isWarning ? 'var(--danger)' : 'var(--success)'}">${formatRp(totalRealisasiBulanIni)}</span> <small style="color:#94a3b8">/ ${formatRp(totalTargetBulanIni)}</small>`;
-        
+        bVsL.innerHTML = `<span style="color:${isWarning ? '#ef4444' : '#16a34a'}">${formatRp(totalRealisasiBulanIni)}</span> <small style="color:#94a3b8">/ ${formatRp(totalTargetBulanIni)}</small>`;
         sCard.style.background = isWarning ? '#fff1f2' : '#f0fdf4';
         sCard.style.borderColor = isWarning ? '#fecaca' : '#bbf7d0';
-        
-        document.getElementById("budgetCardTitle").innerText = "Ringkasan Anggaran Bulan Ini";
+        document.getElementById("budgetCardTitle").innerText = "Ringkasan Anggaran";
         let descEl = document.querySelector("#budgetStatusCard p");
-        if(descEl) descEl.innerHTML = `Total Pengeluaran (Mutasi) vs Total Rencana Anggaran<br><span style="color: #3b82f6; font-weight: 600; font-size: 0.85rem;"><i class="fas fa-wallet"></i> Saldo Kas Saat Ini: ${formatRp(cash)}</span>`;
+        if(descEl) descEl.innerHTML = `Terpakai vs Rencana Anggaran<br><span style="color: #3b82f6; font-weight: 600; font-size: 0.85rem;"><i class="fas fa-wallet"></i> Saldo Kas Saat Ini: ${formatRp(cash)}</span>`;
     }
   } catch(e) { console.error("Render Error:", e); }
 }
