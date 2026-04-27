@@ -786,10 +786,11 @@ return `
 `;
 }
 // ==========================================
-// FITUR BARU: ANIMASI TRANSISI & ICON KATEGORI
+// FITUR BARU: ANIMASI TRANSISI & ICON KATEGORI & KARTU GRADIENT
 // ==========================================
-// 1. Suntik CSS Animasi ke dalam web
+// 1. Suntik CSS ke dalam web
 document.head.insertAdjacentHTML("beforeend", `<style>
+  /* Animasi Transisi */
   .page-transition {
       animation: fadeSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
@@ -797,8 +798,7 @@ document.head.insertAdjacentHTML("beforeend", `<style>
       from { opacity: 0; transform: translateY(15px); }
       to { opacity: 1; transform: translateY(0); }
   }
-  // FITUR BARU: CSS UNTUK KARTU GRADIENT & COLORFUL
-document.head.insertAdjacentHTML("beforeend", `<style>
+  
   /* CSS Kartu Ringkasan Gradient */
   .card-saldo { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white !important; }
   .card-saldo h3, .card-saldo h2, .card-saldo span, .card-saldo i { color: white !important; }
