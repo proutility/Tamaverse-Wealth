@@ -720,25 +720,27 @@ return `
 </div>
 
 <div id="hutang" class="page" style="display:none;">
-  <div class="header-with-picker">
+  <div class="header-with-picker" style="margin-bottom: 20px;">
     <h2 class="header-title">Manajemen Hutang & Cicilan</h2>
   </div>
-  <div class="card">
-    <div class="form-group">
-      <input id="debtName" placeholder="Nama Hutang" style="flex: 1.5;">
-      <input type="number" id="debtAmount" placeholder="Total Hutang (Rp)" style="flex: 1;">
-      <div style="display: flex; align-items: center; border: 1px solid #cbd5e1; border-radius: 8px; background: #ffffff; padding-right: 10px; flex: 1;">
-          <input type="date" id="debtDate" title="Tanggal Jatuh Tempo per Bulan" style="border: none; background: transparent; width: 100%;">
+  
+  <div class="card" style="border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px rgba(0,0,0,0.02); padding: 25px; margin-bottom: 25px;">
+    <div class="form-group" style="display: flex; flex-wrap: wrap; gap: 15px; align-items: stretch;">
+      <input id="debtName" placeholder="Nama Hutang / Cicilan" style="flex: 1.5; min-width: 180px; padding: 12px; border-radius: 10px; border: 1px solid #cbd5e1; outline: none;">
+      <input type="number" id="debtAmount" placeholder="Total Hutang (Rp)" style="flex: 1; min-width: 150px; padding: 12px; border-radius: 10px; border: 1px solid #cbd5e1; outline: none;">
+      <div style="flex: 1; min-width: 150px; display: flex; align-items: center; border: 1px solid #cbd5e1; border-radius: 10px; background: #ffffff; padding: 0 12px;">
+          <i class="far fa-calendar-alt" style="color: #94a3b8; margin-right: 8px;"></i>
+          <input type="date" id="debtDate" title="Tanggal Jatuh Tempo" style="border: none; background: transparent; width: 100%; outline: none; padding: 10px 0;">
       </div>
       <button class="action" onclick="addDebt()" style="flex: 1; min-width: 150px; border-radius: 10px; font-weight: 700; background: #3b82f6; color: white; border: none; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); cursor: pointer;"><i class="fas fa-plus-circle"></i> Catat Hutang</button>
     </div>
   </div>
-  <div class="card" style="overflow-x: auto;">
-    <table id="tabelHutang" style="min-width: 100%;">
-      <thead><tr><th>Nama / Keterangan</th><th>Total Pinjaman</th><th>Sisa Tagihan</th><th style="width: 150px; text-align: center;">Aksi</th></tr></thead>
-      <tbody id="debtList"></tbody>
-    </table>
+  
+  <div style="margin-bottom: 15px; padding: 0 5px;">
+      <h3 style="margin:0; color:#1e293b; font-size: 1.15rem; font-weight: 800;">Daftar Tagihan Aktif</h3>
   </div>
+
+  <div id="debtList" style="display: flex; flex-direction: column; gap: 15px;"></div>
 </div>
 
 <div id="sourceModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.7); z-index:9999; align-items:center; justify-content:center; backdrop-filter: blur(4px);">
@@ -2380,15 +2382,74 @@ function update(){
     }
   }
 
-  const debtList = document.getElementById("debtList");
+ const debtList = document.getElementById("debtList");
   if(debtList) {
     debtList.innerHTML = "";
-    debts.forEach((d, i) => {
-      let status = d.remaining === 0 ? '<span class="text-success" style="font-weight:700; background: #dcfce7; padding: 4px 10px; border-radius: 12px; font-size: 0.85rem;"><i class="fas fa-check-circle"></i> Lunas</span>' : `<span style="font-weight:600; color:#1e293b;">${isBalanceHidden ? "Rp ***.***" : formatRp(d.remaining)}</span>`;
-      let tDisplay = isBalanceHidden ? "Rp ***.***" : formatRp(d.total);
-      
-      debtList.innerHTML += `<tr><td><strong style="color:#1e293b;">${d.name}</strong><br><small style="color:#64748b"><i class="far fa-calendar-alt"></i> Jatuh Tempo: ${d.date}</small></td><td style="color:#475569;">${tDisplay}</td><td>${status}</td><td style="display:flex; gap:8px;">${d.remaining > 0 ? `<button class="btn-success" style="padding: 6px 12px; font-weight: 600;" onclick="payDebt(${i})"><i class="fas fa-money-bill-wave"></i> Bayar</button>` : ''}<button class="btn-warning" style="padding: 6px 10px;" onclick="editDebt(${i})"><i class="fas fa-edit"></i></button><button class="btn-danger" style="padding: 6px 10px;" onclick="deleteDebt(${i})"><i class="fas fa-trash"></i></button></td></tr>`;
-    });
+    if (debts.length === 0) {
+        debtList.innerHTML = `<div style="text-align:center; padding: 50px 20px; background: white; border-radius: 16px; border: 1px dashed #cbd5e1; color:#94a3b8;"><i class="fas fa-file-invoice-dollar" style="font-size: 3rem; margin-bottom: 15px; color: #e2e8f0;"></i><br>Alhamdulillah, belum ada catatan hutang atau cicilan bro!</div>`;
+    } else {
+        debts.forEach((d, i) => {
+          let isLunas = d.remaining === 0;
+          let paidAmount = d.total - d.remaining;
+          let percent = (paidAmount / d.total) * 100;
+          
+          let sisaDisplay = isBalanceHidden ? "Rp ***.***" : formatRp(d.remaining);
+          let totalDisplay = isBalanceHidden ? "Rp ***.***" : formatRp(d.total);
+          
+          let statusBadge = isLunas 
+              ? `<span style="background: #dcfce7; color: #16a34a; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700;"><i class="fas fa-check-circle"></i> LUNAS</span>` 
+              : `<span style="background: #fee2e2; color: #ef4444; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700;"><i class="fas fa-exclamation-circle"></i> BELUM LUNAS</span>`;
+          
+          let bayarBtn = !isLunas 
+              ? `<button style="padding: 8px 16px; border-radius: 8px; background: #10b981; color: white; border: none; font-weight: 600; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2);" onmouseover="this.style.background='#059669'" onmouseout="this.style.background='#10b981'" onclick="payDebt(${i})"><i class="fas fa-money-bill-wave"></i> Bayar</button>` 
+              : ``;
+
+          debtList.innerHTML += `
+            <div class="card" style="margin-bottom: 0; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px rgba(0,0,0,0.02); background: ${isLunas ? '#f8fafc' : '#ffffff'}; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 15px;">
+                  
+                  <div style="display: flex; gap: 15px; flex: 1; min-width: 250px;">
+                      <div style="width: 48px; height: 48px; border-radius: 12px; background: ${isLunas ? '#dcfce7' : '#fee2e2'}; color: ${isLunas ? '#16a34a' : '#ef4444'}; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0;">
+                          <i class="fas fa-file-invoice-dollar"></i>
+                      </div>
+                      <div>
+                          <strong style="font-size: 1.15rem; color: #1e293b; display: block; margin-bottom: 5px;">${d.name}</strong>
+                          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                              ${statusBadge}
+                              <span style="font-size: 0.8rem; color: #64748b;"><i class="far fa-calendar-alt"></i> Jatuh Tempo: <strong style="color: #475569;">${d.date}</strong></span>
+                          </div>
+                      </div>
+                  </div>
+                  
+                  <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 12px;">
+                      <div style="text-align: right;">
+                          <div style="font-size: 0.8rem; color: #64748b; font-weight: 600; text-transform: uppercase;">Sisa Tagihan</div>
+                          <div style="font-size: 1.4rem; font-weight: 800; color: ${isLunas ? '#16a34a' : '#ef4444'};">${sisaDisplay}</div>
+                          <div style="font-size: 0.85rem; color: #94a3b8; margin-top: 2px;">dari total ${totalDisplay}</div>
+                      </div>
+                      
+                      <div style="display: flex; gap: 8px;">
+                          ${bayarBtn}
+                          <button style="width: 36px; height: 36px; border-radius: 8px; background: #f1f5f9; color: #0ea5e9; border: none; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center;" onmouseover="this.style.background='#e0f2fe'" onmouseout="this.style.background='#f1f5f9'" onclick="editDebt(${i})" title="Edit Hutang"><i class="fas fa-edit"></i></button>
+                          <button style="width: 36px; height: 36px; border-radius: 8px; background: #fee2e2; color: #ef4444; border: none; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center;" onmouseover="this.style.background='#fecaca'" onmouseout="this.style.background='#fee2e2'" onclick="deleteDebt(${i})" title="Hapus Hutang"><i class="fas fa-trash"></i></button>
+                      </div>
+                  </div>
+
+              </div>
+              
+              <div style="margin-top: 15px;">
+                  <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: #64748b; margin-bottom: 5px; font-weight: 600;">
+                      <span>Progress Pembayaran</span>
+                      <span>${Math.round(percent)}%</span>
+                  </div>
+                  <div style="height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden;">
+                      <div style="height: 100%; width: ${percent}%; background: ${isLunas ? '#10b981' : '#3b82f6'}; border-radius: 4px; transition: width 0.5s ease;"></div>
+                  </div>
+              </div>
+            </div>
+          `;
+        });
+    }
   }
 
   const goalList = document.getElementById("goalList");
