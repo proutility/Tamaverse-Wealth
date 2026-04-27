@@ -257,39 +257,15 @@ return `
      <div class="mobile-banner-text">Dashboard Pro-Tama Finance</div>
   </div>
 
-  <div class="mobile-menu-grid" style="gap: 15px; margin-bottom: 30px;">
-     <div class="menu-btn-modern" onclick="showPage('aset')">
-         <div class="icon-box-modern" style="background: linear-gradient(135deg, #38bdf8, #0284c7); box-shadow: 0 6px 15px rgba(2, 132, 199, 0.3);"><i class="fas fa-coins"></i></div>
-         <span style="font-weight:700; color:#334155; font-size: 0.9rem;">Asetku</span>
-     </div>
-     <div class="menu-btn-modern" onclick="showPage('budgeting')">
-         <div class="icon-box-modern" style="background: linear-gradient(135deg, #4ade80, #16a34a); box-shadow: 0 6px 15px rgba(22, 163, 74, 0.3);"><i class="fas fa-chart-pie"></i></div>
-         <span style="font-weight:700; color:#334155; font-size: 0.9rem;">Budgeting</span>
-     </div>
-     <div class="menu-btn-modern" onclick="showPage('transaksi')">
-         <div class="icon-box-modern" style="background: linear-gradient(135deg, #facc15, #ca8a04); box-shadow: 0 6px 15px rgba(202, 138, 4, 0.3);"><i class="fas fa-exchange-alt"></i></div>
-         <span style="font-weight:700; color:#334155; font-size: 0.9rem;">Mutasi</span>
-     </div>
-     <div class="menu-btn-modern" onclick="showPage('target')">
-         <div class="icon-box-modern" style="background: linear-gradient(135deg, #c084fc, #7c3aed); box-shadow: 0 6px 15px rgba(124, 58, 237, 0.3);"><i class="fas fa-bullseye"></i></div>
-         <span style="font-weight:700; color:#334155; font-size: 0.9rem;">Target</span>
-     </div>
-     <div class="menu-btn-modern" onclick="showPage('wedding')">
-         <div class="icon-box-modern" style="background: linear-gradient(135deg, #f472b6, #db2777); box-shadow: 0 6px 15px rgba(219, 39, 119, 0.3);"><i class="fas fa-ring"></i></div>
-         <span style="font-weight:700; color:#334155; font-size: 0.9rem;">Wedding</span>
-     </div>
-     <div class="menu-btn-modern" onclick="showPage('hutang')">
-         <div class="icon-box-modern" style="background: linear-gradient(135deg, #f87171, #dc2626); box-shadow: 0 6px 15px rgba(220, 38, 38, 0.3);"><i class="fas fa-hand-holding-usd"></i></div>
-         <span style="font-weight:700; color:#334155; font-size: 0.9rem;">Hutang</span>
-     </div>
-     <div class="menu-btn-modern" onclick="showPage('kalkulator')">
-         <div class="icon-box-modern" style="background: linear-gradient(135deg, #818cf8, #4f46e5); box-shadow: 0 6px 15px rgba(79, 70, 229, 0.3);"><i class="fas fa-chart-line"></i></div>
-         <span style="font-weight:700; color:#334155; font-size: 0.9rem;">Saham</span>
-     </div>
-     <div class="menu-btn-modern" onclick="showPage('laporan')">
-         <div class="icon-box-modern" style="background: linear-gradient(135deg, #2dd4bf, #0891b2); box-shadow: 0 6px 15px rgba(8, 145, 178, 0.3);"><i class="fas fa-file-invoice"></i></div>
-         <span style="font-weight:700; color:#334155; font-size: 0.9rem;">Laporan</span>
-     </div>
+ <div class="mobile-menu-grid">
+     <div class="menu-btn" onclick="showPage('aset')"><div class="icon-box" style="background:#e0f2fe; color:#0284c7;"><i class="fas fa-coins"></i></div><span>Asetku</span></div>
+     <div class="menu-btn" onclick="showPage('budgeting')"><div class="icon-box" style="background:#dcfce7; color:#16a34a;"><i class="fas fa-chart-pie"></i></div><span>Budgeting</span></div>
+     <div class="menu-btn" onclick="showPage('transaksi')"><div class="icon-box" style="background:#fef9c3; color:#ca8a04;"><i class="fas fa-exchange-alt"></i></div><span>Mutasi</span></div>
+     <div class="menu-btn" onclick="showPage('target')"><div class="icon-box" style="background:#f3e8ff; color:#9333ea;"><i class="fas fa-bullseye"></i></div><span>Target</span></div>
+     <div class="menu-btn" onclick="showPage('wedding')"><div class="icon-box" style="background:#fce7f3; color:#db2777;"><i class="fas fa-ring"></i></div><span>Wedding</span></div>
+     <div class="menu-btn" onclick="showPage('hutang')"><div class="icon-box" style="background:#fee2e2; color:#dc2626;"><i class="fas fa-hand-holding-usd"></i></div><span>Hutang</span></div>
+     <div class="menu-btn" onclick="showPage('kalkulator')"><div class="icon-box" style="background:#e0e7ff; color:#7c3aed;"><i class="fas fa-chart-line"></i></div><span>Saham</span></div>
+     <div class="menu-btn" onclick="showPage('laporan')"><div class="icon-box" style="background:#ccfbf1; color:#0d9488;"><i class="fas fa-file-invoice"></i></div><span>Laporan</span></div>
   </div>
   
   <div style="margin-bottom: 20px; display:flex; justify-content:space-between; align-items:center;">
