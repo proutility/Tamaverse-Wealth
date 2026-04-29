@@ -105,7 +105,6 @@ function getGreetingIcon() {
     return "🌙";
 }
 
-// ================= FUNGSI AUTENTIKASI =================
 auth.onAuthStateChanged((user) => {
   if (user) {
     currentUser = user.displayName || user.email.split('@')[0];
@@ -113,38 +112,28 @@ auth.onAuthStateChanged((user) => {
     loadDataFromFirebase();
   } else {
     document.getElementById("app").innerHTML = `
-      <div class="login-wrap">
-        <div class="login-container">
+      <div style="min-height: 100vh; display: flex; align-items: center; justify-content: flex-end; padding: 5%; background: url('bg-login.png') no-repeat center center/cover; position: relative;">
           
-          <div class="login-left">
-            <img src="logo.png" alt="Logo" style="width: 120px; height: 120px; object-fit: contain; margin-bottom: 25px; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.08));">
-            <h1 style="margin: 0 0 10px 0; color: #1e293b; font-size: 2.2rem; line-height: 1.2;">Tamavers Wealth</h1>
-            <p style="color:#64748b; font-size: 1.05rem; margin-bottom: 20px; line-height: 1.5;">Platform manajemen keuangan & aset yang terintegrasi untuk masa depan yang lebih tertata.</p>
-            
-            <div class="login-features">
-                <div class="feature-item"><i class="fas fa-chart-pie"></i> <span>Pantau Cashflow & Aset Real-time</span></div>
-                <div class="feature-item"><i class="fas fa-ring" style="color: #ec4899; background: #fdf2f8;"></i> <span>Wedding Planner Terintegrasi</span></div>
-                <div class="feature-item"><i class="fas fa-calculator" style="color: #8b5cf6; background: #f5f3ff;"></i> <span>Kalkulator Saham Pintar</span></div>
-            </div>
-          </div>
-          
-          <div class="login-right">
-            <div style="text-align:center; margin-bottom: 40px;">
-                <h2 style="margin:0 0 8px 0; color: #1e293b; font-size: 1.8rem;">Selamat Datang! 👋</h2>
-                <p style="color:#64748b; margin:0; font-size: 0.95rem;">Silakan masuk untuk mengakses dashboard.</p>
-            </div>
-            
-            <button class="login-btn-google" onclick="login()">
-              <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width:24px;"> 
-              Lanjutkan dengan Google
-            </button>
-            
-            <div style="margin-top: 40px; text-align: center; color: #94a3b8; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; gap: 6px;">
-                <i class="fas fa-shield-alt"></i> Secured by Google Firebase
-            </div>
-          </div>
+          <div style="position: absolute; top:0; left:0; width:100%; height:100%; background: linear-gradient(to right, rgba(248, 250, 252, 0.1) 40%, rgba(248, 250, 252, 0.95) 100%); pointer-events: none;"></div>
 
-        </div>
+          <div style="position: relative; z-index: 10; background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15); border-radius: 28px; padding: 50px 40px; width: 100%; max-width: 420px; text-align: center; margin-right: 5%;">
+
+              <div style="width: 80px; height: 80px; background: white; border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
+                  <img src="logo.png" alt="Logo" style="width: 55px; height: 55px; object-fit: contain;">
+              </div>
+
+              <h1 style="margin: 0 0 10px 0; color: #1e293b; font-size: 2.2rem; font-weight: 800; letter-spacing: -0.5px;">Tamaverse Wealth</h1>
+              <p style="color:#475569; font-size: 1rem; margin-bottom: 40px; line-height: 1.6; font-weight: 500;">Command center eksklusif untuk manajemen aset, investasi, dan perencanaan masa depan Anda.</p>
+              
+              <button onclick="login()" style="width: 100%; padding: 16px 20px; background: white; border: 1px solid #e2e8f0; border-radius: 16px; font-size: 1.05rem; font-weight: 700; color: #1e293b; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); transition: all 0.3s ease;" onmouseover="this.style.background='#f8fafc'; this.style.transform='translateY(-3px)'; this.style.boxShadow='0 10px 15px rgba(0,0,0,0.05)';" onmouseout="this.style.background='white'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px rgba(0,0,0,0.02)';">
+                  <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width: 24px;"> 
+                  Lanjutkan dengan Google
+              </button>
+
+              <div style="margin-top: 35px; font-size: 0.85rem; color: #94a3b8; display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 600;">
+                  <i class="fas fa-shield-alt"></i> Secured by Google Firebase
+              </div>
+          </div>
       </div>
     `;
   }
