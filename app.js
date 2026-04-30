@@ -88,25 +88,21 @@ function getAssetsFor(ym) { return assetsData[ym] || []; }
 function getBudgetsFor(ym) { return budgetsData[ym] || []; }
 let assets = [];
 
-// ========================================================
-// INITIALIZATION & AUTH STATE
-// ========================================================
-
-// Hide body to prevent blinking while checking auth state
+// Bikin layar transparan dulu sampai Firebase selesai ngecek (Biar gak blinking)
 document.body.style.opacity = "0";
 document.body.style.transition = "opacity 0.3s ease";
 
 auth.onAuthStateChanged((user) => {
-  document.body.style.opacity = "1"; // Show body once checked
+  document.body.style.opacity = "1"; // Munculin layar setelah selesai ngecek
 
   if (user) {
     currentUser = user.displayName || user.email.split('@')[0];
     currentUid = user.uid;
+    
+    // Tarik data dari Firebase (Sistem PIN bakal dipanggil di dalem sini)
     loadDataFromFirebase();
-
-    if(window.targetPageAfterLogin) {
-        setTimeout(() => showPage(window.targetPageAfterLogin), 1500); 
-    }
+    
+    // Note: Kodingan showPage dipindah ke dalem unlockApp() biar nunggu PIN beres
       
   } else {
     // SENSOR FINGERPRINT LOKAL (PEMANCING GOOGLE LOGIN)
@@ -143,7 +139,7 @@ auth.onAuthStateChanged((user) => {
          body, html { 
              margin: 0; padding: 0; width: 100%; height: 100%; font-family: 'Inter', sans-serif; 
              background: #ffffff; overflow: hidden !important; 
-             touch-action: none; overscroll-behavior: none; /* Anti narik-narik layar di Android */
+             touch-action: none; overscroll-behavior: none; 
          }
          #landing-wrapper { 
              margin: 0; padding: 0; width: 100%; height: 100vh; height: 100dvh; 
@@ -258,7 +254,19 @@ auth.onAuthStateChanged((user) => {
           <div class="mobile-view">
               <div style="flex: 1; padding: 20px; display: flex; flex-direction: column; align-items: center; position: relative; z-index: 2; width: 100%; box-sizing: border-box;">
                   <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; margin-top: 10px;">
-                      <div onclick="..." style="background: rgba(255,255,255,0.15); padding: 6px 12px; border-radius: 20px; color: white; font-size: 0.85rem; font-weight: 700; display: flex; align-items: center; gap: 6px; cursor: pointer; user-select: none;">
+                      <div onclick="
+                          let langText = this.querySelector('#langText');
+                          let heroText = document.getElementById('mobileHeroText');
+                          if(langText.innerText === 'ID') {
+                              langText.innerText = 'EN';
+                              this.querySelector('#langFlag').innerText = '🇺🇸';
+                              heroText.innerHTML = 'Track Assets, Budgets & Stocks<br>Easily inside Tamaverse';
+                          } else {
+                              langText.innerText = 'ID';
+                              this.querySelector('#langFlag').innerText = '🇮🇩';
+                              heroText.innerHTML = 'Catat Aset, Budgeting & Saham<br>Praktis Langsung di Tamaverse';
+                          }
+                      " style="background: rgba(255,255,255,0.15); padding: 6px 12px; border-radius: 20px; color: white; font-size: 0.85rem; font-weight: 700; display: flex; align-items: center; gap: 6px; cursor: pointer; user-select: none;">
                           <span id="langFlag" style="font-size: 1.1rem;">🇮🇩</span> <span id="langText">ID</span>
                       </div>
                       <div style="color: white; font-family: 'Playfair Display', 'Georgia', serif; font-size: 1.7rem; font-weight: 800; display: flex; flex-direction: column; align-items: center; line-height: 1;">
@@ -3173,7 +3181,6 @@ window.modernPrompt = async function(title, defaultValue = '', inputType = 'text
 function unlockApp() {
     currentPinMode = ""; 
     
-    // Perbaikan Posisi Loading mutlak di tengah layar HP
     let loaderWrapper = document.createElement('div');
     loaderWrapper.id = 'premium-loader';
     loaderWrapper.setAttribute('style', 'position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100dvh; background: rgba(248, 250, 252, 0.95); z-index: 9999999; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0; padding: 0; left: 0; top: 0;');
@@ -3194,14 +3201,23 @@ function unlockApp() {
     `;
     document.body.appendChild(loaderWrapper);
 
+    // Render HTML utama
     document.getElementById("app").innerHTML = mainApp();
     
     setTimeout(() => { 
-        showPage('dashboard'); 
-        update(); 
-        loaderWrapper.style.transition = "opacity 0.5s ease";
-        loaderWrapper.style.opacity = '0';
-        setTimeout(() => loaderWrapper.remove(), 500); 
+        try {
+            // Langsung buka halaman sesuai pilihan Fast Menu atau Dashboard
+            let target = window.targetPageAfterLogin || 'dashboard';
+            showPage(target); 
+            update(); 
+        } catch (error) {
+            console.log("Abaikan error render sesaat:", error);
+        } finally {
+            // TRIK AMPUH: Apapun yang terjadi, paksakan layarnya ditutup!
+            loaderWrapper.style.transition = "opacity 0.4s ease";
+            loaderWrapper.style.opacity = '0';
+            setTimeout(() => loaderWrapper.remove(), 400); 
+        }
     }, 1200); 
 }
 
