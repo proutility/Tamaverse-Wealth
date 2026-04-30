@@ -123,7 +123,8 @@ auth.onAuthStateChanged((user) => {
          .login-hero {
              width: 100vw;
              height: 100vh;
-             background: url('bg-login.jpg') no-repeat center center/cover fixed;
+             /* Background dengan fallback warna putih transparan kalau gambar gagal load */
+             background: #f8fafc url('bg-login.png') no-repeat center center/cover fixed;
              position: relative;
              box-sizing: border-box;
          }
@@ -337,7 +338,7 @@ auth.onAuthStateChanged((user) => {
               </div>
 
               <div class="fade-up-element" style="margin-top: 60px; animation-delay: 0.8s;">
-                  <button onclick="login()" style="padding: 14px 28px; border-radius: 30px; background: white; color: #16a34a; border: 2px solid #16a34a; font-weight: 700; cursor: pointer; transition: 0.3s;" onmouseover="this.style.background='#16a34a'; this.style.color='white';" onmouseout="this.style.background='white'; this.style.color='#16a34a';">Jelajahi Semua Fitur Sekarang</button>
+                  <button onclick="login()" style="padding: 14px 28px; border-radius: 30px; background: white; color: #16a34a; border: 2px solid #16a34a; font-weight: 700; cursor: pointer; transition: 0.3s;" onmouseover="this.style.background='#16a34a'; this.style.color='white';" onmouseout="this.style.background='white'; this.style.color='#16a34a';">Mulai Manajemen Aset Sekarang</button>
               </div>
 
           </div>
