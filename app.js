@@ -118,14 +118,14 @@ auth.onAuthStateChanged((user) => {
 } else {
     document.getElementById("app").innerHTML = `
       <style>
-         body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: 'Inter', sans-serif; background: #ffffff; scroll-behavior: smooth; }
+         body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: 'Inter', sans-serif; background: #ffffff; scroll-behavior: smooth; overflow-x: hidden; }
          #landing-wrapper { margin: 0; padding: 0; width: 100%; height: 100vh; max-width: 100%; overflow-y: auto; overflow-x: hidden; position: relative; }
          
          /* =========================================
             TAMPILAN DESKTOP (LAPTOP/PC)
          ========================================= */
          .desktop-view { display: block; }
-         .login-hero { width: 100vw; height: 100vh; background: #f8fafc url('bg-login.png') no-repeat center center/cover fixed; position: relative; box-sizing: border-box; }
+         .login-hero { width: 100%; height: 100vh; background: #f8fafc url('bg-login.jpg') no-repeat center center/cover fixed; position: relative; box-sizing: border-box; }
          .landing-nav { position: absolute; top: 0; left: 0; width: 100%; padding: 25px 5%; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; z-index: 20; }
          .nav-left { display: flex; align-items: center; gap: 12px; }
          .nav-right-btn { background: white; border: 1px solid #e2e8f0; padding: 10px 20px; border-radius: 30px; font-size: 0.95rem; font-weight: 700; color: #1e293b; cursor: pointer; display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: all 0.3s ease; }
@@ -138,7 +138,7 @@ auth.onAuthStateChanged((user) => {
          .scroll-indicator { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); color: #94a3b8; font-size: 2rem; cursor: pointer; animation: bounce 2s infinite; z-index: 11; transition: color 0.3s; }
          .scroll-indicator:hover { color: #16a34a; }
          @keyframes bounce { 0%, 20%, 50%, 80%, 100% {transform: translate(-50%, 0);} 40% {transform: translate(-50%, -10px);} 60% {transform: translate(-50%, -5px);} }
-         .advantages-section { width: 100%; min-height: 100vh; background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(241, 245, 249, 0.92) 100%), url('bg-login.png') no-repeat center bottom/cover; box-sizing: border-box; padding: 100px 5% 120px 5%; display: flex; flex-direction: column; align-items: center; position: relative; z-index: 5; }
+         .advantages-section { width: 100%; min-height: 100vh; background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(241, 245, 249, 0.92) 100%), url('bg-login.jpg') no-repeat center bottom/cover; box-sizing: border-box; padding: 100px 5% 120px 5%; display: flex; flex-direction: column; align-items: center; position: relative; z-index: 5; }
          .section-header-wrap { text-align: center; margin-bottom: 70px; }
          .section-tagline { color: #16a34a; font-weight: 800; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px; display: block; }
          .section-title { font-size: 2.6rem; font-weight: 900; color: #1e293b; margin: 0; letter-spacing: -1px; }
@@ -164,14 +164,14 @@ auth.onAuthStateChanged((user) => {
              .mobile-view { 
                  display: flex !important; 
                  flex-direction: column; 
-                 height: 100dvh; /* Pakai dvh biar gak kepotong address bar browser HP */
-                 width: 100vw; 
-                 background: #16a34a; /* Warna solid hijau bank */
+                 height: 100dvh; 
+                 width: 100%; 
+                 /* Perpaduan warna Dark Pine Green yang ngasih kesan Premium & match sama ilustrasi */
+                 background: linear-gradient(180deg, #022c22 0%, #064e3b 60%, #0f766e 100%);
                  position: relative; 
                  overflow: hidden; 
              }
              
-             /* Sembunyikan scrollbar di Fast Menu tapi tetap bisa discroll */
              .mobile-fast-menu {
                  overflow-x: auto;
                  scroll-snap-type: x mandatory;
@@ -182,6 +182,11 @@ auth.onAuthStateChanged((user) => {
              .fast-menu-item { min-width: 80px; scroll-snap-align: start; display: flex; flex-direction: column; align-items: center; gap: 10px; cursor: pointer; }
              .fast-menu-icon { width: 55px; height: 55px; border-radius: 18px; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; box-shadow: inset 0 2px 4px rgba(255,255,255,0.8), 0 4px 6px rgba(0,0,0,0.05); }
              .fast-menu-text { font-size: 0.75rem; font-weight: 700; color: #1e293b; }
+             
+             @keyframes floatMobile { 
+                 0%, 100% { transform: translateY(0); } 
+                 50% { transform: translateY(-10px); } 
+             }
          }
       </style>
 
@@ -263,17 +268,16 @@ auth.onAuthStateChanged((user) => {
           </div>
 
           <!-- ======================================================== -->
-          <!-- 2. TAMPILAN MOBILE (NATIVE APP STYLE ALA BRIMO)          -->
+          <!-- 2. TAMPILAN MOBILE (NATIVE APP STYLE)                    -->
           <!-- ======================================================== -->
           <div class="mobile-view">
               
-              <!-- Bagian Atas (Hijau) -->
-              <div style="flex: 1; padding: 20px 20px 0 20px; display: flex; flex-direction: column; align-items: center; position: relative; z-index: 2;">
+              <!-- Bagian Atas (Premium Dark Pine Green) -->
+              <div style="flex: 1; padding: 20px; display: flex; flex-direction: column; align-items: center; position: relative; z-index: 2; width: 100%; box-sizing: border-box;">
                   
                   <!-- Top Nav -->
                   <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; margin-top: 10px;">
                       
-                      <!-- Bendera ID/EN (Bisa diklik) -->
                       <div onclick="
                           let langText = this.querySelector('#langText');
                           let heroText = document.getElementById('mobileHeroText');
@@ -286,42 +290,41 @@ auth.onAuthStateChanged((user) => {
                               this.querySelector('#langFlag').innerText = '🇮🇩';
                               heroText.innerHTML = 'Catat Aset, Budgeting & Saham<br>Praktis Langsung di Tamaverse';
                           }
-                      " style="background: rgba(255,255,255,0.2); padding: 6px 12px; border-radius: 20px; color: white; font-size: 0.85rem; font-weight: 700; display: flex; align-items: center; gap: 6px; cursor: pointer; user-select: none;">
+                      " style="background: rgba(255,255,255,0.15); padding: 6px 12px; border-radius: 20px; color: white; font-size: 0.85rem; font-weight: 700; display: flex; align-items: center; gap: 6px; cursor: pointer; user-select: none;">
                           <span id="langFlag" style="font-size: 1.1rem;">🇮🇩</span> 
                           <span id="langText">ID</span>
                       </div>
                       
-                      <!-- Logo Teks Elegan (Font Serif Klasik) -->
+                      <!-- Logo Teks Elegan -->
                       <div style="color: white; font-family: 'Playfair Display', 'Georgia', serif; font-size: 1.7rem; font-weight: 800; display: flex; flex-direction: column; align-items: center; line-height: 1;">
                           TAMA
                           <span style="font-family: 'Inter', sans-serif; font-size: 0.8rem; font-weight: 500; letter-spacing: 4px; margin-top: 2px;">WEALTH</span>
                       </div>
                       
-                      <!-- Tombol Bantuan -->
-                      <div style="background: rgba(255,255,255,0.2); padding: 6px 12px; border-radius: 20px; color: white; font-size: 0.85rem; font-weight: 700; display: flex; align-items: center; gap: 6px;">
+                      <div style="background: rgba(255,255,255,0.15); padding: 6px 12px; border-radius: 20px; color: white; font-size: 0.85rem; font-weight: 700; display: flex; align-items: center; gap: 6px;">
                           <i class="fas fa-headset"></i> Kontak
                       </div>
                   </div>
 
-                  <!-- Judul Hero Mobile (Bisa berubah ID/EN) -->
-                  <h2 id="mobileHeroText" style="color: white; font-size: 1.25rem; text-align: center; line-height: 1.5; margin-bottom: auto; font-weight: 700; letter-spacing: -0.3px; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                  <!-- Judul Hero Mobile -->
+                  <h2 id="mobileHeroText" style="color: white; font-size: 1.2rem; text-align: center; line-height: 1.5; margin-bottom: auto; font-weight: 700; letter-spacing: -0.3px; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">
                       Catat Aset, Budgeting & Saham<br>Praktis Langsung di Tamaverse
                   </h2>
 
-                  <div style="width: 100%; flex: 1; display: flex; justify-content: center; align-items: center; padding-top: 10px; margin-bottom: -15px;">
-                      <!-- Gambar dibikin width 115% biar mejanya kelihatan lebar memenuhi layar HP, plus animasi ngambang -->
-                      <img src="illustration.png" alt="Ilustrasi" onerror="this.src='logo.png'; this.style.filter='brightness(0) invert(1) opacity(0.5)';" style="max-height: 280px; width: 115%; object-fit: contain; z-index: 10; margin-left: -7.5%; animation: floatMobile 4s ease-in-out infinite;">
+                  <!-- Tempat Ilustrasi (Lebih Presisi, No Cut-Off) -->
+                  <div style="width: 100%; flex: 1; display: flex; justify-content: center; align-items: center; padding-top: 10px; padding-bottom: 10px;">
+                      <!-- Hapus trik width 115% diganti pakai width 100% biar container aman -->
+                      <img src="illustration.png" alt="Ilustrasi" onerror="this.src='logo.png'; this.style.filter='brightness(0) invert(1) opacity(0.5)';" style="max-height: 260px; max-width: 100%; object-fit: contain; z-index: 10; animation: floatMobile 4s ease-in-out infinite; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.2)); transform: scale(1.05);">
                   </div>
               </div>
 
               <!-- Bagian Bawah (Putih) - Menu & Login -->
-              <div style="background: #ffffff; width: 100%; border-radius: 35px 35px 0 0; padding: 25px 20px 30px 20px; z-index: 5; box-shadow: 0 -10px 25px rgba(0,0,0,0.1); display: flex; flex-direction: column;">
+              <div style="background: #ffffff; width: 100%; border-radius: 35px 35px 0 0; padding: 25px 20px 30px 20px; z-index: 5; box-shadow: 0 -10px 25px rgba(0,0,0,0.15); display: flex; flex-direction: column; box-sizing: border-box;">
                   
                   <div style="text-align: center; color: #1e293b; font-weight: 800; font-size: 1.1rem; margin-bottom: 20px;">
                       Fast Menu <i class="fas fa-info-circle" style="color: #3b82f6; margin-left: 5px;"></i>
                   </div>
 
-                  <!-- Fast Menu Scroll Horizontal -->
                   <div class="mobile-fast-menu" style="display: flex; gap: 15px; padding-bottom: 15px; padding-left: 5px; padding-right: 5px;">
                       <div class="fast-menu-item" onclick="window.targetPageAfterLogin='aset'; login()">
                           <div class="fast-menu-icon" style="background: #e0f2fe; color: #0284c7;"><i class="fas fa-coins"></i></div>
@@ -345,18 +348,17 @@ auth.onAuthStateChanged((user) => {
                       </div>
                   </div>
 
-                  <!-- Titik Indikator Animasi -->
                   <div style="display: flex; justify-content: center; gap: 6px; margin-bottom: 25px;">
-                      <div style="width: 25px; height: 5px; background: #16a34a; border-radius: 5px;"></div>
+                      <div style="width: 25px; height: 5px; background: #064e3b; border-radius: 5px;"></div>
                       <div style="width: 15px; height: 5px; background: #cbd5e1; border-radius: 5px;"></div>
                   </div>
 
-                  <!-- Baris Tombol Login & Fingerprint -->
                   <div style="display: flex; gap: 12px; margin-top: auto;">
-                      <button onclick="window.targetPageAfterLogin='dashboard'; login()" style="flex: 1; background: #0f6c2c; color: white; border: none; border-radius: 16px; font-size: 1.15rem; font-weight: 700; padding: 16px; display: flex; justify-content: center; align-items: center; gap: 10px; box-shadow: 0 8px 15px rgba(21, 128, 61, 0.3);">
+                      <!-- Warna tombol disamakan dengan tema background atas biar matching -->
+                      <button onclick="window.targetPageAfterLogin='dashboard'; login()" style="flex: 1; background: #064e3b; color: white; border: none; border-radius: 16px; font-size: 1.15rem; font-weight: 700; padding: 16px; display: flex; justify-content: center; align-items: center; gap: 10px; box-shadow: 0 8px 15px rgba(6, 78, 59, 0.3);">
                           Login
                       </button>
-                      <button onclick="window.targetPageAfterLogin='dashboard'; login()" style="width: 60px; height: 60px; background: #0f6c2c; color: white; border: none; border-radius: 16px; font-size: 1.6rem; display: flex; justify-content: center; align-items: center; box-shadow: 0 8px 15px rgba(21, 128, 61, 0.3);">
+                      <button onclick="window.targetPageAfterLogin='dashboard'; login()" style="width: 60px; height: 60px; background: #064e3b; color: white; border: none; border-radius: 16px; font-size: 1.6rem; display: flex; justify-content: center; align-items: center; box-shadow: 0 8px 15px rgba(6, 78, 59, 0.3);">
                           <i class="fas fa-fingerprint"></i>
                       </button>
                   </div>
