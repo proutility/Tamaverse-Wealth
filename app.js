@@ -259,6 +259,47 @@ auth.onAuthStateChanged((user) => {
              from { opacity: 0; transform: translateY(40px); }
              to { opacity: 1; transform: translateY(0); }
          }
+         /* =========================================
+            RESPONSIVE MOBILE (HP)
+         ========================================= */
+         @media (max-width: 768px) {
+             /* Navbar dikecilin dikit */
+             .landing-nav { padding: 15px 5%; }
+             .nav-left img { width: 40px !important; height: 40px !important; }
+             .nav-left div { height: 25px !important; }
+             .nav-left strong { font-size: 1.1rem !important; }
+             .nav-right-btn { padding: 8px 12px; font-size: 0.8rem; gap: 6px; }
+             .nav-right-btn img { width: 16px !important; }
+
+             /* Teks Hero dipindah ke tengah & dikasih Card Kaca biar ga nabrak logo background */
+             .hero-content-right {
+                 position: absolute;
+                 top: 50%;
+                 left: 50%;
+                 transform: translate(-50%, -50%);
+                 right: auto;
+                 width: 90%;
+                 height: auto;
+                 padding: 30px 20px;
+                 background: rgba(255, 255, 255, 0.85); 
+                 backdrop-filter: blur(15px);
+                 -webkit-backdrop-filter: blur(15px);
+                 border-radius: 24px;
+                 box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+                 align-items: center;
+                 text-align: center;
+             }
+
+             .hero-title { font-size: 2.2rem; margin-bottom: 15px; }
+             .hero-subtitle { font-size: 0.95rem; margin-bottom: 25px; }
+             
+             /* Tombol ditumpuk atas-bawah biar muat di HP */
+             .hero-content-right div { flex-direction: column; width: 100%; gap: 10px !important; }
+             .hero-content-right button { width: 100%; padding: 14px 20px !important; font-size: 1rem !important; }
+             
+             .section-title { font-size: 1.8rem; }
+             .advantages-section { padding: 60px 5% 80px 5%; }
+         }
       </style>
 
       <div id="landing-wrapper">
@@ -3220,46 +3261,54 @@ window.modernPrompt = async function(title, defaultValue = '', inputType = 'text
 function unlockApp() {
     currentPinMode = ""; // Matiin sensor keyboard supaya nggak kepencet di background
     
-    // 1. Bikin Tampilan Layar Loading Modern
+    // 1. Bikin Tampilan Layar Loading Modern & Responsive
     let loaderWrapper = document.createElement('div');
     loaderWrapper.id = 'premium-loader';
     loaderWrapper.innerHTML = `
-        <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: rgba(248, 250, 252, 0.85); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); z-index: 999999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);">
+        <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: rgba(248, 250, 252, 0.85); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); z-index: 999999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1); box-sizing: border-box; padding: 20px; text-align: center;">
             
-            <div style="position: relative; display: flex; justify-content: center; align-items: center; margin-bottom: 25px;">
+            <div class="loader-circle" style="position: relative; display: flex; justify-content: center; align-items: center; margin-bottom: 25px;">
                 <div style="width: 75px; height: 75px; border: 4px solid #e0f2fe; border-top-color: #0ea5e9; border-radius: 50%; animation: spinLoader 1s linear infinite; box-shadow: 0 4px 15px rgba(14, 165, 233, 0.2);"></div>
                 <i class="fas fa-wallet" style="position: absolute; font-size: 1.5rem; color: #0ea5e9; animation: pulseIcon 1.5s ease-in-out infinite;"></i>
             </div>
             
-            <h3 style="color: #1e293b; font-family: 'Inter', sans-serif; font-size: 1.25rem; font-weight: 800; margin: 0 0 5px 0; letter-spacing: -0.5px;">Menyiapkan Dashboard</h3>
-            <p style="color: #64748b; font-family: 'Inter', sans-serif; font-size: 0.9rem; margin: 0; font-weight: 500;">Mengambil data keuangan Anda...</p>
+            <h3 class="loader-title" style="color: #1e293b; font-family: 'Inter', sans-serif; font-weight: 800; margin: 0 0 8px 0; letter-spacing: -0.5px;">Menyiapkan Dashboard</h3>
+            <p class="loader-text" style="color: #64748b; font-family: 'Inter', sans-serif; margin: 0; font-weight: 500;">Mengambil data keuangan Anda...</p>
             
         </div>
         <style>
             @keyframes spinLoader { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
             @keyframes pulseIcon { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(0.85); opacity: 0.7; } }
+            
+            /* Penyesuaian khusus HP */
+            .loader-title { font-size: 1.25rem; }
+            .loader-text { font-size: 0.9rem; }
+            @media (max-width: 768px) {
+                .loader-circle { margin-bottom: 20px !important; transform: scale(0.85); }
+                .loader-title { font-size: 1.1rem; }
+                .loader-text { font-size: 0.85rem; }
+            }
         </style>
     `;
     document.body.appendChild(loaderWrapper);
 
-    // 2. Render UI di background (Nggak bakal kelihatan karena ketutup loading)
+    // 2. Render UI di background
     document.getElementById("app").innerHTML = mainApp();
     
-    // 3. Kasih waktu sistem buat napas & ngerender (sekitar 1 detik)
+    // 3. Kasih waktu sistem buat napas & ngerender
     setTimeout(() => { 
         showPage('dashboard'); 
         update(); 
         
-        // 4. Efek Fade-out (Pudar halus)
+        // 4. Efek Fade-out
         let loaderElement = loaderWrapper.firstElementChild;
         loaderElement.style.opacity = '0';
         
-        // Hapus elemen dari memori setelah animasi pudar selesai
         setTimeout(() => { 
             loaderWrapper.remove(); 
         }, 500); 
 
-    }, 1200); // 1200ms = 1.2 detik (Bisa lo cepetin atau lamain)
+    }, 1200); 
 }
 
 // ==========================================
