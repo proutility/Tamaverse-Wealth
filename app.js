@@ -308,10 +308,9 @@ auth.onAuthStateChanged((user) => {
                       Catat Aset, Budgeting & Saham<br>Praktis Langsung di Tamaverse
                   </h2>
 
-                  <!-- Tempat Ilustrasi Ala BRImo -->
-                  <!-- INGAT BRO: Lo harus upload gambar ilustrasi (misal orang lagi belanja/pegang HP) ke GitHub lo dengan nama "illustration.png" -->
-                  <div style="width: 100%; display: flex; justify-content: center; align-items: flex-end; padding-top: 20px;">
-                      <img src="illustration.png" alt="Ilustrasi" onerror="this.src='logo.png'; this.style.filter='brightness(0) invert(1) opacity(0.5)';" style="max-height: 260px; width: auto; object-fit: contain; z-index: 10;">
+                  <div style="width: 100%; flex: 1; display: flex; justify-content: center; align-items: center; padding-top: 10px; margin-bottom: -15px;">
+                      <!-- Gambar dibikin width 115% biar mejanya kelihatan lebar memenuhi layar HP, plus animasi ngambang -->
+                      <img src="illustration.png" alt="Ilustrasi" onerror="this.src='logo.png'; this.style.filter='brightness(0) invert(1) opacity(0.5)';" style="max-height: 280px; width: 115%; object-fit: contain; z-index: 10; margin-left: -7.5%; animation: floatMobile 4s ease-in-out infinite;">
                   </div>
               </div>
 
