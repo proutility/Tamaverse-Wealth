@@ -116,47 +116,41 @@ auth.onAuthStateChanged((user) => {
     }
       
   } else {
-    // FUNGSI UNTUK MENGAKTIFKAN SENSOR SIDIK JARI BAWAAN HP
+    // FUNGSI FINGERPRINT YANG UDAH ANTI-BLOCK
     window.triggerFingerprint = async () => {
-        if (window.PublicKeyCredential && PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable) {
-            const available = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
-            if (available) {
-                try {
-                    // Minta persetujuan Biometrik ke HP User
-                    const challenge = new Uint8Array(32);
-                    window.crypto.getRandomValues(challenge);
-                    
-                    await navigator.credentials.create({
-                        publicKey: {
-                            challenge: challenge,
-                            rp: { name: "Tamaverse Wealth" },
-                            user: {
-                                id: new Uint8Array(16),
-                                name: "user",
-                                displayName: "User"
-                            },
-                            pubKeyCredParams: [{type: "public-key", alg: -7}],
-                            authenticatorSelection: {
-                                authenticatorAttachment: "platform",
-                                userVerification: "required"
-                            },
-                            timeout: 60000
-                        }
-                    });
-                    
-                    // JIKA SIDIK JARI COCOK, OTOMATIS LOGIN GOOGLE!
-                    window.targetPageAfterLogin = 'dashboard'; 
-                    login(); 
-                    
-                } catch (err) {
-                    console.log("Fingerprint dibatalkan/gagal", err);
-                    // Batal gak perlu di-alert biar UX-nya smooth
-                }
-            } else {
-                alert("HP lo belum dipasang kunci sidik jari/wajah bro.");
+        if (window.PublicKeyCredential) {
+            try {
+                const challenge = new Uint8Array(32);
+                window.crypto.getRandomValues(challenge);
+                
+                await navigator.credentials.create({
+                    publicKey: {
+                        challenge: challenge,
+                        rp: { name: "Tamaverse Wealth" },
+                        user: {
+                            id: new Uint8Array(16),
+                            name: "user",
+                            displayName: "Tamaverse User"
+                        },
+                        pubKeyCredParams: [{type: "public-key", alg: -7}],
+                        authenticatorSelection: {
+                            authenticatorAttachment: "platform", // Maksa buka sensor biometrik bawaan HP
+                            userVerification: "required"
+                        },
+                        timeout: 60000
+                    }
+                });
+                
+                // JIKA JEMPOL COCOK: Login pake cara Redirect (Biar gak diblock browser Android/Safari)
+                window.targetPageAfterLogin = 'dashboard';
+                const provider = new firebase.auth.GoogleAuthProvider();
+                firebase.auth().signInWithRedirect(provider); 
+                
+            } catch (err) {
+                console.log("Fingerprint batal / error:", err);
             }
         } else {
-            alert("Browser HP ini belum support fitur sidik jari (WebAuthn).");
+            alert("Browser HP ini belum support fitur sidik jari bro.");
         }
     };
 
@@ -166,14 +160,15 @@ auth.onAuthStateChanged((user) => {
          ::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; background: transparent !important; }
          * { -ms-overflow-style: none !important; scrollbar-width: none !important; }
          
-         body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: 'Inter', sans-serif; background: #ffffff; scroll-behavior: smooth; overflow: hidden !important; touch-action: none; }
-         #landing-wrapper { margin: 0; padding: 0; width: 100%; height: 100vh; max-width: 100%; overflow-y: auto; overflow-x: hidden; position: relative; }
+         /* KUNCI LEBAR LAYAR KE 100%, BUKAN 100VW BIAR GAK TEMBUS KANAN */
+         body, html { margin: 0; padding: 0; width: 100%; max-width: 100%; height: 100%; font-family: 'Inter', sans-serif; background: #ffffff; scroll-behavior: smooth; overflow-x: hidden !important; touch-action: none; overscroll-behavior-y: none; }
+         #landing-wrapper { margin: 0; padding: 0; width: 100%; max-width: 100%; height: 100vh; overflow-y: auto; overflow-x: hidden !important; position: relative; }
          
          /* =========================================
             TAMPILAN DESKTOP (LAPTOP/PC)
          ========================================= */
          .desktop-view { display: block; }
-         .login-hero { width: 100vw; height: 100vh; background: #f8fafc url('bg-login.jpg') no-repeat center center/cover fixed; position: relative; box-sizing: border-box; }
+         .login-hero { width: 100%; height: 100vh; background: #f8fafc url('bg-login.jpg') no-repeat center center/cover fixed; position: relative; box-sizing: border-box; }
          .landing-nav { position: absolute; top: 0; left: 0; width: 100%; padding: 25px 5%; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; z-index: 20; }
          .nav-left { display: flex; align-items: center; gap: 12px; }
          .nav-right-btn { background: white; border: 1px solid #e2e8f0; padding: 10px 20px; border-radius: 30px; font-size: 0.95rem; font-weight: 700; color: #1e293b; cursor: pointer; display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: all 0.3s ease; }
@@ -186,7 +181,7 @@ auth.onAuthStateChanged((user) => {
          .scroll-indicator { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); color: #94a3b8; font-size: 2rem; cursor: pointer; animation: bounce 2s infinite; z-index: 11; transition: color 0.3s; }
          .scroll-indicator:hover { color: #16a34a; }
          @keyframes bounce { 0%, 20%, 50%, 80%, 100% {transform: translate(-50%, 0);} 40% {transform: translate(-50%, -10px);} 60% {transform: translate(-50%, -5px);} }
-         .advantages-section { width: 100vw; min-height: 100vh; background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(241, 245, 249, 0.92) 100%), url('bg-login.jpg') no-repeat center bottom/cover; box-sizing: border-box; padding: 100px 5% 120px 5%; display: flex; flex-direction: column; align-items: center; position: relative; z-index: 5; }
+         .advantages-section { width: 100%; min-height: 100vh; background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(241, 245, 249, 0.92) 100%), url('bg-login.jpg') no-repeat center bottom/cover; box-sizing: border-box; padding: 100px 5% 120px 5%; display: flex; flex-direction: column; align-items: center; position: relative; z-index: 5; }
          .section-header-wrap { text-align: center; margin-bottom: 70px; }
          .section-tagline { color: #16a34a; font-weight: 800; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px; display: block; }
          .section-title { font-size: 2.6rem; font-weight: 900; color: #1e293b; margin: 0; letter-spacing: -1px; }
@@ -213,7 +208,7 @@ auth.onAuthStateChanged((user) => {
                  display: flex !important; 
                  flex-direction: column; 
                  height: 100dvh; 
-                 width: 100vw; 
+                 width: 100%; /* KUNCI BIAR GAK LEWAT BATAS KANAN */
                  background: linear-gradient(180deg, #022c22 0%, #064e3b 60%, #0f766e 100%);
                  position: relative; 
                  overflow: hidden; 
@@ -405,6 +400,7 @@ auth.onAuthStateChanged((user) => {
       </div>
     `;
   }
+});
     
 function login(){
   const provider = new firebase.auth.GoogleAuthProvider();
