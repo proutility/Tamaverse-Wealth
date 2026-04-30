@@ -259,46 +259,62 @@ auth.onAuthStateChanged((user) => {
              from { opacity: 0; transform: translateY(40px); }
              to { opacity: 1; transform: translateY(0); }
          }
-         /* =========================================
+        /* =========================================
             RESPONSIVE MOBILE (HP)
          ========================================= */
          @media (max-width: 768px) {
-             /* Navbar dikecilin dikit */
+             /* Navbar & Logo Kecilin Dikit */
              .landing-nav { padding: 15px 5%; }
-             .nav-left img { width: 40px !important; height: 40px !important; }
-             .nav-left div { height: 25px !important; }
-             .nav-left strong { font-size: 1.1rem !important; }
-             .nav-right-btn { padding: 8px 12px; font-size: 0.8rem; gap: 6px; }
+             .nav-left img { width: 45px !important; height: 45px !important; }
+             .nav-left div { height: 30px !important; }
+             .nav-left strong { font-size: 1.2rem !important; }
+             .nav-right-btn { padding: 8px 14px; font-size: 0.85rem; gap: 6px; }
              .nav-right-btn img { width: 16px !important; }
 
-             /* Teks Hero dipindah ke tengah & dikasih Card Kaca biar ga nabrak logo background */
+             /* KOTAK KACA KHUSUS TEKS & TOMBOL DI HP */
              .hero-content-right {
                  position: absolute;
-                 top: 50%;
-                 left: 50%;
-                 transform: translate(-50%, -50%);
-                 right: auto;
-                 width: 90%;
-                 height: auto;
-                 padding: 30px 20px;
-                 background: rgba(255, 255, 255, 0.85); 
-                 backdrop-filter: blur(15px);
-                 -webkit-backdrop-filter: blur(15px);
-                 border-radius: 24px;
-                 box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-                 align-items: center;
+                 top: auto !important;
+                 bottom: 90px !important; /* Ditaruh agak bawah biar logo pohon di background tetep keliatan */
+                 left: 5% !important;
+                 right: 5% !important;
+                 width: 90% !important;
+                 padding: 25px 20px !important;
+                 background: rgba(255, 255, 255, 0.85) !important;
+                 backdrop-filter: blur(15px) !important;
+                 -webkit-backdrop-filter: blur(15px) !important;
+                 border: 1px solid rgba(255,255,255,0.6) !important;
+                 border-radius: 24px !important;
                  text-align: center;
+                 align-items: center;
+                 box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;
+                 transform: none !important;
+                 animation: none !important; /* Matiin animasi geser di HP biar ga lag */
              }
 
-             .hero-title { font-size: 2.2rem; margin-bottom: 15px; }
-             .hero-subtitle { font-size: 0.95rem; margin-bottom: 25px; }
+             /* Ukuran Font Disesuaikan buat HP */
+             .hero-title { font-size: 2.1rem !important; margin-bottom: 10px !important; letter-spacing: -1px !important; line-height: 1.1 !important; }
+             .hero-subtitle { font-size: 0.9rem !important; margin-bottom: 20px !important; line-height: 1.5 !important; }
+
+             /* Tombol Ditumpuk Vertikal Biar Gampang Dipencet */
+             .hero-content-right > div {
+                 flex-direction: column !important;
+                 width: 100% !important;
+                 gap: 12px !important;
+             }
+             .hero-content-right > div > button {
+                 width: 100% !important;
+                 padding: 14px !important;
+                 font-size: 1rem !important;
+                 justify-content: center;
+             }
+
+             /* Turunin icon scroll panah ke bawah */
+             .scroll-indicator { bottom: 20px !important; font-size: 1.5rem !important; }
              
-             /* Tombol ditumpuk atas-bawah biar muat di HP */
-             .hero-content-right div { flex-direction: column; width: 100%; gap: 10px !important; }
-             .hero-content-right button { width: 100%; padding: 14px 20px !important; font-size: 1rem !important; }
-             
-             .section-title { font-size: 1.8rem; }
-             .advantages-section { padding: 60px 5% 80px 5%; }
+             /* Jarak section fitur dirapihin */
+             .section-title { font-size: 1.8rem !important; }
+             .advantages-section { padding: 60px 5% 80px 5% !important; }
          }
       </style>
 
