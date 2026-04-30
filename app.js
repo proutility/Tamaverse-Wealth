@@ -125,7 +125,7 @@ auth.onAuthStateChanged((user) => {
             TAMPILAN DESKTOP (LAPTOP/PC)
          ========================================= */
          .desktop-view { display: block; }
-         .login-hero { width: 100vw; height: 100vh; background: #f8fafc url('bg-login.jpg') no-repeat center center/cover fixed; position: relative; box-sizing: border-box; }
+         .login-hero { width: 100vw; height: 100vh; background: #f8fafc url('bg-login.png') no-repeat center center/cover fixed; position: relative; box-sizing: border-box; }
          .landing-nav { position: absolute; top: 0; left: 0; width: 100%; padding: 25px 5%; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; z-index: 20; }
          .nav-left { display: flex; align-items: center; gap: 12px; }
          .nav-right-btn { background: white; border: 1px solid #e2e8f0; padding: 10px 20px; border-radius: 30px; font-size: 0.95rem; font-weight: 700; color: #1e293b; cursor: pointer; display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: all 0.3s ease; }
@@ -138,7 +138,7 @@ auth.onAuthStateChanged((user) => {
          .scroll-indicator { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); color: #94a3b8; font-size: 2rem; cursor: pointer; animation: bounce 2s infinite; z-index: 11; transition: color 0.3s; }
          .scroll-indicator:hover { color: #16a34a; }
          @keyframes bounce { 0%, 20%, 50%, 80%, 100% {transform: translate(-50%, 0);} 40% {transform: translate(-50%, -10px);} 60% {transform: translate(-50%, -5px);} }
-         .advantages-section { width: 100%; min-height: 100vh; background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(241, 245, 249, 0.92) 100%), url('bg-login.jpg') no-repeat center bottom/cover; box-sizing: border-box; padding: 100px 5% 120px 5%; display: flex; flex-direction: column; align-items: center; position: relative; z-index: 5; }
+         .advantages-section { width: 100%; min-height: 100vh; background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(241, 245, 249, 0.92) 100%), url('bg-login.png') no-repeat center bottom/cover; box-sizing: border-box; padding: 100px 5% 120px 5%; display: flex; flex-direction: column; align-items: center; position: relative; z-index: 5; }
          .section-header-wrap { text-align: center; margin-bottom: 70px; }
          .section-tagline { color: #16a34a; font-weight: 800; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px; display: block; }
          .section-title { font-size: 2.6rem; font-weight: 900; color: #1e293b; margin: 0; letter-spacing: -1px; }
