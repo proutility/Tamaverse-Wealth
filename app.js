@@ -109,9 +109,6 @@ function getGreetingIcon() {
 document.body.style.opacity = "0";
 document.body.style.transition = "opacity 0.3s ease";
 
-// =========================================================================
-// PERBAIKAN POIN 3: LOGIKA BARU AUTH & KEAMANAN
-// =========================================================================
 auth.onAuthStateChanged((user) => {
   document.body.style.opacity = "1"; // Munculin layar setelah selesai ngecek
 
@@ -119,14 +116,11 @@ auth.onAuthStateChanged((user) => {
     currentUser = user.displayName || user.email.split('@')[0];
     currentUid = user.uid;
     
-    // 1. Tarik data dulu dari Firebase (termasuk ngecek user punya PIN atau enggak)
-    loadDataFromFirebase().then(() => {
-        // 2. Setelah data ditarik, jalankan sistem keamanan
-        checkSecurityOnStartup();
-    });
+    // Tarik data dari Firebase, SETELAH ITU baru cek PIN/Fingerprint
+    loadDataFromFirebase();
       
   } else {
-    // SENSOR FINGERPRINT LOKAL (PEMANCING GOOGLE LOGIN) - Tetap seperti kemarin
+    // SENSOR FINGERPRINT LOKAL (PEMANCING GOOGLE LOGIN DARI LANDING PAGE)
     window.triggerFingerprint = async () => {
         if (window.PublicKeyCredential) {
             try {
@@ -142,7 +136,6 @@ auth.onAuthStateChanged((user) => {
                         timeout: 60000
                     }
                 });
-                // Kalo Jempol Cocok, langsung buka Popup Google
                 window.targetPageAfterLogin = 'dashboard';
                 login(); 
             } catch (err) {
@@ -153,60 +146,87 @@ auth.onAuthStateChanged((user) => {
         }
     };
 
-    // Render Landing Page
+    // Render Landing Page Kalo Belum Login
     renderLandingPage();
   }
 });
 
-// FUNGSI LOGIKA KEAMANAN SAAT APLIKASI DIBUKA
-// Ini menjawab poin 3: Dahulukan Biometrik, kalo batal/gagal baru munculin PIN.
-async function checkSecurityOnStartup() {
-    // Diasumsikan lu punya flag di database: userProfile.pinEnabled (true/false)
-    // Dan userProfile.biometricEnabled (true/false) - opsional, kalo gak ada anggap aja enabled.
+function login(){
+  // Pakai Popup biar gak muncul blank putih redirect
+  const provider = new firebase.auth.GoogleAuthProvider();
+  auth.signInWithPopup(provider).catch((error) => alert("Gagal login bro: " + error.message));
+}
+
+function logout() { auth.signOut().then(() => location.reload()); }
+
+function loadDataFromFirebase() {
+  db.collection("usersData").doc(currentUid).get().then((doc) => {
+    if (doc.exists) {
+      let data = doc.data();
+      transactions = data.transactions || [];
+      goals = data.goals || [];
+      debts = data.debts || [];
+      budgetsData = data.budgetsData || {};
+      assetsData = data.assetsData || {};
+      if(data.weddingData) weddingData = data.weddingData;
+      if(data.userProfile) userProfile = data.userProfile;
+    }
+    assets = getAssetsFor(defaultYM);
     
-    // Kalo user gak setting PIN sama sekali, langsung masuk dashboard
+    // --- CEGATAN PIN & FINGERPRINT SETELAH LOGIN ---
+    checkSecurityOnStartup();
+
+    if ("Notification" in window) {
+        Notification.requestPermission().then(permission => {
+            if (permission === "granted") console.log("Izin notifikasi diberikan!");
+        });
+    }
+
+  }).catch((error) => {
+    alert("Gagal narik data dari server bro!");
+  });
+}
+
+// LOGIKA UTAMA KEAMANAN: BIOMETRIK DULUAN, KALAU BATAL BARU MUNCUL PIN
+async function checkSecurityOnStartup() {
+    currentPinInput = "";
+    
+    // Kalau belum pernah set PIN sama sekali
     if (!userProfile.pin || userProfile.pin === "") {
-        renderDashboard(); 
+        renderPinScreen('setup'); 
         return;
     }
 
-    // Coba trigger biometrik bawaan HP dulu (Native Biometric prompt)
+    // Kalau udah punya PIN, kita coba pancing Fingerprint/FaceID HP nya
     if (window.PublicKeyCredential && navigator.credentials.get) {
         try {
-            // Ini cuma pancingan buat munculin prompt sistem, challenge bebas
             const challenge = new Uint8Array(32);
             window.crypto.getRandomValues(challenge);
             
-            // PROMPT SIDIK JARI/FACE ID MUNCUL DI SINI
+            // HP akan memunculkan layar Fingerprint di sini
             await navigator.credentials.get({
                 publicKey: {
                     challenge: challenge,
                     rpId: window.location.hostname,
-                    userVerification: "required", // Wajib verifikasi
+                    userVerification: "required",
                     timeout: 60000
                 }
             });
 
-            // JIKA SUKSES (User nempelin jari):
-            console.log("Keamanan: Biometrik Cocok.");
-            renderDashboard(); // Langsung masuk, PIN gausah muncul.
+            // JIKA SIDIK JARI COCOK: Langsung buka aplikasi, PIN gak usah muncul
+            console.log("Fingerprint Cocok!");
+            unlockApp(); 
 
         } catch (err) {
-            // JIKA GAGAL / USER PENCET 'CANCEL' / PINJAM HP TEMEN:
-            console.log("Keamanan: Biometrik gagal/batal, munculin PIN.", err);
-            
-            // Panggil fungsi munculin modal PIN lu di sini.
-            // Contoh: showPinModal( 'verify', () => renderDashboard() ); 
-            alert("Silakan masukkan PIN Anda (Simulasi Modal PIN)"); // <-- Ganti dengan fungsi modal PIN lu
+            // JIKA SIDIK JARI SALAH ATAU DI-CANCEL (Pencet tombol 'Gunakan PIN' di HP)
+            console.log("Fingerprint batal, munculkan PIN layar.");
+            renderPinScreen('verify');
         }
     } else {
-        // HP Jadul gak support biometrik, langsung munculin PIN
-        console.log("Keamanan: Browser tidak support biometrik, munculin PIN.");
-        // Contoh: showPinModal( 'verify', () => renderDashboard() );
-        alert("Silakan masukkan PIN Anda (HP Gak support sidik jari)"); // <-- Ganti dengan fungsi modal PIN lu
+        // Kalau browser/HP jadul gak support biometrik, langsung munculin PIN
+        renderPinScreen('verify');
     }
 }
-
 
 function renderLandingPage() {
     document.getElementById("app").innerHTML = `
