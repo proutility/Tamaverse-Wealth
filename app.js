@@ -110,6 +110,10 @@ auth.onAuthStateChanged((user) => {
     currentUser = user.displayName || user.email.split('@')[0];
     currentUid = user.uid;
     loadDataFromFirebase();
+
+      if(window.targetPageAfterLogin) {
+        setTimeout(() => showPage(window.targetPageAfterLogin), 1500); // 1.5 detik nunggu layar loading kelar
+    }
       
 } else {
     document.getElementById("app").innerHTML = `
@@ -121,7 +125,6 @@ auth.onAuthStateChanged((user) => {
             TAMPILAN DESKTOP (LAPTOP/PC)
          ========================================= */
          .desktop-view { display: block; }
-         
          .login-hero { width: 100vw; height: 100vh; background: #f8fafc url('bg-login.jpg') no-repeat center center/cover fixed; position: relative; box-sizing: border-box; }
          .landing-nav { position: absolute; top: 0; left: 0; width: 100%; padding: 25px 5%; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; z-index: 20; }
          .nav-left { display: flex; align-items: center; gap: 12px; }
@@ -150,43 +153,42 @@ auth.onAuthStateChanged((user) => {
          @keyframes fadeUpAnim { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
 
          /* =========================================
-            TAMPILAN MOBILE (HP) - ALA M-BANKING
+            TAMPILAN MOBILE (HP) - NATIVE APP STYLE
          ========================================= */
          .mobile-view { display: none; }
 
          @media (max-width: 768px) {
              .desktop-view { display: none !important; }
-             #landing-wrapper { overflow: hidden !important; } /* Mengunci scroll biar seperti aplikasi native */
+             #landing-wrapper { overflow: hidden !important; }
              
              .mobile-view { 
                  display: flex !important; 
                  flex-direction: column; 
-                 height: 100vh; 
+                 height: 100dvh; /* Pakai dvh biar gak kepotong address bar browser HP */
                  width: 100vw; 
-                 background: linear-gradient(180deg, #15803d 0%, #16a34a 60%, #10b981 100%); /* Latar gradien hijau premium */
+                 background: #16a34a; /* Warna solid hijau bank */
                  position: relative; 
                  overflow: hidden; 
              }
-
-             /* Animasi Float untuk Logo & Bubble */
-             @keyframes floatMobile { 
-                 0%, 100% { transform: translateY(0); } 
-                 50% { transform: translateY(-15px); } 
-             }
              
-             /* Sembunyikan scrollbar di Fast Menu */
+             /* Sembunyikan scrollbar di Fast Menu tapi tetap bisa discroll */
+             .mobile-fast-menu {
+                 overflow-x: auto;
+                 scroll-snap-type: x mandatory;
+                 -webkit-overflow-scrolling: touch;
+             }
              .mobile-fast-menu::-webkit-scrollbar { display: none; }
              
-             .fast-menu-item { min-width: 70px; display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; }
-             .fast-menu-icon { width: 55px; height: 55px; border-radius: 18px; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; box-shadow: inset 0 2px 4px rgba(255,255,255,0.5), 0 4px 6px rgba(0,0,0,0.02); }
-             .fast-menu-text { font-size: 0.75rem; font-weight: 700; color: #475569; }
+             .fast-menu-item { min-width: 80px; scroll-snap-align: start; display: flex; flex-direction: column; align-items: center; gap: 10px; cursor: pointer; }
+             .fast-menu-icon { width: 55px; height: 55px; border-radius: 18px; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; box-shadow: inset 0 2px 4px rgba(255,255,255,0.8), 0 4px 6px rgba(0,0,0,0.05); }
+             .fast-menu-text { font-size: 0.75rem; font-weight: 700; color: #1e293b; }
          }
       </style>
 
       <div id="landing-wrapper">
           
           <!-- ======================================================== -->
-          <!-- 1. TAMPILAN DESKTOP (TETAP AMAN & ELEGAN)                -->
+          <!-- 1. TAMPILAN DESKTOP (TETAP AMAN)                         -->
           <!-- ======================================================== -->
           <div class="desktop-view">
               <div class="login-hero">
@@ -206,7 +208,7 @@ auth.onAuthStateChanged((user) => {
                       <h1 class="hero-title">Satu Ekosistem<br>Untuk <span>Kekayaan Anda.</span></h1>
                       <p class="hero-subtitle">Command center eksklusif yang memadukan pencatatan aset, analisis portofolio saham, hingga perencanaan masa depan dalam satu pengalaman premium.</p>
                       <div style="display: flex; gap: 15px;">
-                          <button onclick="login()" style="padding: 16px 30px; background: #16a34a; color: white; border: none; border-radius: 14px; font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: 0.3s; box-shadow: 0 8px 20px rgba(22, 163, 74, 0.3);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 12px 25px rgba(22, 163, 74, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 20px rgba(22, 163, 74, 0.3)';">
+                          <button onclick="window.targetPageAfterLogin='dashboard'; login()" style="padding: 16px 30px; background: #16a34a; color: white; border: none; border-radius: 14px; font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: 0.3s; box-shadow: 0 8px 20px rgba(22, 163, 74, 0.3);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 12px 25px rgba(22, 163, 74, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 20px rgba(22, 163, 74, 0.3)';">
                               Mulai Sekarang
                           </button>
                           <button onclick="document.getElementById('advantagesSection').scrollIntoView({behavior: 'smooth'});" style="padding: 16px 30px; background: rgba(241, 245, 249, 0.8); backdrop-filter: blur(10px); color: #334155; border: 1px solid #cbd5e1; border-radius: 14px; font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: 0.3s;" onmouseover="this.style.background='#e2e8f0';" onmouseout="this.style.background='rgba(241, 245, 249, 0.8)';">
@@ -255,7 +257,7 @@ auth.onAuthStateChanged((user) => {
                       </div>
                   </div>
                   <div class="fade-up-element" style="margin-top: 60px; animation-delay: 0.8s;">
-                      <button onclick="login()" style="padding: 14px 28px; border-radius: 30px; background: white; color: #16a34a; border: 2px solid #16a34a; font-weight: 700; cursor: pointer; transition: 0.3s;" onmouseover="this.style.background='#16a34a'; this.style.color='white';" onmouseout="this.style.background='white'; this.style.color='#16a34a';">Mulai Manajemen Aset Sekarang</button>
+                      <button onclick="window.targetPageAfterLogin='dashboard'; login()" style="padding: 14px 28px; border-radius: 30px; background: white; color: #16a34a; border: 2px solid #16a34a; font-weight: 700; cursor: pointer; transition: 0.3s;" onmouseover="this.style.background='#16a34a'; this.style.color='white';" onmouseout="this.style.background='white'; this.style.color='#16a34a';">Mulai Manajemen Aset Sekarang</button>
                   </div>
               </div>
           </div>
@@ -266,79 +268,79 @@ auth.onAuthStateChanged((user) => {
           <div class="mobile-view">
               
               <!-- Bagian Atas (Hijau) -->
-              <div style="flex: 1; padding: 25px 20px; display: flex; flex-direction: column; align-items: center; position: relative; z-index: 2;">
+              <div style="flex: 1; padding: 20px 20px 0 20px; display: flex; flex-direction: column; align-items: center; position: relative; z-index: 2;">
                   
                   <!-- Top Nav -->
-                  <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; margin-top: 15px;">
+                  <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; margin-top: 10px;">
                       
-                      <!-- Bendera ID (Dibuat pakai CSS biar ringan) -->
-                      <div style="background: rgba(255,255,255,0.2); padding: 5px 12px; border-radius: 20px; color: white; font-size: 0.8rem; font-weight: 700; display: flex; align-items: center; gap: 6px;">
-                          <div style="width: 16px; height: 16px; border-radius: 50%; overflow: hidden; display: flex; flex-direction: column; border: 1px solid rgba(255,255,255,0.5);">
-                              <div style="background: #ef4444; flex: 1;"></div>
-                              <div style="background: #ffffff; flex: 1;"></div>
-                          </div> 
-                          ID
+                      <!-- Bendera ID/EN (Bisa diklik) -->
+                      <div onclick="
+                          let langText = this.querySelector('#langText');
+                          let heroText = document.getElementById('mobileHeroText');
+                          if(langText.innerText === 'ID') {
+                              langText.innerText = 'EN';
+                              this.querySelector('#langFlag').innerText = '🇺🇸';
+                              heroText.innerHTML = 'Track Assets, Budgets & Stocks<br>Easily inside Tamaverse';
+                          } else {
+                              langText.innerText = 'ID';
+                              this.querySelector('#langFlag').innerText = '🇮🇩';
+                              heroText.innerHTML = 'Catat Aset, Budgeting & Saham<br>Praktis Langsung di Tamaverse';
+                          }
+                      " style="background: rgba(255,255,255,0.2); padding: 6px 12px; border-radius: 20px; color: white; font-size: 0.85rem; font-weight: 700; display: flex; align-items: center; gap: 6px; cursor: pointer; user-select: none;">
+                          <span id="langFlag" style="font-size: 1.1rem;">🇮🇩</span> 
+                          <span id="langText">ID</span>
                       </div>
                       
-                      <!-- Logo Teks Tengah -->
-                      <div style="color: white; font-weight: 900; font-size: 1.4rem; display: flex; flex-direction: column; align-items: center; line-height: 1.1;">
-                          TAMA<span style="font-size: 0.95rem; font-weight: 600;">Wealth</span>
+                      <!-- Logo Teks Elegan (Font Serif Klasik) -->
+                      <div style="color: white; font-family: 'Playfair Display', 'Georgia', serif; font-size: 1.7rem; font-weight: 800; display: flex; flex-direction: column; align-items: center; line-height: 1;">
+                          TAMA
+                          <span style="font-family: 'Inter', sans-serif; font-size: 0.8rem; font-weight: 500; letter-spacing: 4px; margin-top: 2px;">WEALTH</span>
                       </div>
                       
                       <!-- Tombol Bantuan -->
-                      <div style="background: rgba(255,255,255,0.2); padding: 5px 12px; border-radius: 20px; color: white; font-size: 0.8rem; font-weight: 700; display: flex; align-items: center; gap: 6px;">
+                      <div style="background: rgba(255,255,255,0.2); padding: 6px 12px; border-radius: 20px; color: white; font-size: 0.85rem; font-weight: 700; display: flex; align-items: center; gap: 6px;">
                           <i class="fas fa-headset"></i> Kontak
                       </div>
                   </div>
 
-                  <!-- Judul Hero Mobile -->
-                  <h2 style="color: white; font-size: 1.25rem; text-align: center; line-height: 1.5; margin-bottom: 20px; font-weight: 700; letter-spacing: -0.5px;">
+                  <!-- Judul Hero Mobile (Bisa berubah ID/EN) -->
+                  <h2 id="mobileHeroText" style="color: white; font-size: 1.25rem; text-align: center; line-height: 1.5; margin-bottom: auto; font-weight: 700; letter-spacing: -0.3px; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                       Catat Aset, Budgeting & Saham<br>Praktis Langsung di Tamaverse
                   </h2>
 
-                  <!-- Ilustrasi Mengambang (Logo Lo & Bubble) -->
-                  <div style="position: relative; width: 100%; flex: 1; display: flex; justify-content: center; align-items: center; margin-bottom: 20px;">
-                      
-                      <!-- Efek Cahaya di belakang logo -->
-                      <div style="position: absolute; background: rgba(255,255,255,0.15); width: 180px; height: 180px; border-radius: 50%; filter: blur(25px);"></div>
-                      
-                      <!-- Logo Utama -->
-                      <img src="logo.png" style="width: 160px; height: 160px; object-fit: contain; animation: floatMobile 3s ease-in-out infinite; z-index: 10; filter: drop-shadow(0 15px 25px rgba(0,0,0,0.3));">
-                      
-                      <!-- Bubble 1: Rp -->
-                      <div style="position: absolute; top: 10%; left: 10%; background: white; color: #16a34a; padding: 6px 12px; border-radius: 12px; font-weight: 800; font-size: 0.9rem; animation: floatMobile 3.5s ease-in-out infinite 0.5s; z-index: 11; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">Rp</div>
-                      
-                      <!-- Bubble 2: Icon Saham -->
-                      <div style="position: absolute; bottom: 15%; right: 10%; background: white; color: #16a34a; padding: 10px; border-radius: 50%; font-weight: 800; font-size: 1rem; animation: floatMobile 2.5s ease-in-out infinite 1s; z-index: 11; box-shadow: 0 4px 10px rgba(0,0,0,0.15);"><i class="fas fa-chart-line"></i></div>
+                  <!-- Tempat Ilustrasi Ala BRImo -->
+                  <!-- INGAT BRO: Lo harus upload gambar ilustrasi (misal orang lagi belanja/pegang HP) ke GitHub lo dengan nama "illustration.png" -->
+                  <div style="width: 100%; display: flex; justify-content: center; align-items: flex-end; padding-top: 20px;">
+                      <img src="illustration.png" alt="Ilustrasi" onerror="this.src='logo.png'; this.style.filter='brightness(0) invert(1) opacity(0.5)';" style="max-height: 260px; width: auto; object-fit: contain; z-index: 10;">
                   </div>
               </div>
 
-              <!-- Bagian Bawah (Putih) - Lengkungan & Tombol Login -->
-              <div style="background: #ffffff; width: 100%; border-radius: 35px 35px 0 0; padding: 25px 20px 30px 20px; z-index: 5; box-shadow: 0 -10px 25px rgba(0,0,0,0.15); display: flex; flex-direction: column;">
+              <!-- Bagian Bawah (Putih) - Menu & Login -->
+              <div style="background: #ffffff; width: 100%; border-radius: 35px 35px 0 0; padding: 25px 20px 30px 20px; z-index: 5; box-shadow: 0 -10px 25px rgba(0,0,0,0.1); display: flex; flex-direction: column;">
                   
                   <div style="text-align: center; color: #1e293b; font-weight: 800; font-size: 1.1rem; margin-bottom: 20px;">
                       Fast Menu <i class="fas fa-info-circle" style="color: #3b82f6; margin-left: 5px;"></i>
                   </div>
 
-                  <!-- Fast Menu Scroll Horizontal (Icon Sesuai App Lo) -->
-                  <div class="mobile-fast-menu" style="display: flex; gap: 15px; overflow-x: auto; padding-bottom: 15px;">
-                      <div class="fast-menu-item" onclick="login()">
+                  <!-- Fast Menu Scroll Horizontal -->
+                  <div class="mobile-fast-menu" style="display: flex; gap: 15px; padding-bottom: 15px; padding-left: 5px; padding-right: 5px;">
+                      <div class="fast-menu-item" onclick="window.targetPageAfterLogin='aset'; login()">
                           <div class="fast-menu-icon" style="background: #e0f2fe; color: #0284c7;"><i class="fas fa-coins"></i></div>
                           <span class="fast-menu-text">Asetku</span>
                       </div>
-                      <div class="fast-menu-item" onclick="login()">
+                      <div class="fast-menu-item" onclick="window.targetPageAfterLogin='budgeting'; login()">
                           <div class="fast-menu-icon" style="background: #dcfce7; color: #16a34a;"><i class="fas fa-chart-pie"></i></div>
                           <span class="fast-menu-text">Budget</span>
                       </div>
-                      <div class="fast-menu-item" onclick="login()">
+                      <div class="fast-menu-item" onclick="window.targetPageAfterLogin='transaksi'; login()">
                           <div class="fast-menu-icon" style="background: #fef9c3; color: #ca8a04;"><i class="fas fa-exchange-alt"></i></div>
                           <span class="fast-menu-text">Mutasi</span>
                       </div>
-                      <div class="fast-menu-item" onclick="login()">
+                      <div class="fast-menu-item" onclick="window.targetPageAfterLogin='target'; login()">
                           <div class="fast-menu-icon" style="background: #f3e8ff; color: #9333ea;"><i class="fas fa-bullseye"></i></div>
                           <span class="fast-menu-text">Target</span>
                       </div>
-                      <div class="fast-menu-item" onclick="login()">
+                      <div class="fast-menu-item" onclick="window.targetPageAfterLogin='kalkulator'; login()">
                           <div class="fast-menu-icon" style="background: #e0e7ff; color: #4f46e5;"><i class="fas fa-chart-line"></i></div>
                           <span class="fast-menu-text">Saham</span>
                       </div>
@@ -352,10 +354,10 @@ auth.onAuthStateChanged((user) => {
 
                   <!-- Baris Tombol Login & Fingerprint -->
                   <div style="display: flex; gap: 12px; margin-top: auto;">
-                      <button onclick="login()" style="flex: 1; background: #0f6c2c; color: white; border: none; border-radius: 16px; font-size: 1.15rem; font-weight: 700; padding: 16px; display: flex; justify-content: center; align-items: center; gap: 10px; box-shadow: 0 8px 15px rgba(21, 128, 61, 0.3);">
+                      <button onclick="window.targetPageAfterLogin='dashboard'; login()" style="flex: 1; background: #0f6c2c; color: white; border: none; border-radius: 16px; font-size: 1.15rem; font-weight: 700; padding: 16px; display: flex; justify-content: center; align-items: center; gap: 10px; box-shadow: 0 8px 15px rgba(21, 128, 61, 0.3);">
                           Login
                       </button>
-                      <button onclick="login()" style="width: 60px; height: 60px; background: #0f6c2c; color: white; border: none; border-radius: 16px; font-size: 1.6rem; display: flex; justify-content: center; align-items: center; box-shadow: 0 8px 15px rgba(21, 128, 61, 0.3);">
+                      <button onclick="window.targetPageAfterLogin='dashboard'; login()" style="width: 60px; height: 60px; background: #0f6c2c; color: white; border: none; border-radius: 16px; font-size: 1.6rem; display: flex; justify-content: center; align-items: center; box-shadow: 0 8px 15px rgba(21, 128, 61, 0.3);">
                           <i class="fas fa-fingerprint"></i>
                       </button>
                   </div>
@@ -367,6 +369,7 @@ auth.onAuthStateChanged((user) => {
     `;
   }
 });
+
 function login(){
   const provider = new firebase.auth.GoogleAuthProvider();
   auth.signInWithPopup(provider).catch((error) => alert("Gagal login bro: " + error.message));
