@@ -109,7 +109,9 @@ function getGreetingIcon() {
 document.body.style.opacity = "0";
 document.body.style.transition = "opacity 0.3s ease";
 
-// PASTIKAN HANYA ADA SATU auth.onAuthStateChanged
+// =========================================================================
+// PERBAIKAN POIN 3: LOGIKA BARU AUTH & KEAMANAN
+// =========================================================================
 auth.onAuthStateChanged((user) => {
   document.body.style.opacity = "1"; // Munculin layar setelah selesai ngecek
 
@@ -117,11 +119,14 @@ auth.onAuthStateChanged((user) => {
     currentUser = user.displayName || user.email.split('@')[0];
     currentUid = user.uid;
     
-    // Tarik data dari Firebase (Sistem PIN bakal dipanggil di dalem sini)
-    loadDataFromFirebase();
+    // 1. Tarik data dulu dari Firebase (termasuk ngecek user punya PIN atau enggak)
+    loadDataFromFirebase().then(() => {
+        // 2. Setelah data ditarik, jalankan sistem keamanan
+        checkSecurityOnStartup();
+    });
       
   } else {
-    // SENSOR FINGERPRINT LOKAL (PEMANCING GOOGLE LOGIN)
+    // SENSOR FINGERPRINT LOKAL (PEMANCING GOOGLE LOGIN) - Tetap seperti kemarin
     window.triggerFingerprint = async () => {
         if (window.PublicKeyCredential) {
             try {
@@ -148,6 +153,62 @@ auth.onAuthStateChanged((user) => {
         }
     };
 
+    // Render Landing Page
+    renderLandingPage();
+  }
+});
+
+// FUNGSI LOGIKA KEAMANAN SAAT APLIKASI DIBUKA
+// Ini menjawab poin 3: Dahulukan Biometrik, kalo batal/gagal baru munculin PIN.
+async function checkSecurityOnStartup() {
+    // Diasumsikan lu punya flag di database: userProfile.pinEnabled (true/false)
+    // Dan userProfile.biometricEnabled (true/false) - opsional, kalo gak ada anggap aja enabled.
+    
+    // Kalo user gak setting PIN sama sekali, langsung masuk dashboard
+    if (!userProfile.pin || userProfile.pin === "") {
+        renderDashboard(); 
+        return;
+    }
+
+    // Coba trigger biometrik bawaan HP dulu (Native Biometric prompt)
+    if (window.PublicKeyCredential && navigator.credentials.get) {
+        try {
+            // Ini cuma pancingan buat munculin prompt sistem, challenge bebas
+            const challenge = new Uint8Array(32);
+            window.crypto.getRandomValues(challenge);
+            
+            // PROMPT SIDIK JARI/FACE ID MUNCUL DI SINI
+            await navigator.credentials.get({
+                publicKey: {
+                    challenge: challenge,
+                    rpId: window.location.hostname,
+                    userVerification: "required", // Wajib verifikasi
+                    timeout: 60000
+                }
+            });
+
+            // JIKA SUKSES (User nempelin jari):
+            console.log("Keamanan: Biometrik Cocok.");
+            renderDashboard(); // Langsung masuk, PIN gausah muncul.
+
+        } catch (err) {
+            // JIKA GAGAL / USER PENCET 'CANCEL' / PINJAM HP TEMEN:
+            console.log("Keamanan: Biometrik gagal/batal, munculin PIN.", err);
+            
+            // Panggil fungsi munculin modal PIN lu di sini.
+            // Contoh: showPinModal( 'verify', () => renderDashboard() ); 
+            alert("Silakan masukkan PIN Anda (Simulasi Modal PIN)"); // <-- Ganti dengan fungsi modal PIN lu
+        }
+    } else {
+        // HP Jadul gak support biometrik, langsung munculin PIN
+        console.log("Keamanan: Browser tidak support biometrik, munculin PIN.");
+        // Contoh: showPinModal( 'verify', () => renderDashboard() );
+        alert("Silakan masukkan PIN Anda (HP Gak support sidik jari)"); // <-- Ganti dengan fungsi modal PIN lu
+    }
+}
+
+
+function renderLandingPage() {
     document.getElementById("app").innerHTML = `
       <style>
          /* KUNCI MATI LAYAR HP BIAR GAK BISA DI SCROLL/GESER SAMA SEKALI */
@@ -211,6 +272,20 @@ auth.onAuthStateChanged((user) => {
                  overflow: hidden; 
              }
              
+             /* PERBAIKAN POIN 1: CSS agar Logo Tengah di Mobile */
+             .mobile-header-container {
+                 width: 100%; display: flex; justify-content: space-between; align-items: center; 
+                 margin-bottom: 25px; margin-top: 10px; position: relative; min-height: 40px;
+             }
+             
+             .mobile-logo-text {
+                 color: white; font-family: 'Playfair Display', 'Georgia', serif; 
+                 font-size: 1.7rem; font-weight: 800; display: flex; flex-direction: column; 
+                 align-items: center; line-height: 1;
+                 /* Kunci agar pasti di tengah layar, mengabaikan tombol kiri-kanan */
+                 position: absolute; left: 50%; transform: translateX(-50%); z-index: 1;
+             }
+             
              .mobile-fast-menu { overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
              .fast-menu-item { min-width: 80px; scroll-snap-align: start; display: flex; flex-direction: column; align-items: center; gap: 10px; cursor: pointer; }
              .fast-menu-icon { width: 55px; height: 55px; border-radius: 18px; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; box-shadow: inset 0 2px 4px rgba(255,255,255,0.8), 0 4px 6px rgba(0,0,0,0.05); }
@@ -269,7 +344,9 @@ auth.onAuthStateChanged((user) => {
           <!-- TAMPILAN MOBILE NATIVE APP -->
           <div class="mobile-view">
               <div style="flex: 1; padding: 20px; display: flex; flex-direction: column; align-items: center; position: relative; z-index: 2; width: 100%; box-sizing: border-box;">
-                  <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; margin-top: 10px;">
+                  
+                  <!-- PERBAIKAN POIN 1: Container Header Mobile -->
+                  <div class="mobile-header-container">
                       <div onclick="
                           let langText = this.querySelector('#langText');
                           let heroText = document.getElementById('mobileHeroText');
@@ -282,16 +359,20 @@ auth.onAuthStateChanged((user) => {
                               this.querySelector('#langFlag').innerText = '🇮🇩';
                               heroText.innerHTML = 'Catat Aset, Budgeting & Saham<br>Praktis Langsung di Tamaverse';
                           }
-                      " style="background: rgba(255,255,255,0.15); padding: 6px 12px; border-radius: 20px; color: white; font-size: 0.85rem; font-weight: 700; display: flex; align-items: center; gap: 6px; cursor: pointer; user-select: none;">
+                      " style="background: rgba(255,255,255,0.15); padding: 6px 12px; border-radius: 20px; color: white; font-size: 0.85rem; font-weight: 700; display: flex; align-items: center; gap: 6px; cursor: pointer; user-select: none; z-index: 2; position: relative;">
                           <span id="langFlag" style="font-size: 1.1rem;">🇮🇩</span> <span id="langText">ID</span>
                       </div>
-                      <div style="color: white; font-family: 'Playfair Display', 'Georgia', serif; font-size: 1.7rem; font-weight: 800; display: flex; flex-direction: column; align-items: center; line-height: 1;">
+                      
+                      <!-- Teks Logo TAMAWEALTH (Sekarang dijamin di tengah) -->
+                      <div class="mobile-logo-text">
                           TAMA<span style="font-family: 'Inter', sans-serif; font-size: 0.8rem; font-weight: 500; letter-spacing: 4px; margin-top: 2px;">WEALTH</span>
                       </div>
-                      <div style="background: rgba(255,255,255,0.15); padding: 6px 12px; border-radius: 20px; color: white; font-size: 0.85rem; font-weight: 700; display: flex; align-items: center; gap: 6px;">
+                      
+                      <div style="background: rgba(255,255,255,0.15); padding: 6px 12px; border-radius: 20px; color: white; font-size: 0.85rem; font-weight: 700; display: flex; align-items: center; gap: 6px; z-index: 2; position: relative;">
                           <i class="fas fa-headset"></i> Kontak
                       </div>
                   </div>
+
                   <h2 id="mobileHeroText" style="color: white; font-size: 1.2rem; text-align: center; line-height: 1.5; margin-bottom: auto; font-weight: 700; letter-spacing: -0.3px; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">Catat Aset, Budgeting & Saham<br>Praktis Langsung di Tamaverse</h2>
                   <div style="width: 100%; flex: 1; display: flex; justify-content: center; align-items: center; padding-top: 10px; padding-bottom: 10px;">
                       <img src="illustration.png" alt="Ilustrasi" onerror="this.src='logo.png'; this.style.filter='brightness(0) invert(1) opacity(0.5)';" style="max-height: 260px; max-width: 100%; object-fit: contain; z-index: 10; animation: floatMobile 4s ease-in-out infinite; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.2)); transform: scale(1.05);">
@@ -321,8 +402,7 @@ auth.onAuthStateChanged((user) => {
           </div>
       </div>
     `;
-  }
-});
+}
 
 function login(){
   // Pakai Popup biar gak muncul blank putih redirect
