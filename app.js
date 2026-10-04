@@ -919,6 +919,14 @@ return `
          <button class="action" onclick="addWedVendor()" style="flex: 1; min-width: 150px; border-radius: 10px; font-weight: 700; background: #3b82f6; color: white; border: none; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); cursor: pointer;"><i class="fas fa-plus"></i> Tambah Vendor</button>
         </div>
       </div>
+
+      <!-- INI BAGIAN TOMBOL EXPORT EXCEL-NYA -->
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
+          <h3 style="margin:0; color:#1e293b; font-size: 1.15rem; font-weight: 800;">Daftar Vendor</h3>
+          <button onclick="exportVendorToExcel()" style="background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; padding: 10px 18px; border-radius: 10px; font-weight: 600; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.02);" onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='#f0fdf4'"><i class="fas fa-file-excel"></i> Export Excel</button>
+      </div>
+      <!-- BATAS TAMBAHAN -->
+
       <div class="card" style="overflow-x: auto; border-radius: 16px; border: 1px solid #e2e8f0; padding: 0;">
         <table id="wedVendorList" style="min-width: 100%; margin: 0;">
             <thead style="background: #f8fafc;">
@@ -3613,3 +3621,63 @@ function sendSystemNotification(title, message) {
 }
 
 if (document.getElementById("barChart")) setTimeout(update, 100);
+
+window.exportVendorToExcel = function() {
+    if(weddingData.vendors.length === 0) {
+        return alert("Belum ada data vendor buat di-export bro!");
+    }
+
+    // Format data biar rapih di Excel
+    let excelData = weddingData.vendors.map((v, index) => {
+        
+        // Gabungin daftar harga jadi satu teks turun ke bawah
+        let pricesStr = "-";
+        if (v.prices && v.prices.length > 0) {
+            pricesStr = v.prices.map(p => `${p.name}: Rp ${p.amount.toLocaleString('id-ID')}`).join('\n');
+        } else if (v.price) {
+            pricesStr = `Estimasi Awal: Rp ${v.price.toLocaleString('id-ID')}`;
+        }
+
+        // Gabungin Plus & Minus pakai nomor urut otomatis
+        let plusStr = "-";
+        if (v.plusList && v.plusList.length > 0) {
+            plusStr = v.plusList.map((p, i) => `${i + 1}. ${p}`).join('\n');
+        }
+
+        let minusStr = "-";
+        if (v.minusList && v.minusList.length > 0) {
+            minusStr = v.minusList.map((m, i) => `${i + 1}. ${m}`).join('\n');
+        }
+
+        // Struktur kolom Excel
+        return {
+            "No": index + 1,
+            "Nama Vendor": v.name,
+            "Layanan": v.service,
+            "Estimasi Harga": pricesStr,
+            "Kelebihan (Plus)": plusStr,
+            "Kekurangan (Minus)": minusStr,
+            "Status": v.status
+        };
+    });
+
+    // Bikin lembar kerja Excel
+    const worksheet = XLSX.utils.json_to_sheet(excelData);
+
+    // Atur lebar kolom (width) otomatis biar langsung rapih saat file dibuka
+    const wscols = [
+        {wch: 5},   // Kolom A: No
+        {wch: 25},  // Kolom B: Nama
+        {wch: 15},  // Kolom C: Layanan
+        {wch: 35},  // Kolom D: Harga
+        {wch: 45},  // Kolom E: Plus
+        {wch: 45},  // Kolom F: Minus
+        {wch: 15}   // Kolom G: Status
+    ];
+    worksheet['!cols'] = wscols;
+
+    // Compile jadi file .xlsx dan langsung Download!
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Vendor Tracker");
+    XLSX.writeFile(workbook, "Tamaverse_Wedding_Vendors.xlsx");
+};
