@@ -921,17 +921,18 @@ return `
       </div>
       <div class="card" style="overflow-x: auto; border-radius: 16px; border: 1px solid #e2e8f0; padding: 0;">
         <table id="wedVendorList" style="min-width: 100%; margin: 0;">
-          <thead style="background: #f8fafc;">
-          <tr>
-            <th style="padding:15px;">Nama Vendor</th>
-            <th>Layanan</th>
-            <th>Estimasi Harga</th>
-            <th>Plus</th>
-            <th>Minus</th>
-            <th>Status</th>
-            <th style="width: 100px; text-align: center;">Aksi</th>
-          </tr>
-        </thead>
+            <thead style="background: #f8fafc;">
+              <tr>
+                <th style="padding:15px; width:50px; text-align:center;">No</th>
+                <th>Nama Vendor</th>
+                <th>Layanan</th>
+                <th>Estimasi Harga</th>
+                <th>Plus</th>
+                <th>Minus</th>
+                <th>Status</th>
+                <th style="width: 100px; text-align: center;">Aksi</th>
+              </tr>
+            </thead>
           
           <tbody id="wedVendorTbody"></tbody>
         </table>
@@ -1533,9 +1534,13 @@ window.manageVendorField = function(id, field) {
     let vendor = weddingData.vendors.find(v => v.id === id);
     if (!vendor) return;
 
-    // Auto-migrasi data lama jadi format list/array bertumpuk
+    // Auto-migrasi data lama
     if (!vendor.prices) vendor.prices = vendor.price ? [{name: 'Estimasi Awal', amount: vendor.price}] : [];
-    if (!vendor.plusList) vendor.plusList = vendor.plus ? [vendor.plus] : [];
+    if (!vendor.plusList) {
+        vendor.plusList = [];
+        if (vendor.plus) vendor.plusList.push(vendor.plus);
+        if (vendor.plusminus) vendor.plusList.push("Catatan Lama: " + vendor.plusminus);
+    }
     if (!vendor.minusList) vendor.minusList = vendor.minus ? [vendor.minus] : [];
 
     let title = '';
@@ -1547,9 +1552,12 @@ window.manageVendorField = function(id, field) {
         vendor.prices.forEach((p, i) => {
             listHTML += `
             <div style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; padding:12px 15px; border-radius:12px; margin-bottom:10px; border:1px solid #e2e8f0; text-align:left; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
-                <div>
-                    <strong style="color:#1e293b; font-size:0.95rem; display:block;">${p.name}</strong>
-                    <span style="color:#0284c7; font-weight:800; font-size:1.1rem;">${formatRp(p.amount)}</span>
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <span style="color:#64748b; font-weight:800; font-size:1rem;">${i + 1}.</span>
+                    <div>
+                        <strong style="color:#1e293b; font-size:0.95rem; display:block;">${p.name}</strong>
+                        <span style="color:#0284c7; font-weight:800; font-size:1.1rem;">${formatRp(p.amount)}</span>
+                    </div>
                 </div>
                 <button style="background:#fee2e2; color:#ef4444; border:none; width:36px; height:36px; border-radius:10px; cursor:pointer; transition:0.2s;" onmouseover="this.style.background='#fecaca'" onmouseout="this.style.background='#fee2e2'" onclick="deleteVendorItem(${id}, 'price', ${i})"><i class="fas fa-trash"></i></button>
             </div>`;
@@ -1559,8 +1567,11 @@ window.manageVendorField = function(id, field) {
         if (vendor.plusList.length === 0) listHTML = '<div style="color:#94a3b8; font-size:0.9rem; margin-bottom:15px;">Belum ada kelebihan vendor ini</div>';
         vendor.plusList.forEach((p, i) => {
             listHTML += `
-            <div style="display:flex; justify-content:space-between; align-items:center; background:#f0fdf4; padding:12px 15px; border-radius:12px; margin-bottom:10px; border:1px solid #bbf7d0; text-align:left; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
-                <span style="color:#15803d; font-size:0.95rem; font-weight:600; flex:1; padding-right:10px;">${p}</span>
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; background:#f0fdf4; padding:12px 15px; border-radius:12px; margin-bottom:10px; border:1px solid #bbf7d0; text-align:left; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                <div style="display:flex; gap:8px; flex:1; padding-right:10px;">
+                    <span style="color:#16a34a; font-weight:800; font-size:0.95rem; margin-top:1px;">${i + 1}.</span>
+                    <span style="color:#15803d; font-size:0.95rem; font-weight:600; line-height:1.4;">${p}</span>
+                </div>
                 <button style="background:#fee2e2; color:#ef4444; border:none; width:36px; height:36px; border-radius:10px; cursor:pointer; transition:0.2s; flex-shrink:0;" onmouseover="this.style.background='#fecaca'" onmouseout="this.style.background='#fee2e2'" onclick="deleteVendorItem(${id}, 'plus', ${i})"><i class="fas fa-trash"></i></button>
             </div>`;
         });
@@ -1569,8 +1580,11 @@ window.manageVendorField = function(id, field) {
         if (vendor.minusList.length === 0) listHTML = '<div style="color:#94a3b8; font-size:0.9rem; margin-bottom:15px;">Belum ada poin kekurangan</div>';
         vendor.minusList.forEach((p, i) => {
             listHTML += `
-            <div style="display:flex; justify-content:space-between; align-items:center; background:#fef2f2; padding:12px 15px; border-radius:12px; margin-bottom:10px; border:1px solid #fecaca; text-align:left; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
-                <span style="color:#b91c1c; font-size:0.95rem; font-weight:600; flex:1; padding-right:10px;">${p}</span>
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; background:#fef2f2; padding:12px 15px; border-radius:12px; margin-bottom:10px; border:1px solid #fecaca; text-align:left; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                <div style="display:flex; gap:8px; flex:1; padding-right:10px;">
+                    <span style="color:#ef4444; font-weight:800; font-size:0.95rem; margin-top:1px;">${i + 1}.</span>
+                    <span style="color:#b91c1c; font-size:0.95rem; font-weight:600; line-height:1.4;">${p}</span>
+                </div>
                 <button style="background:#fee2e2; color:#ef4444; border:none; width:36px; height:36px; border-radius:10px; cursor:pointer; transition:0.2s; flex-shrink:0;" onmouseover="this.style.background='#fecaca'" onmouseout="this.style.background='#fee2e2'" onclick="deleteVendorItem(${id}, 'minus', ${i})"><i class="fas fa-trash"></i></button>
             </div>`;
         });
@@ -1936,32 +1950,38 @@ function renderWedding() {
  const vendorTbody = document.getElementById('wedVendorTbody');
     if(vendorTbody) {
         vendorTbody.innerHTML = '';
-        weddingData.vendors.forEach(v => {
+        weddingData.vendors.forEach((v, index) => {
             let statusBtnClass = v.status === 'Lunas' ? 'btn-success' : (v.status === 'DP' ? 'btn-warning' : 'action');
             let statusBtnStyle = v.status === 'Tanya' ? 'background:#e2e8f0; color:#475569;' : '';
             
-            // Siapin array kosong jaga-jaga kalau datanya baru dibikin
+            // Auto-migrasi data lama & data dari format sebelumnya
             if (!v.prices) v.prices = v.price ? [{name: 'Estimasi Awal', amount: v.price}] : [];
-            if (!v.plusList) v.plusList = v.plus ? [v.plus] : [];
+            if (!v.plusList) {
+                v.plusList = [];
+                if (v.plus) v.plusList.push(v.plus);
+                if (v.plusminus) v.plusList.push("Catatan Lama: " + v.plusminus); // Jaga-jaga biar data nggak ilang
+            }
             if (!v.minusList) v.minusList = v.minus ? [v.minus] : [];
 
-          // Susun HTML berulang buat masing-masing baris, rapih nyusun ke bawah
+            // Susun HTML berulang buat masing-masing baris, rapih nyusun ke bawah
             let priceText = v.prices.length > 0
                 ? v.prices.map(p => `<div style="margin-bottom:8px;"><span style="font-size:0.75rem; color:#64748b; display:block;">${p.name}</span><span style="color:#0284c7; font-weight:800; font-size:0.95rem;">${formatRp(p.amount)}</span></div>`).join('')
                 : '<em style="color:#94a3b8; font-size:0.85rem; font-weight:600;"><i class="fas fa-plus-circle"></i> Tambah Harga</em>';
 
-            // Pakai (p, index) buat ngeluarin nomor urut otomatis (1, 2, 3, dst)
+            // Pakai (p, i) buat ngeluarin nomor urut per poin (1, 2, 3, dst)
             let plusText = v.plusList.length > 0
-                ? v.plusList.map((p, index) => `<div style="margin-bottom:8px; display:flex; gap:6px; align-items:flex-start;"><span style="color:#16a34a; font-size:0.85rem; font-weight:800; margin-top:2px;">${index + 1}.</span><span style="color:#15803d; line-height:1.4; font-size:0.9rem; font-weight:600;">${p}</span></div>`).join('')
+                ? v.plusList.map((p, i) => `<div style="margin-bottom:8px; display:flex; gap:6px; align-items:flex-start;"><span style="color:#16a34a; font-size:0.85rem; font-weight:800; margin-top:2px;">${i + 1}.</span><span style="color:#15803d; line-height:1.4; font-size:0.9rem; font-weight:600;">${p}</span></div>`).join('')
                 : '<em style="color:#94a3b8; font-size:0.85rem; font-weight:600;"><i class="fas fa-plus-circle"></i> Tambah Plus</em>';
 
             let minusText = v.minusList.length > 0
-                ? v.minusList.map((p, index) => `<div style="margin-bottom:8px; display:flex; gap:6px; align-items:flex-start;"><span style="color:#ef4444; font-size:0.85rem; font-weight:800; margin-top:2px;">${index + 1}.</span><span style="color:#b91c1c; line-height:1.4; font-size:0.9rem; font-weight:600;">${p}</span></div>`).join('')
+                ? v.minusList.map((p, i) => `<div style="margin-bottom:8px; display:flex; gap:6px; align-items:flex-start;"><span style="color:#ef4444; font-size:0.85rem; font-weight:800; margin-top:2px;">${i + 1}.</span><span style="color:#b91c1c; line-height:1.4; font-size:0.9rem; font-weight:600;">${p}</span></div>`).join('')
                 : '<em style="color:#94a3b8; font-size:0.85rem; font-weight:600;"><i class="fas fa-plus-circle"></i> Tambah Minus</em>';
 
-            // Masukin ke tabel (Kodingan bersih tanpa teks panduan nyelip)
+            // Masukin ke tabel (Kodingan komplit: ada Nomor Baris, Tombol Aksi rapi, Data Migrasi aman)
             vendorTbody.innerHTML += `
                 <tr style="transition: background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+                    <td style="vertical-align:top; padding-top:20px; text-align:center; font-weight:700; color:#64748b;">${index + 1}</td>
+                    
                     <td style="vertical-align:top; padding-top:20px;"><strong style="color:#1e293b;">${v.name}</strong></td>
                     <td style="color:#475569; vertical-align:top; padding-top:20px;">${v.service}</td>
                     
