@@ -1529,35 +1529,138 @@ function addWedVendor() {
     document.getElementById('wedVendorService').value = '';
     save(); renderWedding();
 }
-window.editWedVendorPrice = function(id) {
+window.manageVendorField = function(id, field) {
     let vendor = weddingData.vendors.find(v => v.id === id);
     if (!vendor) return;
-    let newPrice = prompt("Masukkan Estimasi Harga (Rp) untuk " + vendor.name + ":", vendor.price || "");
-    if (newPrice !== null && newPrice.trim() !== "") {
-        let parsedPrice = parseInt(newPrice.replace(/\./g, '').replace(/,/g, ''));
-        vendor.price = isNaN(parsedPrice) ? 0 : parsedPrice;
-        save(); renderWedding();
+
+    // Auto-migrasi data lama jadi format list/array bertumpuk
+    if (!vendor.prices) vendor.prices = vendor.price ? [{name: 'Estimasi Awal', amount: vendor.price}] : [];
+    if (!vendor.plusList) vendor.plusList = vendor.plus ? [vendor.plus] : [];
+    if (!vendor.minusList) vendor.minusList = vendor.minus ? [vendor.minus] : [];
+
+    let title = '';
+    let listHTML = '';
+
+    if (field === 'price') {
+        title = 'Daftar Harga - ' + vendor.name;
+        if (vendor.prices.length === 0) listHTML = '<div style="color:#94a3b8; font-size:0.9rem; margin-bottom:15px;">Belum ada estimasi harga</div>';
+        vendor.prices.forEach((p, i) => {
+            listHTML += `
+            <div style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; padding:12px 15px; border-radius:12px; margin-bottom:10px; border:1px solid #e2e8f0; text-align:left; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                <div>
+                    <strong style="color:#1e293b; font-size:0.95rem; display:block;">${p.name}</strong>
+                    <span style="color:#0284c7; font-weight:800; font-size:1.1rem;">${formatRp(p.amount)}</span>
+                </div>
+                <button style="background:#fee2e2; color:#ef4444; border:none; width:36px; height:36px; border-radius:10px; cursor:pointer; transition:0.2s;" onmouseover="this.style.background='#fecaca'" onmouseout="this.style.background='#fee2e2'" onclick="deleteVendorItem(${id}, 'price', ${i})"><i class="fas fa-trash"></i></button>
+            </div>`;
+        });
+    } else if (field === 'plus') {
+        title = 'Poin Plus - ' + vendor.name;
+        if (vendor.plusList.length === 0) listHTML = '<div style="color:#94a3b8; font-size:0.9rem; margin-bottom:15px;">Belum ada kelebihan vendor ini</div>';
+        vendor.plusList.forEach((p, i) => {
+            listHTML += `
+            <div style="display:flex; justify-content:space-between; align-items:center; background:#f0fdf4; padding:12px 15px; border-radius:12px; margin-bottom:10px; border:1px solid #bbf7d0; text-align:left; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                <span style="color:#15803d; font-size:0.95rem; font-weight:600; flex:1; padding-right:10px;">${p}</span>
+                <button style="background:#fee2e2; color:#ef4444; border:none; width:36px; height:36px; border-radius:10px; cursor:pointer; transition:0.2s; flex-shrink:0;" onmouseover="this.style.background='#fecaca'" onmouseout="this.style.background='#fee2e2'" onclick="deleteVendorItem(${id}, 'plus', ${i})"><i class="fas fa-trash"></i></button>
+            </div>`;
+        });
+    } else if (field === 'minus') {
+        title = 'Poin Minus - ' + vendor.name;
+        if (vendor.minusList.length === 0) listHTML = '<div style="color:#94a3b8; font-size:0.9rem; margin-bottom:15px;">Belum ada poin kekurangan</div>';
+        vendor.minusList.forEach((p, i) => {
+            listHTML += `
+            <div style="display:flex; justify-content:space-between; align-items:center; background:#fef2f2; padding:12px 15px; border-radius:12px; margin-bottom:10px; border:1px solid #fecaca; text-align:left; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                <span style="color:#b91c1c; font-size:0.95rem; font-weight:600; flex:1; padding-right:10px;">${p}</span>
+                <button style="background:#fee2e2; color:#ef4444; border:none; width:36px; height:36px; border-radius:10px; cursor:pointer; transition:0.2s; flex-shrink:0;" onmouseover="this.style.background='#fecaca'" onmouseout="this.style.background='#fee2e2'" onclick="deleteVendorItem(${id}, 'minus', ${i})"><i class="fas fa-trash"></i></button>
+            </div>`;
+        });
+    }
+
+    let addBtnHTML = `<button style="width:100%; padding:14px; background:#3b82f6; color:white; border:none; border-radius:12px; font-weight:700; font-size:1rem; margin-top:5px; cursor:pointer; box-shadow:0 4px 12px rgba(59,130,246,0.3); transition:0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'" onclick="addVendorItem(${id}, '${field}')"><i class="fas fa-plus-circle"></i> Tambah Data Baru</button>`;
+
+    Swal.fire({
+        title: title,
+        html: `
+            <div style="max-height: 350px; overflow-y: auto; margin-bottom: 10px; padding-right: 5px; text-align:center;">
+                ${listHTML}
+            </div>
+            ${addBtnHTML}
+        `,
+        showConfirmButton: true,
+        confirmButtonText: 'Tutup Selesai',
+        confirmButtonColor: '#94a3b8',
+        customClass: { popup: 'swal2-custom-popup', title: 'swal2-title' }
+    });
+};
+
+window.addVendorItem = async function(id, field) {
+    let vendor = weddingData.vendors.find(v => v.id === id);
+    if (!vendor) return;
+
+    if (field === 'price') {
+        Swal.fire({
+            title: 'Tambah Estimasi Harga',
+            html: `
+                <div style="text-align:left; margin-bottom:8px; font-weight:700; color:#475569; font-size:0.85rem; text-transform:uppercase;">Nama Paket / Jenis</div>
+                <input id="swal-price-name" class="swal2-custom-input" style="width:100%; box-sizing:border-box; margin-bottom:20px;" placeholder="Cth: Paket Diamond / Prewed Studio">
+                
+                <div style="text-align:left; margin-bottom:8px; font-weight:700; color:#475569; font-size:0.85rem; text-transform:uppercase;">Nominal Harga</div>
+                <input id="swal-price-amount" type="number" class="swal2-custom-input" style="width:100%; box-sizing:border-box;" placeholder="Rp ...">
+            `,
+            showCancelButton: true,
+            confirmButtonText: '<i class="fas fa-save"></i> Simpan',
+            confirmButtonColor: '#3b82f6',
+            cancelButtonText: 'Batal',
+            customClass: { popup: 'swal2-custom-popup', confirmButton: 'swal2-confirm', cancelButton: 'swal2-cancel' },
+            preConfirm: () => {
+                let name = document.getElementById('swal-price-name').value;
+                let amount = document.getElementById('swal-price-amount').value;
+                if (!name || !amount) { Swal.showValidationMessage('Nama dan nominal wajib diisi bro!'); return false; }
+                return { name, amount: parseInt(amount) };
+            }
+        }).then((res) => {
+            if (res.isConfirmed) {
+                vendor.prices.push({ name: res.value.name, amount: res.value.amount });
+                save(); renderWedding();
+                manageVendorField(id, field); // Otomatis buka pop-up list lagi setelah nyimpen
+            } else {
+                manageVendorField(id, field); 
+            }
+        });
+    } else {
+        let titleText = field === 'plus' ? 'Tambah Kelebihan' : 'Tambah Kekurangan';
+        let { value } = await Swal.fire({
+            title: titleText,
+            input: 'text',
+            inputPlaceholder: 'Ketik poin di sini...',
+            showCancelButton: true,
+            confirmButtonText: '<i class="fas fa-save"></i> Simpan',
+            confirmButtonColor: '#3b82f6',
+            cancelButtonText: 'Batal',
+            customClass: { popup: 'swal2-custom-popup', input: 'swal2-custom-input', confirmButton: 'swal2-confirm', cancelButton: 'swal2-cancel' }
+        });
+
+        if (value && value.trim() !== '') {
+            if (field === 'plus') vendor.plusList.push(value.trim());
+            if (field === 'minus') vendor.minusList.push(value.trim());
+            save(); renderWedding();
+            manageVendorField(id, field); 
+        } else if (value !== undefined) {
+            manageVendorField(id, field); 
+        }
     }
 };
 
-window.editWedVendorPlus = function(id) {
+window.deleteVendorItem = function(id, field, index) {
     let vendor = weddingData.vendors.find(v => v.id === id);
     if (!vendor) return;
-    let newPlus = prompt("Masukkan poin PLUS (kelebihan) untuk " + vendor.name + ":", vendor.plus || "");
-    if (newPlus !== null) {
-        vendor.plus = newPlus.trim();
-        save(); renderWedding();
-    }
-};
 
-window.editWedVendorMinus = function(id) {
-    let vendor = weddingData.vendors.find(v => v.id === id);
-    if (!vendor) return;
-    let newMinus = prompt("Masukkan poin MINUS (kekurangan) untuk " + vendor.name + ":", vendor.minus || "");
-    if (newMinus !== null) {
-        vendor.minus = newMinus.trim();
-        save(); renderWedding();
-    }
+    if (field === 'price') vendor.prices.splice(index, 1);
+    if (field === 'plus') vendor.plusList.splice(index, 1);
+    if (field === 'minus') vendor.minusList.splice(index, 1);
+
+    save(); renderWedding();
+    manageVendorField(id, field); 
 };
 window.editWedVendorNotes = function(id) {
     let vendor = weddingData.vendors.find(v => v.id === id);
@@ -1793,35 +1896,57 @@ function renderWedding() {
         budgetContainer.innerHTML = budgetHTML;
     }
 
-   const vendorTbody = document.getElementById('wedVendorTbody');
+ const vendorTbody = document.getElementById('wedVendorTbody');
     if(vendorTbody) {
         vendorTbody.innerHTML = '';
         weddingData.vendors.forEach(v => {
             let statusBtnClass = v.status === 'Lunas' ? 'btn-success' : (v.status === 'DP' ? 'btn-warning' : 'action');
             let statusBtnStyle = v.status === 'Tanya' ? 'background:#e2e8f0; color:#475569;' : '';
             
-            // Format 3 kolom baru
-            let priceText = v.price ? formatRp(v.price) : '<em style="color:#cbd5e1; font-size:0.8rem;"><i class="fas fa-edit"></i> Klik 2x buat isi</em>';
-            let plusText = v.plus ? v.plus : '<em style="color:#cbd5e1; font-size:0.8rem;"><i class="fas fa-edit"></i> Klik 2x buat isi</em>';
-            let minusText = v.minus ? v.minus : '<em style="color:#cbd5e1; font-size:0.8rem;"><i class="fas fa-edit"></i> Klik 2x buat isi</em>';
+            // Siapin array kosong jaga-jaga kalau datanya baru dibikin
+            if (!v.prices) v.prices = v.price ? [{name: 'Estimasi Awal', amount: v.price}] : [];
+            if (!v.plusList) v.plusList = v.plus ? [v.plus] : [];
+            if (!v.minusList) v.minusList = v.minus ? [v.minus] : [];
 
+            // Susun HTML berulang buat masing-masing baris, rapih nyusun ke bawah
+            let priceText = v.prices.length > 0
+                ? v.prices.map(p => `<div style="margin-bottom:8px;"><span style="font-size:0.75rem; color:#64748b; display:block;">${p.name}</span><span style="color:#0284c7; font-weight:800; font-size:0.95rem;">${formatRp(p.amount)}</span></div>`).join('')
+                : '<em style="color:#94a3b8; font-size:0.85rem; font-weight:600;"><i class="fas fa-plus-circle"></i> Tambah Harga</em>';
+
+            let plusText = v.plusList.length > 0
+                ? v.plusList.map(p => `<div style="margin-bottom:8px; display:flex; gap:6px; align-items:flex-start;"><i class="fas fa-check-circle" style="color:#16a34a; margin-top:3px; font-size:0.85rem;"></i><span style="color:#15803d; line-height:1.4; font-size:0.9rem; font-weight:600;">${p}</span></div>`).join('')
+                : '<em style="color:#94a3b8; font-size:0.85rem; font-weight:600;"><i class="fas fa-plus-circle"></i> Tambah Plus</em>';
+
+            let minusText = v.minusList.length > 0
+                ? v.minusList.map(p => `<div style="margin-bottom:8px; display:flex; gap:6px; align-items:flex-start;"><i class="fas fa-times-circle" style="color:#ef4444; margin-top:3px; font-size:0.85rem;"></i><span style="color:#b91c1c; line-height:1.4; font-size:0.9rem; font-weight:600;">${p}</span></div>`).join('')
+                : '<em style="color:#94a3b8; font-size:0.85rem; font-weight:600;"><i class="fas fa-plus-circle"></i> Tambah Minus</em>';
+
+            // Pake 'onclick' biasa biar mulus di HP, ditambah vertical-align: top biar rata atas kalau tingginya beda
             vendorTbody.innerHTML += `
-                <tr>
-                    <td><strong style="color:#1e293b;">${v.name}</strong></td>
-                    <td style="color:#475569;">${v.service}</td>
+                <tr style="transition: background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+                    <td style="vertical-align:top; padding-top:20px;"><strong style="color:#1e293b;">${v.name}</strong></td>
+                    <td style="color:#475569; vertical-align:top; padding-top:20px;">${v.service}</td>
                     
-                    <td ondblclick="editWedVendorPrice(${v.id})" title="Klik 2x untuk edit Harga" style="cursor:pointer; color:#0284c7; font-weight:700; font-size:0.9rem;">
-                        ${priceText}
-                    </td>
-                    <td ondblclick="editWedVendorPlus(${v.id})" title="Klik 2x untuk edit Plus" style="cursor:pointer; color:#16a34a; font-size:0.9rem;">
-                        ${plusText}
-                    </td>
-                    <td ondblclick="editWedVendorMinus(${v.id})" title="Klik 2x untuk edit Minus" style="cursor:pointer; color:#ef4444; font-size:0.9rem;">
-                        ${minusText}
+                    <td onclick="manageVendorField(${v.id}, 'price')" title="Klik untuk atur Harga" style="cursor:pointer; vertical-align:top; padding-top:20px;">
+                        <div style="padding:12px; background:#f0f9ff; border-radius:12px; border:1px solid #bae6fd; transition:0.2s;" onmouseover="this.style.borderColor='#3b82f6'" onmouseout="this.style.borderColor='#bae6fd'">
+                            ${priceText}
+                        </div>
                     </td>
                     
-                    <td><button class="${statusBtnClass}" style="padding: 4px 10px; font-size:0.8rem; ${statusBtnStyle}" onclick="toggleWedVendorStatus(${v.id})">${v.status}</button></td>
-                    <td style="text-align:center;"><button class="btn-danger" style="padding: 6px 10px;" onclick="deleteWedVendor(${v.id})"><i class="fas fa-trash"></i></button></td>
+                    <td onclick="manageVendorField(${v.id}, 'plus')" title="Klik untuk atur Plus" style="cursor:pointer; vertical-align:top; padding-top:20px;">
+                        <div style="padding:12px; background:#f0fdf4; border-radius:12px; border:1px solid #bbf7d0; transition:0.2s;" onmouseover="this.style.borderColor='#16a34a'" onmouseout="this.style.borderColor='#bbf7d0'">
+                            ${plusText}
+                        </div>
+                    </td>
+                    
+                    <td onclick="manageVendorField(${v.id}, 'minus')" title="Klik untuk atur Minus" style="cursor:pointer; vertical-align:top; padding-top:20px;">
+                        <div style="padding:12px; background:#fef2f2; border-radius:12px; border:1px solid #fecaca; transition:0.2s;" onmouseover="this.style.borderColor='#ef4444'" onmouseout="this.style.borderColor='#fecaca'">
+                            ${minusText}
+                        </div>
+                    </td>
+                    
+                    <td style="vertical-align:top; padding-top:20px;"><button class="${statusBtnClass}" style="padding: 6px 12px; font-size:0.8rem; font-weight:700; border-radius:8px; ${statusBtnStyle}" onclick="toggleWedVendorStatus(${v.id})">${v.status}</button></td>
+                    <td style="text-align:center; vertical-align:top; padding-top:20px;"><button class="btn-danger" style="padding: 8px 12px; border-radius:8px;" onclick="deleteWedVendor(${v.id})"><i class="fas fa-trash"></i></button></td>
                 </tr>
             `;
         });
