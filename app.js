@@ -3627,10 +3627,33 @@ window.exportVendorToExcel = function() {
         return alert("Belum ada data vendor buat di-export bro!");
     }
 
-    // Format data biar rapih di Excel
-    let excelData = weddingData.vendors.map((v, index) => {
-        
-        // Gabungin daftar harga jadi satu teks turun ke bawah
+    // 1. Inisialisasi Workbook ExcelJS
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Vendor Tracker');
+
+    // 2. Setup Kolom dan Lebarnya
+    worksheet.columns = [
+        { header: 'No', key: 'no', width: 5 },
+        { header: 'Nama Vendor', key: 'name', width: 25 },
+        { header: 'Layanan', key: 'service', width: 15 },
+        { header: 'Estimasi Harga', key: 'price', width: 30 },
+        { header: 'Kelebihan (Plus)', key: 'plus', width: 45 },
+        { header: 'Kekurangan (Minus)', key: 'minus', width: 45 },
+        { header: 'Status', key: 'status', width: 15 }
+    ];
+
+    // 3. Styling Header (Warna Biru, Teks Putih Bold, Rata Tengah)
+    worksheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    worksheet.getRow(1).fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FF3B82F6' } // Warna biru bawaan TamaWealth
+    };
+    worksheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center' };
+
+    // 4. Masukin Data dari Firebase ke Excel
+    weddingData.vendors.forEach((v, index) => {
+        // Susun daftar harga
         let pricesStr = "-";
         if (v.prices && v.prices.length > 0) {
             pricesStr = v.prices.map(p => `${p.name}: Rp ${p.amount.toLocaleString('id-ID')}`).join('\n');
@@ -3638,7 +3661,7 @@ window.exportVendorToExcel = function() {
             pricesStr = `Estimasi Awal: Rp ${v.price.toLocaleString('id-ID')}`;
         }
 
-        // Gabungin Plus & Minus pakai nomor urut otomatis
+        // Susun Plus & Minus
         let plusStr = "-";
         if (v.plusList && v.plusList.length > 0) {
             plusStr = v.plusList.map((p, i) => `${i + 1}. ${p}`).join('\n');
@@ -3649,35 +3672,44 @@ window.exportVendorToExcel = function() {
             minusStr = v.minusList.map((m, i) => `${i + 1}. ${m}`).join('\n');
         }
 
-        // Struktur kolom Excel
-        return {
-            "No": index + 1,
-            "Nama Vendor": v.name,
-            "Layanan": v.service,
-            "Estimasi Harga": pricesStr,
-            "Kelebihan (Plus)": plusStr,
-            "Kekurangan (Minus)": minusStr,
-            "Status": v.status
-        };
+        // Tambah Baris
+        worksheet.addRow({
+            no: index + 1,
+            name: v.name,
+            service: v.service,
+            price: pricesStr,
+            plus: plusStr,
+            minus: minusStr,
+            status: v.status
+        });
     });
 
-    // Bikin lembar kerja Excel
-    const worksheet = XLSX.utils.json_to_sheet(excelData);
+    // 5. Styling Seluruh Baris Data (Border, Wrap Text, Rata Atas)
+    worksheet.eachRow((row, rowNumber) => {
+        row.eachCell((cell, colNumber) => {
+            // Kasih Garis Tabel (Border)
+            cell.border = {
+                top: {style:'thin', color: {argb:'FFCBD5E1'}},
+                left: {style:'thin', color: {argb:'FFCBD5E1'}},
+                bottom: {style:'thin', color: {argb:'FFCBD5E1'}},
+                right: {style:'thin', color: {argb:'FFCBD5E1'}}
+            };
+            
+            // Setting Rata Atas dan Auto Wrap-Text biar rapi turun ke bawah
+            if (rowNumber > 1) {
+                cell.alignment = { vertical: 'top', horizontal: 'left', wrapText: true };
+                
+                // Khusus kolom No dan Status kita bikin rata tengah
+                if (colNumber === 1 || colNumber === 7) {
+                    cell.alignment = { vertical: 'top', horizontal: 'center', wrapText: true };
+                }
+            }
+        });
+    });
 
-    // Atur lebar kolom (width) otomatis biar langsung rapih saat file dibuka
-    const wscols = [
-        {wch: 5},   // Kolom A: No
-        {wch: 25},  // Kolom B: Nama
-        {wch: 15},  // Kolom C: Layanan
-        {wch: 35},  // Kolom D: Harga
-        {wch: 45},  // Kolom E: Plus
-        {wch: 45},  // Kolom F: Minus
-        {wch: 15}   // Kolom G: Status
-    ];
-    worksheet['!cols'] = wscols;
-
-    // Compile jadi file .xlsx dan langsung Download!
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Vendor Tracker");
-    XLSX.writeFile(workbook, "Tamaverse_Wedding_Vendors.xlsx");
+    // 6. Compile dan Download File Excel (.xlsx)
+    workbook.xlsx.writeBuffer().then((data) => {
+        let blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        saveAs(blob, 'Tamaverse_Wedding_Vendors.xlsx');
+    });
 };
