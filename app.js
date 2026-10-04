@@ -1945,20 +1945,21 @@ function renderWedding() {
             if (!v.plusList) v.plusList = v.plus ? [v.plus] : [];
             if (!v.minusList) v.minusList = v.minus ? [v.minus] : [];
 
-            // Susun HTML berulang buat masing-masing baris, rapih nyusun ke bawah
+          // Susun HTML berulang buat masing-masing baris, rapih nyusun ke bawah
             let priceText = v.prices.length > 0
                 ? v.prices.map(p => `<div style="margin-bottom:8px;"><span style="font-size:0.75rem; color:#64748b; display:block;">${p.name}</span><span style="color:#0284c7; font-weight:800; font-size:0.95rem;">${formatRp(p.amount)}</span></div>`).join('')
                 : '<em style="color:#94a3b8; font-size:0.85rem; font-weight:600;"><i class="fas fa-plus-circle"></i> Tambah Harga</em>';
 
+            // Pakai (p, index) buat ngeluarin nomor urut otomatis (1, 2, 3, dst)
             let plusText = v.plusList.length > 0
-                ? v.plusList.map(p => `<div style="margin-bottom:8px; display:flex; gap:6px; align-items:flex-start;"><i class="fas fa-check-circle" style="color:#16a34a; margin-top:3px; font-size:0.85rem;"></i><span style="color:#15803d; line-height:1.4; font-size:0.9rem; font-weight:600;">${p}</span></div>`).join('')
+                ? v.plusList.map((p, index) => `<div style="margin-bottom:8px; display:flex; gap:6px; align-items:flex-start;"><span style="color:#16a34a; font-size:0.85rem; font-weight:800; margin-top:2px;">${index + 1}.</span><span style="color:#15803d; line-height:1.4; font-size:0.9rem; font-weight:600;">${p}</span></div>`).join('')
                 : '<em style="color:#94a3b8; font-size:0.85rem; font-weight:600;"><i class="fas fa-plus-circle"></i> Tambah Plus</em>';
 
             let minusText = v.minusList.length > 0
-                ? v.minusList.map(p => `<div style="margin-bottom:8px; display:flex; gap:6px; align-items:flex-start;"><i class="fas fa-times-circle" style="color:#ef4444; margin-top:3px; font-size:0.85rem;"></i><span style="color:#b91c1c; line-height:1.4; font-size:0.9rem; font-weight:600;">${p}</span></div>`).join('')
+                ? v.minusList.map((p, index) => `<div style="margin-bottom:8px; display:flex; gap:6px; align-items:flex-start;"><span style="color:#ef4444; font-size:0.85rem; font-weight:800; margin-top:2px;">${index + 1}.</span><span style="color:#b91c1c; line-height:1.4; font-size:0.9rem; font-weight:600;">${p}</span></div>`).join('')
                 : '<em style="color:#94a3b8; font-size:0.85rem; font-weight:600;"><i class="fas fa-plus-circle"></i> Tambah Minus</em>';
 
-            // Pake 'onclick' biasa biar mulus di HP, ditambah vertical-align: top biar rata atas kalau tingginya beda
+            // Masukin ke tabel (Kodingan bersih tanpa teks panduan nyelip)
             vendorTbody.innerHTML += `
                 <tr style="transition: background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
                     <td style="vertical-align:top; padding-top:20px;"><strong style="color:#1e293b;">${v.name}</strong></td>
@@ -1983,7 +1984,7 @@ function renderWedding() {
                     </td>
                     
                     <td style="vertical-align:top; padding-top:20px;"><button class="${statusBtnClass}" style="padding: 6px 12px; font-size:0.8rem; font-weight:700; border-radius:8px; ${statusBtnStyle}" onclick="toggleWedVendorStatus(${v.id})">${v.status}</button></td>
-                                       // Ganti baris <td> yang ini (bagian kolom AKSI):
+                    
                     <td style="text-align:center; vertical-align:top; padding-top:20px;">
                         <div style="display:flex; justify-content:center; gap:8px;">
                             <button style="background:#fef9c3; color:#ca8a04; border:none; padding: 8px 12px; border-radius:8px; cursor:pointer; transition:0.2s;" onmouseover="this.style.background='#fde047'" onmouseout="this.style.background='#fef9c3'" onclick="editWedVendorBasic(${v.id})" title="Edit Vendor"><i class="fas fa-edit"></i></button>
