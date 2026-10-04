@@ -921,7 +921,18 @@ return `
       </div>
       <div class="card" style="overflow-x: auto; border-radius: 16px; border: 1px solid #e2e8f0; padding: 0;">
         <table id="wedVendorList" style="min-width: 100%; margin: 0;">
-          <thead style="background: #f8fafc;"><tr><th style="padding:15px;">Nama Vendor</th><th>Layanan</th><th>Plus / Minus</th><th>Status</th><th style="width: 100px; text-align: center;">Aksi</th></tr></thead>
+          <thead style="background: #f8fafc;">
+          <tr>
+            <th style="padding:15px;">Nama Vendor</th>
+            <th>Layanan</th>
+            <th>Estimasi Harga</th>
+            <th>Plus</th>
+            <th>Minus</th>
+            <th>Status</th>
+            <th style="width: 100px; text-align: center;">Aksi</th>
+          </tr>
+        </thead>
+          
           <tbody id="wedVendorTbody"></tbody>
         </table>
       </div>
@@ -1518,6 +1529,36 @@ function addWedVendor() {
     document.getElementById('wedVendorService').value = '';
     save(); renderWedding();
 }
+window.editWedVendorPrice = function(id) {
+    let vendor = weddingData.vendors.find(v => v.id === id);
+    if (!vendor) return;
+    let newPrice = prompt("Masukkan Estimasi Harga (Rp) untuk " + vendor.name + ":", vendor.price || "");
+    if (newPrice !== null && newPrice.trim() !== "") {
+        let parsedPrice = parseInt(newPrice.replace(/\./g, '').replace(/,/g, ''));
+        vendor.price = isNaN(parsedPrice) ? 0 : parsedPrice;
+        save(); renderWedding();
+    }
+};
+
+window.editWedVendorPlus = function(id) {
+    let vendor = weddingData.vendors.find(v => v.id === id);
+    if (!vendor) return;
+    let newPlus = prompt("Masukkan poin PLUS (kelebihan) untuk " + vendor.name + ":", vendor.plus || "");
+    if (newPlus !== null) {
+        vendor.plus = newPlus.trim();
+        save(); renderWedding();
+    }
+};
+
+window.editWedVendorMinus = function(id) {
+    let vendor = weddingData.vendors.find(v => v.id === id);
+    if (!vendor) return;
+    let newMinus = prompt("Masukkan poin MINUS (kekurangan) untuk " + vendor.name + ":", vendor.minus || "");
+    if (newMinus !== null) {
+        vendor.minus = newMinus.trim();
+        save(); renderWedding();
+    }
+};
 window.editWedVendorNotes = function(id) {
     let vendor = weddingData.vendors.find(v => v.id === id);
     if (!vendor) return;
@@ -1752,23 +1793,31 @@ function renderWedding() {
         budgetContainer.innerHTML = budgetHTML;
     }
 
-    const vendorTbody = document.getElementById('wedVendorTbody');
+   const vendorTbody = document.getElementById('wedVendorTbody');
     if(vendorTbody) {
         vendorTbody.innerHTML = '';
         weddingData.vendors.forEach(v => {
             let statusBtnClass = v.status === 'Lunas' ? 'btn-success' : (v.status === 'DP' ? 'btn-warning' : 'action');
             let statusBtnStyle = v.status === 'Tanya' ? 'background:#e2e8f0; color:#475569;' : '';
             
-            // Siapin teks untuk kolom plus/minus
-            let plusMinusText = v.plusminus ? v.plusminus : '<em style="color:#cbd5e1; font-size:0.8rem;"><i class="fas fa-edit"></i> Klik 2x buat isi</em>';
+            // Format 3 kolom baru
+            let priceText = v.price ? formatRp(v.price) : '<em style="color:#cbd5e1; font-size:0.8rem;"><i class="fas fa-edit"></i> Klik 2x buat isi</em>';
+            let plusText = v.plus ? v.plus : '<em style="color:#cbd5e1; font-size:0.8rem;"><i class="fas fa-edit"></i> Klik 2x buat isi</em>';
+            let minusText = v.minus ? v.minus : '<em style="color:#cbd5e1; font-size:0.8rem;"><i class="fas fa-edit"></i> Klik 2x buat isi</em>';
 
             vendorTbody.innerHTML += `
                 <tr>
                     <td><strong style="color:#1e293b;">${v.name}</strong></td>
                     <td style="color:#475569;">${v.service}</td>
                     
-                    <td ondblclick="editWedVendorNotes(${v.id})" title="Klik 2x untuk edit" style="cursor:pointer; color:#64748b; font-size:0.9rem;">
-                        ${plusMinusText}
+                    <td ondblclick="editWedVendorPrice(${v.id})" title="Klik 2x untuk edit Harga" style="cursor:pointer; color:#0284c7; font-weight:700; font-size:0.9rem;">
+                        ${priceText}
+                    </td>
+                    <td ondblclick="editWedVendorPlus(${v.id})" title="Klik 2x untuk edit Plus" style="cursor:pointer; color:#16a34a; font-size:0.9rem;">
+                        ${plusText}
+                    </td>
+                    <td ondblclick="editWedVendorMinus(${v.id})" title="Klik 2x untuk edit Minus" style="cursor:pointer; color:#ef4444; font-size:0.9rem;">
+                        ${minusText}
                     </td>
                     
                     <td><button class="${statusBtnClass}" style="padding: 4px 10px; font-size:0.8rem; ${statusBtnStyle}" onclick="toggleWedVendorStatus(${v.id})">${v.status}</button></td>
