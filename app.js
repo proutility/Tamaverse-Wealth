@@ -1684,6 +1684,43 @@ function toggleWedVendorStatus(id) {
 function deleteWedVendor(id) {
     if(confirm("Hapus vendor ini?")) { weddingData.vendors = weddingData.vendors.filter(v => v.id !== id); save(); renderWedding(); }
 }
+window.editWedVendorBasic = function(id) {
+    let vendor = weddingData.vendors.find(v => v.id === id);
+    if (!vendor) return;
+
+    Swal.fire({
+        title: 'Edit Data Vendor',
+        html: `
+            <div style="text-align:left; margin-bottom:8px; font-weight:700; color:#475569; font-size:0.85rem; text-transform:uppercase;">Nama Vendor</div>
+            <input id="swal-edit-vname" class="swal2-custom-input" style="width:100%; box-sizing:border-box; margin-bottom:20px;" value="${vendor.name}">
+            
+            <div style="text-align:left; margin-bottom:8px; font-weight:700; color:#475569; font-size:0.85rem; text-transform:uppercase;">Layanan (MUA, Dekor, dll)</div>
+            <input id="swal-edit-vservice" class="swal2-custom-input" style="width:100%; box-sizing:border-box;" value="${vendor.service}">
+        `,
+        showCancelButton: true,
+        confirmButtonText: '<i class="fas fa-save"></i> Simpan',
+        confirmButtonColor: '#3b82f6',
+        cancelButtonText: 'Batal',
+        customClass: { popup: 'swal2-custom-popup', confirmButton: 'swal2-confirm', cancelButton: 'swal2-cancel' },
+        preConfirm: () => {
+            let newName = document.getElementById('swal-edit-vname').value;
+            let newService = document.getElementById('swal-edit-vservice').value;
+            if (!newName || !newService) {
+                Swal.showValidationMessage('Nama dan layanan nggak boleh kosong bro!');
+                return false;
+            }
+            return { newName, newService };
+        }
+    }).then((res) => {
+        if (res.isConfirmed) {
+            vendor.name = res.value.newName;
+            vendor.service = res.value.newService;
+            save(); 
+            renderWedding();
+            Swal.fire({ text: 'Data vendor berhasil diupdate!', icon: 'success', timer: 1200, showConfirmButton: false });
+        }
+    });
+};
 
 function addWedGuest() {
     let name = document.getElementById('wedGuestName').value;
@@ -1946,7 +1983,13 @@ function renderWedding() {
                     </td>
                     
                     <td style="vertical-align:top; padding-top:20px;"><button class="${statusBtnClass}" style="padding: 6px 12px; font-size:0.8rem; font-weight:700; border-radius:8px; ${statusBtnStyle}" onclick="toggleWedVendorStatus(${v.id})">${v.status}</button></td>
-                    <td style="text-align:center; vertical-align:top; padding-top:20px;"><button class="btn-danger" style="padding: 8px 12px; border-radius:8px;" onclick="deleteWedVendor(${v.id})"><i class="fas fa-trash"></i></button></td>
+                                       // Ganti baris <td> yang ini (bagian kolom AKSI):
+                    <td style="text-align:center; vertical-align:top; padding-top:20px;">
+                        <div style="display:flex; justify-content:center; gap:8px;">
+                            <button style="background:#fef9c3; color:#ca8a04; border:none; padding: 8px 12px; border-radius:8px; cursor:pointer; transition:0.2s;" onmouseover="this.style.background='#fde047'" onmouseout="this.style.background='#fef9c3'" onclick="editWedVendorBasic(${v.id})" title="Edit Vendor"><i class="fas fa-edit"></i></button>
+                            <button class="btn-danger" style="padding: 8px 12px; border-radius:8px;" onclick="deleteWedVendor(${v.id})" title="Hapus Vendor"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </td>
                 </tr>
             `;
         });
